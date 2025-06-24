@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- DB Connection Settings -->
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/hospital_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">Grande123</property>
+
+        <!-- Hibernate Settings -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
+        <property name="hibernate.hbm2ddl.auto">update</property> <!-- use update/create-drop in dev -->
+
+        <!-- Logging -->
+        <property name="show_sql">false</property>
+        <property name="format_sql">true</property>
+
+        <!-- Annotated Model Classes -->
+        <mapping class="org.example.models.Patient"/>
+        <mapping class="org.example.models.Doctor"/>
+        <mapping class="org.example.models.Appointment"/>
+        <mapping class="org.example.models.User"/>
+    </session-factory>
+</hibernate-configuration>
