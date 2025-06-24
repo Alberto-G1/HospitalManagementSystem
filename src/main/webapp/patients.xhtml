@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <title>Register Patient</title>
+</h:head>
+<h:body>
+    <h:form>
+        <h:panelGrid columns="2">
+
+            <h:outputLabel value="First Name:" />
+            <h:inputText value="#{patientBean.patient.firstName}" required="true" />
+
+            <h:outputLabel value="Last Name:" />
+            <h:inputText value="#{patientBean.patient.lastName}" required="true" />
+
+            <h:outputLabel value="Date of Birth (YYYY-MM-DD):" />
+            <h:inputText value="#{patientBean.dateOfBirthStr}" required="true" />
+
+            <h:outputLabel value="Gender:" />
+            <h:selectOneMenu value="#{patientBean.patient.gender}" required="true">
+                <f:selectItem itemLabel="Select..." itemValue="#{null}" />
+                <f:selectItem itemLabel="MALE" itemValue="MALE" />
+                <f:selectItem itemLabel="FEMALE" itemValue="FEMALE" />
+                <f:selectItem itemLabel="OTHER" itemValue="OTHER" />
+            </h:selectOneMenu>
+
+            <h:outputLabel value="Phone Number:" />
+            <h:inputText value="#{patientBean.patient.phoneNumber}" required="true" />
+
+            <h:outputLabel value="Address:" />
+            <h:inputText value="#{patientBean.patient.address}" />
+
+            <h:outputLabel value="Email:" />
+            <h:inputText value="#{patientBean.patient.email}" />
+
+            <h:outputLabel value="Emergency Contact:" />
+            <h:inputText value="#{patientBean.patient.emergencyContact}" />
+
+            <h:commandButton value="Register Patient" action="#{patientBean.register}" />
+
+        </h:panelGrid>
+    </h:form>
+</h:body>
+</html>

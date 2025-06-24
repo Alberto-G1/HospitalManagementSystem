@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui" xmlns:f="jakarta.faces.core">
+<h:head><title>Appointments</title></h:head>
+<h:body>
+    <h:form>
+        <p:panel header="Book Appointment">
+            <p:selectOneMenu value="#{appointmentBean.appointment.patient}" converter="omnifaces.SelectItemsConverter">
+                <f:selectItems value="#{appointmentBean.patients}" var="p" itemValue="#{p}" itemLabel="#{p.firstName} #{p.lastName}"/>
+            </p:selectOneMenu>
+
+            <p:selectOneMenu value="#{appointmentBean.appointment.doctor}" converter="omnifaces.SelectItemsConverter">
+                <f:selectItems value="#{appointmentBean.doctors}" var="d" itemValue="#{d}" itemLabel="Dr. #{d.firstName} #{d.lastName}"/>
+            </p:selectOneMenu>
+
+            <p:inputText value="#{appointmentBean.appointment.reason}" placeholder="Reason"/>
+            <p:commandButton value="Book" action="#{appointmentBean.book}" update="@form"/>
+        </p:panel>
+
+        <p:dataTable value="#{appointmentBean.appointments}" var="a">
+            <p:column headerText="Patient">#{a.patient.firstName} #{a.patient.lastName}</p:column>
+            <p:column headerText="Doctor">Dr. #{a.doctor.firstName} #{a.doctor.lastName}</p:column>
+            <p:column headerText="Reason">#{a.reason}</p:column>
+            <p:column>
+                <p:commandButton value="Cancel" action="#{appointmentBean.cancel(a.appointmentID)}" update="@form"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+</h:body>
+</html>
