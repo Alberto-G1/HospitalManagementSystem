@@ -1,10 +1,14 @@
 package org.example.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import org.example.dao.PatientDAO;
 import org.example.models.Patient;
 
 import java.util.List;
 
+@Named
+@ApplicationScoped
 public class PatientService {
     private final PatientDAO patientDAO = new PatientDAO();
 

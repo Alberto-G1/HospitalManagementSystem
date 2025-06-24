@@ -3,6 +3,7 @@ package org.example.models;
 import jakarta.persistence.*;
 import org.example.enums.Gender;
 
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "patients")
@@ -18,7 +19,7 @@ public class Patient {
     private String lastName;
 
     @Column(nullable = false)
-    private String dateOfBirth; // Could also use LocalDate + converter
+    private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
@@ -36,14 +37,14 @@ public class Patient {
     @Column(length = 50)
     private String emergencyContact;
 
-    // Getters and setters
+    // Getters and Setters
     public int getPatientID() { return patientID; }
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
-    public String getDateOfBirth() { return dateOfBirth; }
-    public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
     public Gender getGender() { return gender; }
     public void setGender(Gender gender) { this.gender = gender; }
     public String getAddress() { return address; }
