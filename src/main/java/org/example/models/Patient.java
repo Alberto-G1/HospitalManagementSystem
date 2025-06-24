@@ -1,8 +1,8 @@
 package org.example.models;
 
+import jakarta.persistence.*;
 import org.example.enums.Gender;
 
-import javax.persistence.*;
 
 @Entity
 @Table(name = "patients")

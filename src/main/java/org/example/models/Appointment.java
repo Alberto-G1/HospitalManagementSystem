@@ -1,8 +1,9 @@
 package org.example.models;
 
+import jakarta.persistence.*;
 import org.example.enums.AppointmentStatus;
 
-import javax.persistence.*;
+//import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Time;
 
