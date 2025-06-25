@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Admin Dashboard - Hospital Management System</title>
+</h:head>
+<h:body>
+    <!-- Debug info -->
+    <h:outputText value="Debug: Logged in = #{userBean.loggedIn}, Role = #{userBean.user.role}, Admin = #{userBean.admin}"
+                  style="font-size: 10px; color: gray;" rendered="true"/>
+
+    <h:form rendered="#{userBean.admin}">
+        <p:menubar>
+            <p:menuitem value="Dashboard" outcome="admin-dashboard" icon="pi pi-home"/>
+            <p:submenu label="Manage" icon="pi pi-cog">
+                <p:menuitem value="Patients" outcome="patients" icon="pi pi-users"/>
+                <p:menuitem value="Doctors" outcome="doctors" icon="pi pi-user-plus"/>
+                <p:menuitem value="Appointments" outcome="appointments" icon="pi pi-calendar"/>
+                <p:menuitem value="System Users" outcome="system-users" icon="pi pi-user"/>
+            </p:submenu>
+            <p:submenu label="Reports" icon="pi pi-chart-bar">
+                <p:menuitem value="Patient Reports" action="#{adminDashboardBean.generatePatientReport}" icon="pi pi-file"/>
+                <p:menuitem value="Appointment Reports" action="#{adminDashboardBean.generateAppointmentReport}" icon="pi pi-calendar"/>
+            </p:submenu>
+            <p:menuitem value="Logout" action="#{userBean.logout}" icon="pi pi-sign-out"/>
+        </p:menubar>
+
+        <div style="padding: 20px;">
+            <h2>Admin Dashboard</h2>
+            <h3>Welcome, #{userBean.user.username}!</h3>
+            <p:messages id="messages" showDetail="true" closable="true"/>
+
+            <p:panelGrid columns="3" style="width: 100%; margin-top: 20px;">
+                <!-- Statistics Cards -->
+                <p:panel header="Total Patients" style="text-align: center;">
+                    <h:outputText value="#{adminDashboardBean.totalPatients}" style="font-size: 2em; color: #007ad9;"/>
+                    <br/>
+                    <p:commandButton value="Manage Patients" outcome="patients" styleClass="ui-button-secondary"/>
+                </p:panel>
+
+                <p:panel header="Total Doctors" style="text-align: center;">
+                    <h:outputText value="#{adminDashboardBean.totalDoctors}" style="font-size: 2em; color: #28a745;"/>
+                    <br/>
+                    <p:commandButton value="Manage Doctors" outcome="doctors" styleClass="ui-button-secondary"/>
+                </p:panel>
+
+                <p:panel header="Total Appointments" style="text-align: center;">
+                    <h:outputText value="#{adminDashboardBean.totalAppointments}" style="font-size: 2em; color: #ffc107;"/>
+                    <br/>
+                    <p:commandButton value="Manage Appointments" outcome="appointments" styleClass="ui-button-secondary"/>
+                </p:panel>
+            </p:panelGrid>
+
+            <!-- System Status -->
+            <p:panel header="System Status" style="margin-top: 20px;">
+                <p:panelGrid columns="2" style="width: 100%;">
+                    <p:outputLabel value="Database Status:"/>
+                    <h:outputText value="Connected" style="color: green; font-weight: bold;"/>
+
+                    <p:outputLabel value="Server Status:"/>
+                    <h:outputText value="Running" style="color: green; font-weight: bold;"/>
+
+                    <p:outputLabel value="Current Time:"/>
+                    <h:outputText value="#{adminDashboardBean.currentDateTime}">
+                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
+                    </h:outputText>
+                </p:panelGrid>
+            </p:panel>
+
+            <!-- Quick Actions -->
+            <p:panel header="Quick Actions" style="margin-top: 20px;">
+                <p:commandButton value="Add New Doctor" outcome="doctors" icon="pi pi-plus" styleClass="ui-button-success" style="margin: 5px;"/>
+                <p:commandButton value="Register Patient" outcome="patients" icon="pi pi-user-plus" styleClass="ui-button-info" style="margin: 5px;"/>
+                <p:commandButton value="Schedule Appointment" outcome="appointments" icon="pi pi-calendar-plus" styleClass="ui-button-warning" style="margin: 5px;"/>
+                <p:commandButton value="Manage Users" outcome="system-users" icon="pi pi-users" styleClass="ui-button-secondary" style="margin: 5px;"/>
+            </p:panel>
+        </div>
+    </h:form>
+
+    <!-- Access Denied for non-admin users -->
+    <h:panelGroup rendered="#{!userBean.admin}">
+        <div style="padding: 20px;">
+            <p:panel header="Access Denied" style="max-width: 500px; margin: 50px auto;">
+                <p:messages showDetail="true" closable="true"/>
+                <p>You do not have permission to access this page.</p>
+                <p>Current login status: #{userBean.loggedIn ? 'Logged in' : 'Not logged in'}</p>
+                <p>Current role: #{userBean.user.role}</p>
+                <p:separator/>
+                <h:form>
+                    <p:commandButton value="Go to Login"
+                                     action="login?faces-redirect=true"
+                                     styleClass="ui-button-info"
+                                     style="margin: 5px;"/>
+                    <p:commandButton value="Go to Welcome"
+                                     action="welcome?faces-redirect=true"
+                                     styleClass="ui-button-secondary"
+                                     style="margin: 5px;"/>
+                </h:form>
+            </p:panel>
+        </div>
+    </h:panelGroup>
+</h:body>
+</html>

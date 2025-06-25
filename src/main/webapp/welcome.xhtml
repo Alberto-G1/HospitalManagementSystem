@@ -24,6 +24,12 @@
             border-radius: 8px;
             background: #f9f9f9;
         }
+        .nav-button {
+            width: 200px;
+            height: 50px;
+            margin: 10px;
+            font-size: 16px;
+        }
     </style>
 </h:head>
 <h:body>
@@ -57,19 +63,17 @@
                 <h3>Get Started</h3>
                 <p>Choose an option below to access the system:</p>
 
-                <p:panelGrid columns="2" style="margin: 20px auto;">
+                <div style="margin: 20px auto;">
                     <p:commandButton value="Login"
-                                     outcome="login.xhtml"
-                                     styleClass="ui-button-success"
-                                     icon="pi pi-sign-in"
-                                     style="margin: 10px;"/>
+                                     action="#{welcomeBean.navigateToLogin}"
+                                     styleClass="ui-button-success nav-button"
+                                     icon="pi pi-sign-in"/>
 
                     <p:commandButton value="Register New User"
-                                     outcome="register.xhtml"
-                                     styleClass="ui-button-info"
-                                     icon="pi pi-user-plus"
-                                     style="margin: 10px;"/>
-                </p:panelGrid>
+                                     action="#{welcomeBean.navigateToRegister}"
+                                     styleClass="ui-button-info nav-button"
+                                     icon="pi pi-user-plus"/>
+                </div>
 
                 <p:separator />
 
@@ -82,6 +86,13 @@
                     <li>Role-based dashboards and permissions</li>
                     <li>Comprehensive reporting and audit trails</li>
                 </ul>
+
+                <p:separator />
+
+                <div style="margin-top: 30px;">
+                    <h4>Need Help?</h4>
+                    <p>Contact your system administrator for assistance with login credentials or system access.</p>
+                </div>
             </p:panel>
         </h:form>
     </div>

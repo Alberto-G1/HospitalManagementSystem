@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Receptionist Dashboard - Hospital Management System</title>
+</h:head>
+<h:body>
+    <!-- Debug info -->
+    <h:outputText value="Debug: Logged in = #{userBean.loggedIn}, Role = #{userBean.user.role}, Receptionist = #{userBean.receptionist}"
+                  style="font-size: 10px; color: gray;" rendered="true"/>
+
+    <h:form rendered="#{userBean.receptionist}">
+        <p:menubar>
+            <p:menuitem value="Dashboard" outcome="receptionist-dashboard" icon="pi pi-home"/>
+            <p:menuitem value="Patients" outcome="patients" icon="pi pi-users"/>
+            <p:menuitem value="Appointments" outcome="appointments" icon="pi pi-calendar"/>
+            <p:menuitem value="Logout" action="#{userBean.logout}" icon="pi pi-sign-out"/>
+        </p:menubar>
+
+        <div style="padding: 20px;">
+            <h2>Receptionist Dashboard</h2>
+            <h3>Welcome, #{userBean.user.username}!</h3>
+            <p:messages id="messages" showDetail="true" closable="true"/>
+
+            <p:panel header="Quick Actions" style="margin-top: 20px;">
+                <p:commandButton value="Register New Patient" outcome="patients" icon="pi pi-user-plus" styleClass="ui-button-success" style="margin: 5px;"/>
+                <p:commandButton value="Schedule Appointment" outcome="appointments" icon="pi pi-calendar-plus" styleClass="ui-button-info" style="margin: 5px;"/>
+                <p:commandButton value="View All Patients" outcome="patients" icon="pi pi-users" styleClass="ui-button-secondary" style="margin: 5px;"/>
+            </p:panel>
+        </div>
+    </h:form>
+
+    <!-- Access Denied -->
+    <h:panelGroup rendered="#{!userBean.receptionist}">
+        <div style="padding: 20px;">
+            <p:panel header="Access Denied" style="max-width: 500px; margin: 50px auto;">
+                <p:messages showDetail="true" closable="true"/>
+                <p>You do not have permission to access this page.</p>
+                <p>Current login status: #{userBean.loggedIn ? 'Logged in' : 'Not logged in'}</p>
+                <p>Current role: #{userBean.user.role}</p>
+                <p:separator/>
+                <h:form>
+                    <p:commandButton value="Go to Login"
+                                     action="login?faces-redirect=true"
+                                     styleClass="ui-button-info"
+                                     style="margin: 5px;"/>
+                    <p:commandButton value="Go to Welcome"
+                                     action="welcome?faces-redirect=true"
+                                     styleClass="ui-button-secondary"
+                                     style="margin: 5px;"/>
+                </h:form>
+            </p:panel>
+        </div>
+    </h:panelGroup>
+</h:body>
+</html>
