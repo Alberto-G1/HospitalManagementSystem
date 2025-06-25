@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Patient Management - Hospital Management System</title>
+</h:head>
+<h:body>
+    <h:form rendered="#{userBean.canManagePatients}">
+        <p:menubar>
+            <p:menuitem value="Dashboard" outcome="#{userBean.admin ? 'admin-dashboard.xhtml' : 'receptionist-dashboard.xhtml'}" icon="pi pi-home"/>
+            <p:menuitem value="Patients" outcome="patients.xhtml" icon="pi pi-users"/>
+            <p:menuitem value="Doctors" outcome="doctors.xhtml" icon="pi pi-user" rendered="#{userBean.admin}"/>
+            <p:menuitem value="Appointments" outcome="appointments.xhtml" icon="pi pi-calendar"/>
+            <p:menuitem value="Logout" action="#{userBean.logout}" icon="pi pi-sign-out"/>
+        </p:menubar>
+
+        <div style="padding: 20px;">
+            <h2>Patient Management</h2>
+            <p:messages id="messages" showDetail="true" closable="true" autoUpdate="true"/>
+
+            <!-- Search Panel -->
+            <p:panel header="Search Patients" toggleable="true" collapsed="false" style="margin-bottom: 20px;">
+                <p:panelGrid columns="3">
+                    <p:inputText value="#{patientBean.searchTerm}" placeholder="Search by name, phone, or email"/>
+                    <p:commandButton value="Search" action="#{patientBean.search}" update="patientTable" icon="pi pi-search"/>
+                    <p:commandButton value="Clear" action="#{patientBean.clearSearch}" update="patientTable" icon="pi pi-times"/>
+                </p:panelGrid>
+            </p:panel>
+
+            <!-- Add/Edit Patient Panel -->
+            <p:panel header="#{patientBean.editMode ? 'Edit Patient' : 'Add New Patient'}" toggleable="true" collapsed="false" style="margin-bottom: 20px;">
+                <p:panelGrid columns="2" style="width: 100%;">
+                    <p:outputLabel for="firstName" value="First Name:" />
+                    <p:inputText id="firstName" value="#{patientBean.patient.firstName}" required="true" maxlength="50"/>
+
+                    <p:outputLabel for="lastName" value="Last Name:" />
+                    <p:inputText id="lastName" value="#{patientBean.patient.lastName}" required="true" maxlength="50"/>
+
+                    <p:outputLabel for="dateOfBirth" value="Date of Birth:" />
+                    <p:calendar id="dateOfBirth" value="#{patientBean.patient.dateOfBirth}" pattern="yyyy-MM-dd" required="true" maxdate="#{patientBean.today}"/>
+
+                    <p:outputLabel for="gender" value="Gender:" />
+                    <p:selectOneMenu id="gender" value="#{patientBean.patient.gender}" required="true">
+                        <f:selectItem itemLabel="Select Gender..." itemValue="#{null}" />
+                        <f:selectItems value="#{patientBean.genderOptions}" var="gender" itemValue="#{gender}" itemLabel="#{gender}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="phoneNumber" value="Phone Number:" />
+                    <p:inputText id="phoneNumber" value="#{patientBean.patient.phoneNumber}" required="true" maxlength="15"/>
+
+                    <p:outputLabel for="email" value="Email:" />
+                    <p:inputText id="email" value="#{patientBean.patient.email}" maxlength="50"/>
+
+                    <p:outputLabel for="address" value="Address:" />
+                    <p:inputTextarea id="address" value="#{patientBean.patient.address}" rows="3" maxlength="100"/>
+
+                    <p:outputLabel for="emergencyContact" value="Emergency Contact:" />
+                    <p:inputText id="emergencyContact" value="#{patientBean.patient.emergencyContact}" maxlength="50"/>
+                </p:panelGrid>
+
+                <p:separator />
+
+                <p:commandButton value="#{patientBean.editMode ? 'Update Patient' : 'Register Patient'}"
+                                 action="#{patientBean.editMode ? patientBean.update() : patientBean.register()}"
+                                 update="messages patientTable"
+                                 styleClass="#{patientBean.editMode ? 'ui-button-warning' : 'ui-button-success'}"
+                                 icon="#{patientBean.editMode ? 'pi pi-pencil' : 'pi pi-plus'}"/>
+
+                <p:commandButton value="Cancel" action="#{patientBean.cancelEdit}" update="@form"
+                                 styleClass="ui-button-secondary" rendered="#{patientBean.editMode}"
+                                 style="margin-left: 10px;" icon="pi pi-times"/>
+            </p:panel>
+
+            <!-- Patients Table -->
+            <p:panel header="Patients List">
+                <p:dataTable id="patientTable" value="#{patientBean.filteredPatients}" var="patient"
+                             paginator="true" rows="10" paginatorPosition="bottom"
+                             emptyMessage="No patients found."
+                             sortBy="#{patient.lastName}" sortOrder="ascending">
+
+                    <p:column headerText="ID" sortBy="#{patient.patientID}">
+                        #{patient.patientID}
+                    </p:column>
+
+                    <p:column headerText="Name" sortBy="#{patient.lastName}">
+                        #{patient.firstName} #{patient.lastName}
+                    </p:column>
+
+                    <p:column headerText="Age" sortBy="#{patient.dateOfBirth}">
+                        #{patientBean.getPatientAge(patient.dateOfBirth)}
+                    </p:column>
+
+                    <p:column headerText="Gender" sortBy="#{patient.gender}">
+                        #{patient.gender}
+                    </p:column>
+
+                    <p:column headerText="Phone" sortBy="#{patient.phoneNumber}">
+                        #{patient.phoneNumber}
+                    </p:column>
+
+                    <p:column headerText="Email">
+                        #{patient.email}
+                    </p:column>
+
+                    <p:column headerText="Actions" style="width: 200px;">
+                        <p:commandButton value="View" action="#{patientBean.viewDetails(patient)}"
+                                         oncomplete="PF('patientDetailsDialog').show()"
+                                         update="patientDetailsPanel"
+                                         styleClass="ui-button-info"
+                                         icon="pi pi-eye" style="margin: 2px;"/>
+
+                        <p:commandButton value="Edit" action="#{patientBean.edit(patient)}"
+                                         update="@form"
+                                         styleClass="ui-button-warning"
+                                         icon="pi pi-pencil" style="margin: 2px;"/>
+
+                        <p:commandButton value="Delete" action="#{patientBean.delete(patient.patientID)}"
+                                         update="messages patientTable"
+                                         styleClass="ui-button-danger"
+                                         icon="pi pi-trash" style="margin: 2px;"
+                                         onclick="return confirm('Are you sure you want to delete this patient?');"/>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </div>
+
+        <!-- Patient Details Dialog -->
+        <p:dialog header="Patient Details" widgetVar="patientDetailsDialog" modal="true" width="600" height="400">
+            <p:panel id="patientDetailsPanel">
+                <p:panelGrid columns="2" rendered="#{patientBean.selectedPatient != null}">
+                    <h:outputText value="Patient ID:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.patientID}"/>
+
+                    <h:outputText value="Full Name:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.firstName} #{patientBean.selectedPatient.lastName}"/>
+
+                    <h:outputText value="Date of Birth:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.dateOfBirth}">
+                        <f:convertDateTime pattern="yyyy-MM-dd"/>
+                    </h:outputText>
+
+                    <h:outputText value="Age:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.getPatientAge(patientBean.selectedPatient.dateOfBirth)} years"/>
+
+                    <h:outputText value="Gender:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.gender}"/>
+
+                    <h:outputText value="Phone Number:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.phoneNumber}"/>
+
+                    <h:outputText value="Email:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.email}"/>
+
+                    <h:outputText value="Address:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.address}"/>
+
+                    <h:outputText value="Emergency Contact:" style="font-weight: bold;"/>
+                    <h:outputText value="#{patientBean.selectedPatient.emergencyContact}"/>
+                </p:panelGrid>
+            </p:panel>
+        </p:dialog>
+    </h:form>
+
+    <!-- Access Denied -->
+    <h:panelGroup rendered="#{!userBean.canManagePatients}">
+        <p:panel header="Access Denied">
+            <p>You do not have permission to manage patients.</p>
+            <p:commandButton value="Go to Dashboard" outcome="#{userBean.admin ? 'admin-dashboard.xhtml' : (userBean.doctor ? 'doctor-dashboard.xhtml' : 'login.xhtml')}"/>
+        </p:panel>
+    </h:panelGroup>
+</h:body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>System Users Management - Hospital Management System</title>
+</h:head>
+<h:body>
+    <h:form rendered="#{userBean.admin}">
+        <p:menubar>
+            <p:menuitem value="Dashboard" outcome="admin-dashboard.xhtml" icon="pi pi-home"/>
+            <p:menuitem value="Patients" outcome="patients.xhtml" icon="pi pi-users"/>
+            <p:menuitem value="Doctors" outcome="doctors.xhtml" icon="pi pi-user"/>
+            <p:menuitem value="Appointments" outcome="appointments.xhtml" icon="pi pi-calendar"/>
+            <p:menuitem value="System Users" outcome="system-users.xhtml" icon="pi pi-user"/>
+            <p:menuitem value="Logout" action="#{userBean.logout}" icon="pi pi-sign-out"/>
+        </p:menubar>
+
+        <div style="padding: 20px;">
+            <h2>System Users Management</h2>
+            <p:messages id="messages" showDetail="true" closable="true" autoUpdate="true"/>
+
+            <!-- Add User Panel -->
+            <p:panel header="Add New System User" toggleable="true" collapsed="true" style="margin-bottom: 20px;">
+                <p:panelGrid columns="2" style="width: 100%;">
+                    <p:outputLabel for="username" value="Username:"/>
+                    <p:inputText id="username" value="#{systemUserBean.user.username}" required="true" maxlength="50"/>
+
+                    <p:outputLabel for="password" value="Password:"/>
+                    <p:password id="password" value="#{systemUserBean.user.password}" required="true" maxlength="100"/>
+
+                    <p:outputLabel for="email" value="Email:"/>
+                    <p:inputText id="email" value="#{systemUserBean.user.email}" required="true" maxlength="50"/>
+
+                    <p:outputLabel for="role" value="Role:"/>
+                    <p:selectOneMenu id="role" value="#{systemUserBean.user.role}" required="true">
+                        <f:selectItem itemLabel="Select Role..." itemValue="#{null}"/>
+                        <f:selectItem itemLabel="Admin" itemValue="ADMIN"/>
+                        <f:selectItem itemLabel="Doctor" itemValue="DOCTOR"/>
+                        <f:selectItem itemLabel="Receptionist" itemValue="RECEPTIONIST"/>
+                    </p:selectOneMenu>
+                </p:panelGrid>
+
+                <p:separator/>
+
+                <p:commandButton value="Add User" 
+                               action="#{systemUserBean.addUser}" 
+                               update="messages userTable"
+                               styleClass="ui-button-success" 
+                               icon="pi pi-plus"/>
+            </p:panel>
+
+            <!-- Users Table -->
+            <p:panel header="System Users List">
+                <p:dataTable id="userTable" 
+                           value="#{systemUserBean.users}" 
+                           var="user" 
+                           paginator="true" 
+                           rows="10" 
+                           paginatorPosition="bottom"
+                           emptyMessage="No users found."
+                           sortBy="#{user.username}" 
+                           sortOrder="ascending">
+                    
+                    <p:column headerText="ID" sortBy="#{user.userID}" style="width: 60px;">
+                        #{user.userID}
+                    </p:column>
+
+                    <p:column headerText="Username" sortBy="#{user.username}">
+                        #{user.username}
+                    </p:column>
+
+                    <p:column headerText="Email" sortBy="#{user.email}">
+                        #{user.email}
+                    </p:column>
+
+                    <p:column headerText="Role" sortBy="#{user.role}">
+                        <h:outputText value="#{user.role}" 
+                                    style="font-weight: bold; color: #{user.role == 'ADMIN' ? '#dc3545' : (user.role == 'DOCTOR' ? '#28a745' : '#007bff')};"/>
+                    </p:column>
+
+                    <p:column headerText="Actions" style="width: 200px;">
+                        <p:commandButton value="Edit" 
+                                       action="#{systemUserBean.editUser(user)}" 
+                                       update="@form"
+                                       styleClass="ui-button-warning" 
+                                       icon="pi pi-pencil" 
+                                       style="margin: 2px;"
+                                       rendered="#{user.userID != userBean.user.userID}"/>
+                        
+                        <p:commandButton value="Delete" 
+                                       action="#{systemUserBean.deleteUser(user.userID)}" 
+                                       update="messages userTable"
+                                       styleClass="ui-button-danger" 
+                                       icon="pi pi-trash" 
+                                       style="margin: 2px;"
+                                       rendered="#{user.userID != userBean.user.userID}"
+                                       onclick="return confirm('Are you sure you want to delete this user?');"/>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </div>
+    </h:form>
+
+    <!-- Access Denied -->
+    <h:panelGroup rendered="#{!userBean.admin}">
+        <p:panel header="Access Denied">
+            <p>You do not have permission to manage system users.</p>
+            <p:commandButton value="Go to Dashboard" outcome="admin-dashboard.xhtml"/>
+        </p:panel>
+    </h:panelGroup>
+</h:body>
+</html>

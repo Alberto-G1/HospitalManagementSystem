@@ -58,4 +58,7 @@ public class Appointment {
     public void setReason(String reason) { this.reason = reason; }
     public AppointmentStatus getStatus() { return status; }
     public void setStatus(AppointmentStatus status) { this.status = status; }
+
+    public void setAppointmentID(int appointmentID) {
+    }
 }

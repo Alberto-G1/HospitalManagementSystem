@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Hospital Management System - Welcome</title>
+    <style>
+        .welcome-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .nav-button {
+            width: 200px;
+            height: 50px;
+            margin: 10px;
+            font-size: 16px;
+        }
+    </style>
+</h:head>
+<h:body>
+    <div class="welcome-container">
+        <h:form>
+            <p:panel header="Welcome to Hospital Management System" styleClass="welcome-panel">
+                <h2>Comprehensive Healthcare Management Solution</h2>
+                <p>Our Hospital Management System provides a complete solution for managing patients, doctors, appointments, and administrative tasks. Built with modern technology to ensure efficiency and reliability.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>Patient Management</h3>
+                        <p>Register and manage patient information, medical history, and contact details.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Doctor Management</h3>
+                        <p>Maintain doctor profiles, specializations, and availability schedules.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Appointment Scheduling</h3>
+                        <p>Efficient appointment booking and management system with real-time updates.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Role-Based Access</h3>
+                        <p>Secure access control for Administrators, Doctors, and Receptionists.</p>
+                    </div>
+                </div>
+
+                <p:separator />
+
+                <h3>Get Started</h3>
+                <p>Choose an option below to access the system:</p>
+
+                <div style="margin: 20px auto;">
+                    <p:commandButton value="Login"
+                                     action="#{welcomeBean.navigateToLogin}"
+                                     styleClass="ui-button-success nav-button"
+                                     icon="pi pi-sign-in"/>
+
+                    <p:commandButton value="Register New User"
+                                     action="#{welcomeBean.navigateToRegister}"
+                                     styleClass="ui-button-info nav-button"
+                                     icon="pi pi-user-plus"/>
+                </div>
+
+                <p:separator />
+
+                <h4>System Features:</h4>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>Secure user authentication and authorization</li>
+                    <li>Complete patient registration and management</li>
+                    <li>Doctor profile and schedule management</li>
+                    <li>Appointment booking and tracking</li>
+                    <li>Role-based dashboards and permissions</li>
+                    <li>Comprehensive reporting and audit trails</li>
+                </ul>
+
+                <p:separator />
+
+                <div style="margin-top: 30px;">
+                    <h4>Need Help?</h4>
+                    <p>Contact your system administrator for assistance with login credentials or system access.</p>
+                </div>
+            </p:panel>
+        </h:form>
+    </div>
+</h:body>
+</html>
