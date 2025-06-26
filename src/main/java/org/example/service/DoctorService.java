@@ -9,6 +9,7 @@ import org.example.dao.DoctorDAO;
 import org.example.enums.Availability;
 import org.example.models.Doctor;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -35,21 +36,26 @@ public class DoctorService {
             }
 
             // Check for duplicate email
-            if (isEmailExists(doctor.getEmail(), doctor.getDoctorID())) {
+            if (doctorDAO.findByEmail(doctor.getEmail()) != null) {
                 addErrorMessage("Registration Failed", "Email address already exists in the system.");
                 return false;
             }
 
             // Check for duplicate phone number
-            if (isPhoneNumberExists(doctor.getPhoneNumber(), doctor.getDoctorID())) {
+            if (doctorDAO.findByPhoneExcludingId(doctor.getPhoneNumber(), 0) != null) {
                 addErrorMessage("Registration Failed", "Phone number already exists in the system.");
                 return false;
             }
 
+            // Set audit fields
+            doctor.setAddedBy(currentUser);
+            doctor.setCreatedAt(new Date());
+            doctor.setUpdatedAt(new Date());
+
             doctorDAO.save(doctor);
 
             // Log activity
-            if (currentUser != null) {
+            if (currentUser != null && activityLogService != null) {
                 activityLogService.logActivity(currentUser, "DOCTOR_ADDED",
                         "Added doctor: Dr. " + doctor.getFirstName() + " " + doctor.getLastName());
             }
@@ -70,21 +76,26 @@ public class DoctorService {
             }
 
             // Check for duplicate email (excluding current doctor)
-            if (isEmailExists(doctor.getEmail(), doctor.getDoctorID())) {
+            Doctor existingEmailDoctor = doctorDAO.findByEmailExcludingId(doctor.getEmail(), doctor.getDoctorID());
+            if (existingEmailDoctor != null) {
                 addErrorMessage("Update Failed", "Email address already exists in the system.");
                 return false;
             }
 
             // Check for duplicate phone number (excluding current doctor)
-            if (isPhoneNumberExists(doctor.getPhoneNumber(), doctor.getDoctorID())) {
+            Doctor existingPhoneDoctor = doctorDAO.findByPhoneExcludingId(doctor.getPhoneNumber(), doctor.getDoctorID());
+            if (existingPhoneDoctor != null) {
                 addErrorMessage("Update Failed", "Phone number already exists in the system.");
                 return false;
             }
 
+            // Update audit fields
+            doctor.setUpdatedAt(new Date());
+
             doctorDAO.save(doctor);
 
             // Log activity
-            if (currentUser != null) {
+            if (currentUser != null && activityLogService != null) {
                 activityLogService.logActivity(currentUser, "DOCTOR_UPDATED",
                         "Updated doctor: Dr. " + doctor.getFirstName() + " " + doctor.getLastName());
             }
@@ -105,16 +116,11 @@ public class DoctorService {
                 return false;
             }
 
-            // Check if doctor has appointments
-            if (hasActiveAppointments(doctor.getDoctorID())) {
-                addErrorMessage("Delete Failed", "Cannot delete doctor with active appointments. Please reassign or cancel appointments first.");
-                return false;
-            }
-
-            doctorDAO.delete(doctor);
+            // Perform soft delete
+            doctorDAO.softDelete(doctor);
 
             // Log activity
-            if (currentUser != null) {
+            if (currentUser != null && activityLogService != null) {
                 activityLogService.logActivity(currentUser, "DOCTOR_DELETED",
                         "Deleted doctor: Dr. " + doctor.getFirstName() + " " + doctor.getLastName());
             }
@@ -164,6 +170,24 @@ public class DoctorService {
         }
     }
 
+    public List<Doctor> getDoctorsBySpeciality(String speciality) {
+        try {
+            return doctorDAO.findBySpeciality(speciality);
+        } catch (Exception e) {
+            addErrorMessage("Error", "Error retrieving doctors by speciality: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    public Doctor getDoctorByEmail(String email) {
+        try {
+            return doctorDAO.findByEmail(email);
+        } catch (Exception e) {
+            addErrorMessage("Error", "Error finding doctor by email: " + e.getMessage());
+            return null;
+        }
+    }
+
     private boolean validateDoctor(Doctor doctor) {
         if (doctor == null) {
             addErrorMessage("Validation Error", "Doctor data is required.");
@@ -205,7 +229,7 @@ public class DoctorService {
             addErrorMessage("Validation Error", "Phone number is required.");
             return false;
         }
-        if (!PHONE_PATTERN.matcher(doctor.getPhoneNumber().replaceAll("[\\s\\-$]", "")).matches()) {
+        if (!PHONE_PATTERN.matcher(doctor.getPhoneNumber().replaceAll("[\\s\\-()]", "")).matches()) {
             addErrorMessage("Validation Error", "Invalid phone number format.");
             return false;
         }
@@ -221,82 +245,6 @@ public class DoctorService {
         }
 
         return true;
-    }
-
-    private boolean isEmailExists(String email, int excludeDoctorId) {
-        List<Doctor> doctors = getAllDoctors();
-        return doctors.stream()
-                .anyMatch(d -> d.getDoctorID() != excludeDoctorId &&
-                        email.equalsIgnoreCase(d.getEmail()));
-    }
-
-    private boolean isPhoneNumberExists(String phoneNumber, int excludeDoctorId) {
-        List<Doctor> doctors = getAllDoctors();
-        return doctors.stream()
-                .anyMatch(d -> d.getDoctorID() != excludeDoctorId &&
-                        d.getPhoneNumber().equals(phoneNumber));
-    }
-
-    private boolean hasActiveAppointments(int doctorId) {
-        // This would need to be implemented with a proper query
-        // For now, return false - in real implementation, check appointments table
-        return false;
-    }
-    // Add these additional methods to the existing DoctorService class
-
-    public List<Doctor> getDoctorsBySpeciality(String speciality) {
-        try {
-            return doctorDAO.findBySpeciality(speciality);
-        } catch (Exception e) {
-            addErrorMessage("Error", "Error retrieving doctors by speciality: " + e.getMessage());
-            return List.of();
-        }
-    }
-
-    public Doctor getDoctorByEmail(String email) {
-        try {
-            return doctorDAO.findByEmail(email);
-        } catch (Exception e) {
-            addErrorMessage("Error", "Error finding doctor by email: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public boolean toggleDoctorAvailability(int doctorId, String currentUser) {
-        try {
-            Doctor doctor = getDoctor(doctorId);
-            if (doctor == null) {
-                addErrorMessage("Update Failed", "Doctor not found.");
-                return false;
-            }
-
-            Availability newAvailability = doctor.getIsAvailable() == Availability.AVAILABLE ?
-                    Availability.UNAVAILABLE : Availability.AVAILABLE;
-            doctor.setIsAvailable(newAvailability);
-
-            return updateDoctor(doctor, currentUser);
-        } catch (Exception e) {
-            addErrorMessage("Update Failed", "Error toggling availability: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public long countDoctorsBySpeciality(String speciality) {
-        try {
-            return getDoctorsBySpeciality(speciality).size();
-        } catch (Exception e) {
-            addErrorMessage("Error", "Error counting doctors by speciality: " + e.getMessage());
-            return 0;
-        }
-    }
-
-    public long countAvailableDoctors() {
-        try {
-            return getAvailableDoctors().size();
-        } catch (Exception e) {
-            addErrorMessage("Error", "Error counting available doctors: " + e.getMessage());
-            return 0;
-        }
     }
 
     // Make these methods public for use in beans
