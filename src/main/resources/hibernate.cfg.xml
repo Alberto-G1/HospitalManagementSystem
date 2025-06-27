@@ -20,9 +20,9 @@
         <property name="format_sql">true</property>
 
         <!-- Annotated Model Classes -->
-        <mapping class="org.example.models.Patient"/>
-        <mapping class="org.example.models.Doctor"/>
-        <mapping class="org.example.models.Appointment"/>
-        <mapping class="org.example.models.User"/>
+        <mapping class="org.medcare.models.Patient"/>
+        <mapping class="org.medcare.models.Doctor"/>
+        <mapping class="org.medcare.models.Appointment"/>
+        <mapping class="org.medcare.models.User"/>
     </session-factory>
 </hibernate-configuration>
