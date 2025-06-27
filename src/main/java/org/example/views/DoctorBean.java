@@ -45,25 +45,60 @@ public class DoctorBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        loadDoctors();
+        try {
+            System.out.println("DoctorBean init() called");
+            loadDoctors();
+            System.out.println("DoctorBean init() completed. Doctors loaded: " +
+                    (doctors != null ? doctors.size() : 0));
+        } catch (Exception e) {
+            System.err.println("Error in DoctorBean init(): " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public String getAvailabilityClass(Doctor doc) {
+        if (doc == null || doc.getIsAvailable() == null) return "unknown";
+        return "availability-" + doc.getIsAvailable().toString().toLowerCase();
     }
 
     public void loadDoctors() {
-        doctors = doctorService.getAllDoctors();
-        filteredDoctors = doctors;
-        availableDoctors = doctorService.getAvailableDoctors();
+        try {
+            System.out.println("Loading doctors...");
+            doctors = doctorService.getAllDoctors();
+            filteredDoctors = doctors;
+            availableDoctors = doctorService.getAvailableDoctors();
+            System.out.println("Doctors loaded successfully. Count: " +
+                    (doctors != null ? doctors.size() : 0));
+        } catch (Exception e) {
+            System.err.println("Error loading doctors: " + e.getMessage());
+            e.printStackTrace();
+            // Initialize empty lists to prevent null pointer exceptions
+            doctors = Arrays.asList();
+            filteredDoctors = Arrays.asList();
+            availableDoctors = Arrays.asList();
+        }
     }
 
     public String addDoctor() {
         try {
+            System.out.println("Adding doctor: " + doctor.getFirstName() + " " + doctor.getLastName());
+
+            if (userBean == null || !userBean.isLoggedIn()) {
+                doctorService.addErrorMessage("Add Failed", "User not logged in");
+                return null;
+            }
+
             if (doctorService.addDoctor(doctor, userBean.getUser().getUsername())) {
                 resetForm();
                 loadDoctors();
                 showAddForm = false;
-                return "doctors.xhtml?faces-redirect=true";
+                System.out.println("Doctor added successfully");
+                return null; // Stay on same page to avoid ViewExpiredException
             }
             return null; // Stay on same page if validation fails
         } catch (Exception e) {
+            System.err.println("Error adding doctor: " + e.getMessage());
+            e.printStackTrace();
             doctorService.addErrorMessage("Add Failed", "Unexpected error: " + e.getMessage());
             return null;
         }
@@ -71,61 +106,114 @@ public class DoctorBean implements Serializable {
 
     public String updateDoctor() {
         try {
+            System.out.println("Updating doctor ID: " + doctor.getDoctorID());
+
+            if (userBean == null || !userBean.isLoggedIn()) {
+                doctorService.addErrorMessage("Update Failed", "User not logged in");
+                return null;
+            }
+
             if (doctorService.updateDoctor(doctor, userBean.getUser().getUsername())) {
                 resetForm();
                 loadDoctors();
                 editMode = false;
-                return "doctors.xhtml?faces-redirect=true";
+                System.out.println("Doctor updated successfully");
+                return null; // Stay on same page to avoid ViewExpiredException
             }
             return null;
         } catch (Exception e) {
+            System.err.println("Error updating doctor: " + e.getMessage());
+            e.printStackTrace();
             doctorService.addErrorMessage("Update Failed", "Unexpected error: " + e.getMessage());
             return null;
         }
     }
 
     public void editDoctor(Doctor d) {
-        this.doctor = new Doctor();
-        // Copy properties to avoid direct reference issues
-//        this.doctor.setDoctorID(d.getDoctorID());
-        this.doctor.setFirstName(d.getFirstName());
-        this.doctor.setLastName(d.getLastName());
-        this.doctor.setSpeciality(d.getSpeciality());
-        this.doctor.setPhoneNumber(d.getPhoneNumber());
-        this.doctor.setEmail(d.getEmail());
-        this.doctor.setIsAvailable(d.getIsAvailable());
+        try {
+            System.out.println("Editing doctor: " + d.getFirstName() + " " + d.getLastName());
+            this.doctor = new Doctor();
 
-        this.editMode = true;
-        this.showAddForm = false;
+            // Copy properties to avoid direct reference issues
+            this.doctor.setDoctorID(d.getDoctorID());
+            this.doctor.setFirstName(d.getFirstName());
+            this.doctor.setLastName(d.getLastName());
+            this.doctor.setSpeciality(d.getSpeciality());
+            this.doctor.setPhoneNumber(d.getPhoneNumber());
+            this.doctor.setEmail(d.getEmail());
+            this.doctor.setIsAvailable(d.getIsAvailable());
+            this.doctor.setAddedBy(d.getAddedBy());
+            this.doctor.setCreatedAt(d.getCreatedAt());
+            this.doctor.setUpdatedAt(d.getUpdatedAt());
+
+            this.editMode = true;
+            this.showAddForm = false;
+            System.out.println("Doctor set for editing. Edit mode: " + editMode);
+        } catch (Exception e) {
+            System.err.println("Error setting doctor for edit: " + e.getMessage());
+            e.printStackTrace();
+            doctorService.addErrorMessage("Edit Error", "Error preparing doctor for edit: " + e.getMessage());
+        }
     }
 
     public String deleteDoctor(int id) {
         try {
+            System.out.println("Deleting doctor with ID: " + id);
+
+            if (userBean == null || !userBean.isLoggedIn()) {
+                doctorService.addErrorMessage("Delete Failed", "User not logged in");
+                return null;
+            }
+
             Doctor d = doctorService.getDoctor(id);
             if (d != null && doctorService.deleteDoctor(d, userBean.getUser().getUsername())) {
                 loadDoctors();
+                System.out.println("Doctor deleted successfully");
+            } else if (d == null) {
+                doctorService.addErrorMessage("Delete Failed", "Doctor not found");
             }
-            return "doctors.xhtml?faces-redirect=true";
+            return null; // Stay on same page to avoid ViewExpiredException
         } catch (Exception e) {
+            System.err.println("Error deleting doctor: " + e.getMessage());
+            e.printStackTrace();
             doctorService.addErrorMessage("Delete Failed", "Unexpected error: " + e.getMessage());
             return null;
         }
     }
 
     public void search() {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            applyFilters();
-        } else {
-            List<Doctor> searchResults = doctorService.searchDoctors(searchTerm.trim());
-            filteredDoctors = applyFiltersToList(searchResults);
+        try {
+            System.out.println("Searching doctors with term: " + searchTerm);
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                applyFilters();
+            } else {
+                List<Doctor> searchResults = doctorService.searchDoctors(searchTerm.trim());
+                filteredDoctors = applyFiltersToList(searchResults);
+            }
+            System.out.println("Search completed. Results: " +
+                    (filteredDoctors != null ? filteredDoctors.size() : 0));
+        } catch (Exception e) {
+            System.err.println("Error searching doctors: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void applyFilters() {
-        filteredDoctors = applyFiltersToList(doctors);
+        try {
+            filteredDoctors = applyFiltersToList(doctors);
+            System.out.println("Filters applied. Results: " +
+                    (filteredDoctors != null ? filteredDoctors.size() : 0));
+        } catch (Exception e) {
+            System.err.println("Error applying filters: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private List<Doctor> applyFiltersToList(List<Doctor> doctorList) {
+        if (doctorList == null) {
+            return Arrays.asList();
+        }
+
         return doctorList.stream()
                 .filter(d -> filterSpeciality == null || filterSpeciality.isEmpty() ||
                         d.getSpeciality().toLowerCase().contains(filterSpeciality.toLowerCase()))
@@ -134,31 +222,62 @@ public class DoctorBean implements Serializable {
     }
 
     public void clearFilters() {
-        searchTerm = "";
-        filterSpeciality = "";
-        filterAvailability = null;
-        filteredDoctors = doctors;
+        try {
+            searchTerm = "";
+            filterSpeciality = "";
+            filterAvailability = null;
+            filteredDoctors = doctors;
+            System.out.println("Filters cleared");
+        } catch (Exception e) {
+            System.err.println("Error clearing filters: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void viewDetails(Doctor d) {
-        selectedDoctor = d;
+        try {
+            selectedDoctor = d;
+            System.out.println("Selected doctor for details: " +
+                    (d != null ? d.getFirstName() + " " + d.getLastName() : "null"));
+        } catch (Exception e) {
+            System.err.println("Error viewing doctor details: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void showAddDoctorForm() {
-        resetForm();
-        showAddForm = true;
-        editMode = false;
+        try {
+            resetForm();
+            showAddForm = true;
+            editMode = false;
+            System.out.println("Add doctor form shown");
+        } catch (Exception e) {
+            System.err.println("Error showing add form: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void hideAddDoctorForm() {
-        showAddForm = false;
-        resetForm();
+        try {
+            showAddForm = false;
+            resetForm();
+            System.out.println("Add doctor form hidden");
+        } catch (Exception e) {
+            System.err.println("Error hiding add form: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void cancelEdit() {
-        resetForm();
-        editMode = false;
-        showAddForm = false;
+        try {
+            resetForm();
+            editMode = false;
+            showAddForm = false;
+            System.out.println("Edit cancelled");
+        } catch (Exception e) {
+            System.err.println("Error cancelling edit: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void resetForm() {
@@ -168,6 +287,13 @@ public class DoctorBean implements Serializable {
 
     public void toggleAvailability(Doctor d) {
         try {
+            System.out.println("Toggling availability for doctor: " + d.getFirstName() + " " + d.getLastName());
+
+            if (userBean == null || !userBean.isLoggedIn()) {
+                doctorService.addErrorMessage("Update Failed", "User not logged in");
+                return;
+            }
+
             d.setIsAvailable(d.getIsAvailable() == Availability.AVAILABLE ?
                     Availability.UNAVAILABLE : Availability.AVAILABLE);
 
@@ -176,8 +302,11 @@ public class DoctorBean implements Serializable {
                 doctorService.addSuccessMessage("Success",
                         "Dr. " + d.getFirstName() + " " + d.getLastName() +
                                 " is now " + d.getIsAvailable().toString().toLowerCase());
+                System.out.println("Availability toggled successfully");
             }
         } catch (Exception e) {
+            System.err.println("Error toggling availability: " + e.getMessage());
+            e.printStackTrace();
             doctorService.addErrorMessage("Update Failed", "Error updating availability: " + e.getMessage());
         }
     }
@@ -192,11 +321,19 @@ public class DoctorBean implements Serializable {
     }
 
     public List<String> getUniqueSpecialities() {
-        return doctors.stream()
-                .map(Doctor::getSpeciality)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
+        try {
+            if (doctors == null || doctors.isEmpty()) {
+                return Arrays.asList();
+            }
+            return doctors.stream()
+                    .map(Doctor::getSpeciality)
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error getting unique specialities: " + e.getMessage());
+            return Arrays.asList();
+        }
     }
 
     public String getAvailabilityLabel(Availability availability) {
@@ -209,22 +346,30 @@ public class DoctorBean implements Serializable {
                 "color: #dc3545; font-weight: bold;";
     }
 
+    // Permission methods
     public boolean canEditDoctor() {
-        return userBean.isAdmin();
+        return userBean != null && userBean.isAdmin();
     }
 
     public boolean canDeleteDoctor() {
-        return userBean.isAdmin();
+        return userBean != null && userBean.isAdmin();
     }
 
     public boolean canAddDoctor() {
-        return userBean.isAdmin();
+        return userBean != null && userBean.isAdmin();
     }
 
     public boolean canToggleAvailability() {
-        return userBean.isAdmin() || userBean.isDoctor();
+        return userBean != null && (userBean.isAdmin() || userBean.isDoctor());
     }
 
+    // Getter methods for JSF EL compatibility
+    public boolean getCanAddDoctor() { return canAddDoctor(); }
+    public boolean getCanEditDoctor() { return canEditDoctor(); }
+    public boolean getCanDeleteDoctor() { return canDeleteDoctor(); }
+    public boolean getCanToggleAvailability() { return canToggleAvailability(); }
+
+    // Statistics methods
     public int getTotalDoctors() {
         return doctors != null ? doctors.size() : 0;
     }
@@ -237,43 +382,26 @@ public class DoctorBean implements Serializable {
         return getTotalDoctors() - getAvailableDoctorsCount();
     }
 
-    public List<Doctor> getDoctorsBySpeciality(String speciality) {
-        return doctors.stream()
-                .filter(d -> d.getSpeciality().equalsIgnoreCase(speciality))
-                .collect(Collectors.toList());
-    }
-
     public String getDoctorFullName(Doctor doctor) {
+        if (doctor == null) return "Unknown Doctor";
         return "Dr. " + doctor.getFirstName() + " " + doctor.getLastName();
     }
 
-    public String getDoctorDisplayName(Doctor doctor) {
-        return getDoctorFullName(doctor) + " - " + doctor.getSpeciality();
-    }
-
-    // Validation helper methods
-    public boolean isValidEmail(String email) {
-        return email != null && email.matches("^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$");
-    }
-
-    public boolean isValidPhoneNumber(String phone) {
-        return phone != null && phone.matches("^[\\+]?[1-9]?[0-9]{7,15}$");
-    }
-
-    // Statistics methods
-    public double getAverageExperienceYears() {
-        // This would require an experience field in the Doctor model
-        // For now, return a placeholder
-        return 8.5;
-    }
-
     public String getMostCommonSpeciality() {
-        return doctors.stream()
-                .collect(Collectors.groupingBy(Doctor::getSpeciality, Collectors.counting()))
-                .entrySet().stream()
-                .max(java.util.Map.Entry.comparingByValue())
-                .map(java.util.Map.Entry::getKey)
-                .orElse("N/A");
+        try {
+            if (doctors == null || doctors.isEmpty()) {
+                return "N/A";
+            }
+            return doctors.stream()
+                    .collect(Collectors.groupingBy(Doctor::getSpeciality, Collectors.counting()))
+                    .entrySet().stream()
+                    .max(java.util.Map.Entry.comparingByValue())
+                    .map(java.util.Map.Entry::getKey)
+                    .orElse("N/A");
+        } catch (Exception e) {
+            System.err.println("Error getting most common speciality: " + e.getMessage());
+            return "N/A";
+        }
     }
 
     // Getters and Setters
@@ -283,9 +411,17 @@ public class DoctorBean implements Serializable {
     public Doctor getSelectedDoctor() { return selectedDoctor; }
     public void setSelectedDoctor(Doctor selectedDoctor) { this.selectedDoctor = selectedDoctor; }
 
-    public List<Doctor> getDoctors() { return doctors; }
-    public List<Doctor> getFilteredDoctors() { return filteredDoctors; }
-    public List<Doctor> getAvailableDoctors() { return availableDoctors; }
+    public List<Doctor> getDoctors() {
+        return doctors != null ? doctors : Arrays.asList();
+    }
+
+    public List<Doctor> getFilteredDoctors() {
+        return filteredDoctors != null ? filteredDoctors : Arrays.asList();
+    }
+
+    public List<Doctor> getAvailableDoctors() {
+        return availableDoctors != null ? availableDoctors : Arrays.asList();
+    }
 
     public String getSearchTerm() { return searchTerm; }
     public void setSearchTerm(String searchTerm) { this.searchTerm = searchTerm; }

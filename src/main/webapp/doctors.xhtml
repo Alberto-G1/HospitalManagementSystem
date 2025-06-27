@@ -11,17 +11,25 @@
         .doctor-actions { white-space: nowrap; }
         .stats-panel { margin-bottom: 20px; }
         .filter-panel { margin-bottom: 20px; }
+        .action-button { margin: 2px; }
+        .panel-spacing { margin-bottom: 15px; }
     </style>
 </h:head>
 <h:body>
-    <h:form rendered="#{userBean.canManageDoctors or userBean.doctor}">
+    <!-- Debug info -->
+    <h:outputText value="Debug: Logged in = #{userBean.loggedIn}, Role = #{userBean.user.role}, Admin = #{userBean.admin}"
+                  style="font-size: 10px; color: gray;" rendered="false"/>
+
+    <!-- Main Content - Show for admins and doctors -->
+    <h:form id="mainForm" rendered="#{userBean.canManageDoctors or userBean.doctor}">
         <p:menubar>
             <p:menuitem value="Dashboard"
-                        outcome="#{userBean.admin ? 'admin-dashboard.xhtml' : 'doctor-dashboard.xhtml'}"
+                        outcome="#{userBean.admin ? 'admin-dashboard' : 'doctor-dashboard'}"
                         icon="pi pi-home"/>
-            <p:menuitem value="Patients" outcome="patients.xhtml" icon="pi pi-users" rendered="#{userBean.canManagePatients}"/>
-            <p:menuitem value="Doctors" outcome="doctors.xhtml" icon="pi pi-user"/>
-            <p:menuitem value="Appointments" outcome="appointments.xhtml" icon="pi pi-calendar"/>
+            <p:menuitem value="Patients" outcome="patients" icon="pi pi-users"
+                        rendered="#{userBean.canManagePatients}"/>
+            <p:menuitem value="Doctors" outcome="doctors" icon="pi pi-user"/>
+            <p:menuitem value="Appointments" outcome="appointments" icon="pi pi-calendar"/>
             <p:menuitem value="Logout" action="#{userBean.logout}" icon="pi pi-sign-out"/>
         </p:menubar>
 
@@ -29,91 +37,111 @@
             <h2>Doctor Management</h2>
             <p:messages id="messages" showDetail="true" closable="true" autoUpdate="true"/>
 
-            <!-- Statistics Panel -->
-            <p:panel header="Doctor Statistics" styleClass="stats-panel" rendered="#{userBean.admin}">
+            <!-- Statistics Panel - Only for Admins -->
+            <p:panel header="Doctor Statistics" styleClass="stats-panel panel-spacing"
+                     rendered="#{userBean.admin}">
                 <p:panelGrid columns="4" style="width: 100%;">
                     <p:panel header="Total Doctors" style="text-align: center;">
-                        <h:outputText value="#{doctorBean.totalDoctors}" style="font-size: 2em; color: #007bff;"/>
+                        <h:outputText value="#{doctorBean.totalDoctors}"
+                                      style="font-size: 2em; color: #007bff;"/>
                     </p:panel>
 
                     <p:panel header="Available" style="text-align: center;">
-                        <h:outputText value="#{doctorBean.availableDoctorsCount}" style="font-size: 2em; color: #28a745;"/>
+                        <h:outputText value="#{doctorBean.availableDoctorsCount}"
+                                      style="font-size: 2em; color: #28a745;"/>
                     </p:panel>
 
                     <p:panel header="Unavailable" style="text-align: center;">
-                        <h:outputText value="#{doctorBean.unavailableDoctorsCount}" style="font-size: 2em; color: #dc3545;"/>
+                        <h:outputText value="#{doctorBean.unavailableDoctorsCount}"
+                                      style="font-size: 2em; color: #dc3545;"/>
                     </p:panel>
 
                     <p:panel header="Most Common Speciality" style="text-align: center;">
-                        <h:outputText value="#{doctorBean.mostCommonSpeciality}" style="font-size: 1.2em; color: #6c757d;"/>
+                        <h:outputText value="#{doctorBean.mostCommonSpeciality}"
+                                      style="font-size: 1.2em; color: #6c757d;"/>
                     </p:panel>
                 </p:panelGrid>
             </p:panel>
 
             <!-- Search and Filter Panel -->
-            <p:panel header="Search &amp; Filter Doctors" toggleable="true" collapsed="false" styleClass="filter-panel">
-                <p:panelGrid columns="3" style="width: 100%;">
+            <p:panel id="searchFilterPanel" header="Search &amp; Filter Doctors" toggleable="true" collapsed="false"
+                     styleClass="filter-panel panel-spacing">
+                <p:panelGrid id="searchForm" columns="3" style="width: 100%;">
                     <!-- Search -->
                     <p:outputLabel value="Search:"/>
-                    <p:inputText value="#{doctorBean.searchTerm}" placeholder="Name, speciality, phone, or email"/>
+                    <p:inputText id="searchInput" value="#{doctorBean.searchTerm}"
+                                 placeholder="Name, speciality, phone, or email"/>
                     <p:commandButton value="Search" action="#{doctorBean.search}"
-                                     update="doctorTable" icon="pi pi-search" styleClass="ui-button-success"/>
+                                     update="doctorTable" icon="pi pi-search"
+                                     styleClass="ui-button-success"/>
 
                     <!-- Speciality Filter -->
                     <p:outputLabel value="Speciality:"/>
-                    <p:selectOneMenu value="#{doctorBean.filterSpeciality}">
+                    <p:selectOneMenu id="specialityFilter" value="#{doctorBean.filterSpeciality}">
                         <f:selectItem itemLabel="All Specialities" itemValue=""/>
                         <f:selectItems value="#{doctorBean.uniqueSpecialities}" var="spec"
                                        itemValue="#{spec}" itemLabel="#{spec}"/>
                     </p:selectOneMenu>
                     <p:commandButton value="Apply Filters" action="#{doctorBean.applyFilters}"
-                                     update="doctorTable" icon="pi pi-filter" styleClass="ui-button-info"/>
+                                     update="doctorTable" icon="pi pi-filter"
+                                     styleClass="ui-button-info"/>
 
                     <!-- Availability Filter -->
                     <p:outputLabel value="Availability:"/>
-                    <p:selectOneMenu value="#{doctorBean.filterAvailability}">
+                    <p:selectOneMenu id="availabilityFilter" value="#{doctorBean.filterAvailability}">
                         <f:selectItem itemLabel="All" itemValue="#{null}"/>
                         <f:selectItems value="#{doctorBean.availabilityOptions}" var="avail"
-                                       itemValue="#{avail}" itemLabel="#{doctorBean.getAvailabilityLabel(avail)}"/>
+                                       itemValue="#{avail}"
+                                       itemLabel="#{doctorBean.getAvailabilityLabel(avail)}"/>
                     </p:selectOneMenu>
                     <p:commandButton value="Clear All" action="#{doctorBean.clearFilters}"
-                                     update="doctorTable @this" icon="pi pi-times" styleClass="ui-button-secondary"/>
+                                     update="doctorTable searchForm" icon="pi pi-times"
+                                     styleClass="ui-button-secondary"/>
                 </p:panelGrid>
             </p:panel>
 
-            <!-- Quick Actions Panel -->
-            <p:panel header="Quick Actions" style="margin-bottom: 20px;" rendered="#{doctorBean.canAddDoctor}">
+            <!-- Quick Actions Panel - Only for Admins -->
+            <p:panel header="Quick Actions" styleClass="panel-spacing"
+                     rendered="#{doctorBean.canAddDoctor}">
                 <p:commandButton value="Add New Doctor"
                                  action="#{doctorBean.showAddDoctorForm}"
-                                 update="@form"
+                                 update="addDoctorPanel editDoctorPanel"
                                  icon="pi pi-plus"
                                  styleClass="ui-button-success"/>
             </p:panel>
 
-            <!-- Add Doctor Panel (shown when adding) -->
-            <p:panel header="Add New Doctor" rendered="#{doctorBean.showAddForm}" style="margin-bottom: 20px;">
+            <!-- Add Doctor Panel -->
+            <p:panel id="addDoctorPanel" header="Add New Doctor"
+                     rendered="#{doctorBean.showAddForm}"
+                     styleClass="panel-spacing">
                 <p:panelGrid columns="2" style="width: 100%;">
                     <p:outputLabel for="addFirstName" value="First Name:"/>
-                    <p:inputText id="addFirstName" value="#{doctorBean.doctor.firstName}" required="true" maxlength="50"/>
+                    <p:inputText id="addFirstName" value="#{doctorBean.doctor.firstName}"
+                                 required="true" maxlength="50"/>
 
                     <p:outputLabel for="addLastName" value="Last Name:"/>
-                    <p:inputText id="addLastName" value="#{doctorBean.doctor.lastName}" required="true" maxlength="50"/>
+                    <p:inputText id="addLastName" value="#{doctorBean.doctor.lastName}"
+                                 required="true" maxlength="50"/>
 
                     <p:outputLabel for="addSpeciality" value="Speciality:"/>
                     <p:autoComplete id="addSpeciality" value="#{doctorBean.doctor.speciality}"
                                     completeMethod="#{doctorBean.commonSpecialities}"
-                                    required="true" maxlength="100"/>
+                                    var="spec" itemLabel="#{spec}" itemValue="#{spec}"
+                                    forceSelection="false" maxlength="100"/>
 
                     <p:outputLabel for="addPhone" value="Phone Number:"/>
-                    <p:inputText id="addPhone" value="#{doctorBean.doctor.phoneNumber}" required="true" maxlength="15"/>
+                    <p:inputText id="addPhone" value="#{doctorBean.doctor.phoneNumber}"
+                                 required="true" maxlength="15"/>
 
                     <p:outputLabel for="addEmail" value="Email:"/>
-                    <p:inputText id="addEmail" value="#{doctorBean.doctor.email}" required="true" maxlength="50"/>
+                    <p:inputText id="addEmail" value="#{doctorBean.doctor.email}"
+                                 required="true" maxlength="50"/>
 
                     <p:outputLabel for="addAvailability" value="Availability:"/>
-                    <p:selectOneMenu id="addAvailability" value="#{doctorBean.doctor.isAvailable}" required="true">
-                        <f:selectItems value="#{doctorBean.availabilityOptions}" var="avail"
-                                       itemValue="#{avail}" itemLabel="#{doctorBean.getAvailabilityLabel(avail)}"/>
+                    <p:selectOneMenu id="addAvailability" value="#{doctorBean.doctor.isAvailable}"
+                                     required="true">
+                        <f:selectItem itemLabel="Available" itemValue="AVAILABLE"/>
+                        <f:selectItem itemLabel="Unavailable" itemValue="UNAVAILABLE"/>
                     </p:selectOneMenu>
                 </p:panelGrid>
 
@@ -121,42 +149,49 @@
 
                 <p:commandButton value="Add Doctor"
                                  action="#{doctorBean.addDoctor}"
-                                 update="messages doctorTable"
-                                 styleClass="ui-button-success"
+                                 update="messages doctorTable addDoctorPanel"
+                                 styleClass="ui-button-success action-button"
                                  icon="pi pi-plus"/>
 
                 <p:commandButton value="Cancel"
                                  action="#{doctorBean.hideAddDoctorForm}"
-                                 update="@form"
-                                 styleClass="ui-button-secondary"
-                                 style="margin-left: 10px;"
+                                 update="addDoctorPanel"
+                                 styleClass="ui-button-secondary action-button"
                                  icon="pi pi-times"/>
             </p:panel>
 
-            <!-- Edit Doctor Panel (shown when editing) -->
-            <p:panel header="Edit Doctor" rendered="#{doctorBean.editMode}" style="margin-bottom: 20px;">
+            <!-- Edit Doctor Panel -->
+            <p:panel id="editDoctorPanel" header="Edit Doctor"
+                     rendered="#{doctorBean.editMode}"
+                     styleClass="panel-spacing">
                 <p:panelGrid columns="2" style="width: 100%;">
                     <p:outputLabel for="editFirstName" value="First Name:"/>
-                    <p:inputText id="editFirstName" value="#{doctorBean.doctor.firstName}" required="true" maxlength="50"/>
+                    <p:inputText id="editFirstName" value="#{doctorBean.doctor.firstName}"
+                                 required="true" maxlength="50"/>
 
                     <p:outputLabel for="editLastName" value="Last Name:"/>
-                    <p:inputText id="editLastName" value="#{doctorBean.doctor.lastName}" required="true" maxlength="50"/>
+                    <p:inputText id="editLastName" value="#{doctorBean.doctor.lastName}"
+                                 required="true" maxlength="50"/>
 
                     <p:outputLabel for="editSpeciality" value="Speciality:"/>
                     <p:autoComplete id="editSpeciality" value="#{doctorBean.doctor.speciality}"
                                     completeMethod="#{doctorBean.commonSpecialities}"
-                                    required="true" maxlength="100"/>
+                                    var="spec" itemLabel="#{spec}" itemValue="#{spec}"
+                                    forceSelection="false" maxlength="100"/>
 
                     <p:outputLabel for="editPhone" value="Phone Number:"/>
-                    <p:inputText id="editPhone" value="#{doctorBean.doctor.phoneNumber}" required="true" maxlength="15"/>
+                    <p:inputText id="editPhone" value="#{doctorBean.doctor.phoneNumber}"
+                                 required="true" maxlength="15"/>
 
                     <p:outputLabel for="editEmail" value="Email:"/>
-                    <p:inputText id="editEmail" value="#{doctorBean.doctor.email}" required="true" maxlength="50"/>
+                    <p:inputText id="editEmail" value="#{doctorBean.doctor.email}"
+                                 required="true" maxlength="50"/>
 
                     <p:outputLabel for="editAvailability" value="Availability:"/>
-                    <p:selectOneMenu id="editAvailability" value="#{doctorBean.doctor.isAvailable}" required="true">
-                        <f:selectItems value="#{doctorBean.availabilityOptions}" var="avail"
-                                       itemValue="#{avail}" itemLabel="#{doctorBean.getAvailabilityLabel(avail)}"/>
+                    <p:selectOneMenu id="editAvailability" value="#{doctorBean.doctor.isAvailable}"
+                                     required="true">
+                        <f:selectItem itemLabel="Available" itemValue="AVAILABLE"/>
+                        <f:selectItem itemLabel="Unavailable" itemValue="UNAVAILABLE"/>
                     </p:selectOneMenu>
                 </p:panelGrid>
 
@@ -164,20 +199,19 @@
 
                 <p:commandButton value="Update Doctor"
                                  action="#{doctorBean.updateDoctor}"
-                                 update="messages doctorTable"
-                                 styleClass="ui-button-warning"
+                                 update="messages doctorTable editDoctorPanel"
+                                 styleClass="ui-button-warning action-button"
                                  icon="pi pi-pencil"/>
 
                 <p:commandButton value="Cancel Edit"
                                  action="#{doctorBean.cancelEdit}"
-                                 update="@form"
-                                 styleClass="ui-button-secondary"
-                                 style="margin-left: 10px;"
+                                 update="editDoctorPanel"
+                                 styleClass="ui-button-secondary action-button"
                                  icon="pi pi-times"/>
             </p:panel>
 
             <!-- Doctors Table -->
-            <p:panel header="Doctors List">
+            <p:panel header="Doctors List" styleClass="panel-spacing">
                 <p:dataTable id="doctorTable"
                              value="#{doctorBean.filteredDoctors}"
                              var="doctor"
@@ -186,105 +220,144 @@
                              paginatorPosition="bottom"
                              emptyMessage="No doctors found."
                              sortBy="#{doctor.lastName}"
-                             sortOrder="ascending">
+                             sortOrder="ascending"
+                             lazy="false">
 
                     <p:column headerText="ID" sortBy="#{doctor.doctorID}" style="width: 60px;">
-                        #{doctor.doctorID}
+                        <h:outputText value="#{doctor.doctorID}"/>
                     </p:column>
 
                     <p:column headerText="Name" sortBy="#{doctor.lastName}">
-                        Dr. #{doctor.firstName} #{doctor.lastName}
+                        <h:outputText value="Dr. #{doctor.firstName} #{doctor.lastName}"/>
                     </p:column>
 
                     <p:column headerText="Speciality" sortBy="#{doctor.speciality}">
-                        #{doctor.speciality}
+                        <h:outputText value="#{doctor.speciality}"/>
                     </p:column>
 
                     <p:column headerText="Phone" sortBy="#{doctor.phoneNumber}">
-                        #{doctor.phoneNumber}
+                        <h:outputText value="#{doctor.phoneNumber}"/>
                     </p:column>
 
                     <p:column headerText="Email" sortBy="#{doctor.email}">
-                        #{doctor.email}
+                        <h:outputText value="#{doctor.email}"/>
                     </p:column>
 
-                    <p:column headerText="Availability" sortBy="#{doctor.isAvailable}" style="width: 120px;">
+                    <p:column headerText="Availability" sortBy="#{doctor.isAvailable}"
+                              style="width: 120px;">
                         <h:outputText value="#{doctor.isAvailable}"
                                       styleClass="availability-#{doctor.isAvailable.toString().toLowerCase()}"/>
                     </p:column>
 
-                    <p:column headerText="Actions" style="width: 300px;" styleClass="doctor-actions">
+                    <p:column headerText="Actions" style="width: 280px;"
+                              styleClass="doctor-actions">
+
+                        <!-- View Details Button -->
                         <p:commandButton value="View"
                                          action="#{doctorBean.viewDetails(doctor)}"
+                                         update="doctorDetailsDialog"
                                          oncomplete="PF('doctorDetailsDialog').show()"
-                                         update="doctorDetailsPanel"
-                                         styleClass="ui-button-info"
                                          icon="pi pi-eye"
-                                         style="margin: 1px;"/>
+                                         styleClass="ui-button-info action-button"
+                                         title="View Details"/>
 
-                        <p:commandButton value="Edit"
-                                         action="#{doctorBean.editDoctor(doctor)}"
-                                         update="@form"
-                                         styleClass="ui-button-warning"
-                                         icon="pi pi-pencil"
-                                         style="margin: 1px;"
-                                         rendered="#{doctorBean.canEditDoctor}"/>
-
+                        <!-- Toggle Availability Button -->
                         <p:commandButton value="#{doctor.isAvailable == 'AVAILABLE' ? 'Set Unavailable' : 'Set Available'}"
                                          action="#{doctorBean.toggleAvailability(doctor)}"
                                          update="messages doctorTable"
-                                         styleClass="#{doctor.isAvailable == 'AVAILABLE' ? 'ui-button-warning' : 'ui-button-success'}"
                                          icon="pi pi-refresh"
-                                         style="margin: 1px;"
+                                         styleClass="#{doctor.isAvailable == 'AVAILABLE' ? 'ui-button-warning' : 'ui-button-success'} action-button"
                                          rendered="#{doctorBean.canToggleAvailability}"
-                                         onclick="return confirm('Change availability status?');"/>
+                                         title="Toggle Availability"/>
 
+                        <!-- Edit Button - Only for Admins -->
+                        <p:commandButton value="Edit"
+                                         action="#{doctorBean.editDoctor(doctor)}"
+                                         update="editDoctorPanel addDoctorPanel"
+                                         icon="pi pi-pencil"
+                                         styleClass="ui-button-warning action-button"
+                                         rendered="#{doctorBean.canEditDoctor}"
+                                         title="Edit Doctor"/>
+
+                        <!-- Delete Button - Only for Admins -->
                         <p:commandButton value="Delete"
                                          action="#{doctorBean.deleteDoctor(doctor.doctorID)}"
                                          update="messages doctorTable"
-                                         styleClass="ui-button-danger"
                                          icon="pi pi-trash"
-                                         style="margin: 1px;"
+                                         styleClass="ui-button-danger action-button"
                                          rendered="#{doctorBean.canDeleteDoctor}"
-                                         onclick="return confirm('Are you sure you want to delete this doctor?');"/>
+                                         onclick="return confirm('Are you sure you want to delete Dr. #{doctor.firstName} #{doctor.lastName}?')"
+                                         title="Delete Doctor"/>
                     </p:column>
+
                 </p:dataTable>
             </p:panel>
+
+            <!-- Doctor Details Dialog -->
+            <p:dialog id="doctorDetailsDialog"
+                      widgetVar="doctorDetailsDialog"
+                      header="Doctor Details"
+                      modal="true"
+                      resizable="false"
+                      width="600"
+                      height="400">
+
+                <h:panelGroup rendered="#{doctorBean.selectedDoctor != null}">
+                    <p:panelGrid columns="2" style="width: 100%;">
+                        <p:outputLabel value="Doctor ID:"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.doctorID}"/>
+
+                        <p:outputLabel value="Full Name:"/>
+                        <h:outputText value="#{doctorBean.getDoctorFullName(doctorBean.selectedDoctor)}"/>
+
+                        <p:outputLabel value="Speciality:"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.speciality}"/>
+
+                        <p:outputLabel value="Phone Number:"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.phoneNumber}"/>
+
+                        <p:outputLabel value="Email:"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.email}"/>
+
+                        <p:outputLabel value="Availability:"/>
+                        <h:outputText value="#{doctorBean.getAvailabilityLabel(doctorBean.selectedDoctor.isAvailable)}"
+                                      style="#{doctorBean.getAvailabilityStyle(doctorBean.selectedDoctor.isAvailable)}"/>
+
+                        <p:outputLabel value="Added By:"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.addedBy}"/>
+
+                        <p:outputLabel value="Created At:"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.createdAt}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                        </h:outputText>
+
+                        <p:outputLabel value="Updated At:" rendered="#{doctorBean.selectedDoctor.updatedAt != null}"/>
+                        <h:outputText value="#{doctorBean.selectedDoctor.updatedAt}" rendered="#{doctorBean.selectedDoctor.updatedAt != null}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                        </h:outputText>
+                    </p:panelGrid>
+
+                    <p:separator/>
+
+                    <p:commandButton value="Close"
+                                     onclick="PF('doctorDetailsDialog').hide()"
+                                     icon="pi pi-times"
+                                     styleClass="ui-button-secondary"/>
+                </h:panelGroup>
+            </p:dialog>
+
         </div>
-
-        <!-- Doctor Details Dialog -->
-        <p:dialog header="Doctor Details" widgetVar="doctorDetailsDialog" modal="true" width="600" height="400">
-            <p:panel id="doctorDetailsPanel">
-                <p:panelGrid columns="2" rendered="#{doctorBean.selectedDoctor != null}">
-                    <h:outputText value="Doctor ID:" style="font-weight: bold;"/>
-                    <h:outputText value="#{doctorBean.selectedDoctor.doctorID}"/>
-
-                    <h:outputText value="Full Name:" style="font-weight: bold;"/>
-                    <h:outputText value="#{doctorBean.getDoctorFullName(doctorBean.selectedDoctor)}"/>
-
-                    <h:outputText value="Speciality:" style="font-weight: bold;"/>
-                    <h:outputText value="#{doctorBean.selectedDoctor.speciality}"/>
-
-                    <h:outputText value="Phone Number:" style="font-weight: bold;"/>
-                    <h:outputText value="#{doctorBean.selectedDoctor.phoneNumber}"/>
-
-                    <h:outputText value="Email:" style="font-weight: bold;"/>
-                    <h:outputText value="#{doctorBean.selectedDoctor.email}"/>
-
-                    <h:outputText value="Availability:" style="font-weight: bold;"/>
-                    <h:outputText value="#{doctorBean.getAvailabilityLabel(doctorBean.selectedDoctor.isAvailable)}"
-                                  style="#{doctorBean.getAvailabilityStyle(doctorBean.selectedDoctor.isAvailable)}"/>
-                </p:panelGrid>
-            </p:panel>
-        </p:dialog>
     </h:form>
 
-    <!-- Access Denied -->
-    <h:panelGroup rendered="#{!userBean.canManageDoctors and !userBean.doctor}">
-        <p:panel header="Access Denied">
-            <p>You do not have permission to view doctor information.</p>
-            <p:commandButton value="Go to Dashboard" outcome="#{userBean.admin ? 'admin-dashboard.xhtml' : 'login.xhtml'}"/>
-        </p:panel>
+    <!-- No Access Message -->
+    <h:panelGroup rendered="#{not (userBean.canManageDoctors or userBean.doctor)}">
+        <div style="padding: 20px; text-align: center;">
+            <h2>Access Denied</h2>
+            <p>You don't have permission to access this page.</p>
+            <p:button value="Go to Dashboard" outcome="dashboard"
+                      styleClass="ui-button-info"/>
+        </div>
     </h:panelGroup>
+
 </h:body>
 </html>

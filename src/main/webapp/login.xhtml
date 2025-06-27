@@ -3,57 +3,173 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <title>Login - Hospital Management System</title>
+    <title>Login - MedCare HMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" />
     <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f9fc;
+            background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
+            max-width: 450px;
+            margin: 0 auto;
             padding: 20px;
+            width: 100%;
         }
+
         .login-panel {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+            overflow: hidden;
+            background: rgba(255,255,255,0.95);
+            border: none !important;
         }
+
+        .login-panel .ui-panel-titlebar {
+            background: linear-gradient(135deg, #16697A, #489FB5) !important;
+            color: white !important;
+            font-size: 1.5rem !important;
+            font-weight: 600;
+            padding: 20px !important;
+            text-align: center;
+            border: none !important;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .brand-logo img {
+            height: 70px;
+            width: auto;
+        }
+
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #16697A;
+            margin: 0;
+        }
+
         .full-width-button {
             width: 100%;
-            margin-top: 15px;
+            margin-top: 20px !important;
+            height: 45px;
+            font-weight: 500 !important;
+            border-radius: 6px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .ui-button-success {
+            background: linear-gradient(135deg, #28a745, #5cb85c) !important;
+            border: none !important;
+        }
+
+        .ui-button-info {
+            background: linear-gradient(135deg, #17a2b8, #5bc0de) !important;
+            border: none !important;
+        }
+
+        .ui-button-secondary {
+            background: linear-gradient(135deg, #6c757d, #868e96) !important;
+            border: none !important;
+        }
+
+        .full-width-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+
+        .panel-grid-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .alternative-action {
+            text-align: center;
+            margin: 15px 0;
+            color: #6c757d;
+        }
+
+        .input-field {
+            width: 100% !important;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 15px;
+                max-width: 90%;
+            }
+
+            .brand-logo img {
+                height: 60px;
+            }
+
+            .brand-name {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </h:head>
 <h:body>
     <div class="login-container">
         <h:form>
-            <p:panel header="Hospital Management System - Login" styleClass="login-panel">
+            <p:panel header="Login to MedCare HMS" styleClass="login-panel">
+                <div class="brand-logo">
+                    <img src="#{resource['images/logo/HMS-logo.png']}" alt="MedCare HMS Logo" />
+                    <h1 class="brand-name">MEDCARE HMS</h1>
+                </div>
+
                 <p:messages id="messages" showDetail="true" closable="true" autoUpdate="true"/>
 
-                <p:panelGrid columns="2" style="width: 100%;">
-                    <p:outputLabel for="username" value="Username:" />
-                    <p:inputText id="username" value="#{userBean.user.username}" required="true" placeholder="Enter username"/>
+                <p:panelGrid columns="1" style="width: 100%;" styleClass="panel-grid">
+                    <p:outputLabel for="username" value="Username" styleClass="panel-grid-label" />
+                    <p:inputText id="username" value="#{userBean.user.username}" required="true"
+                                 placeholder="Enter username" styleClass="input-field"/>
 
-                    <p:outputLabel for="password" value="Password:" />
-                    <p:password id="password" value="#{userBean.passwordInput}" required="true" placeholder="Enter password"/>
+                    <p:outputLabel for="password" value="Password" styleClass="panel-grid-label" />
+                    <p:password id="password" value="#{userBean.passwordInput}" required="true"
+                                placeholder="Enter password" styleClass="input-field" feedback="false"/>
                 </p:panelGrid>
 
                 <p:commandButton value="Login"
                                  action="#{userBean.login}"
                                  update="messages"
-                                 styleClass="ui-button-success full-width-button"/>
+                                 styleClass="ui-button-success full-width-button"
+                                 icon="pi pi-sign-in"/>
 
-                <p:separator />
-
-                <div style="text-align: center;">
+                <div class="alternative-action">
                     <p>Don't have an account?</p>
-                    <p:commandButton value="Register New User"
-                                     action="register?faces-redirect=true"
-                                     styleClass="ui-button-info full-width-button"/>
                 </div>
 
-                <p:separator />
+                <p:commandButton value="Register New User"
+                                 action="register?faces-redirect=true"
+                                 styleClass="ui-button-info full-width-button"
+                                 icon="pi pi-user-plus"/>
 
-                <div style="text-align: center;">
-                    <p:commandButton value="Back to Welcome"
-                                     action="welcome?faces-redirect=true"
-                                     styleClass="ui-button-secondary full-width-button"/>
+                <div class="alternative-action">
+                    <p>or return to</p>
                 </div>
+
+                <p:commandButton value="Welcome Page"
+                                 action="welcome?faces-redirect=true"
+                                 styleClass="ui-button-secondary full-width-button"
+                                 icon="pi pi-home"/>
             </p:panel>
         </h:form>
     </div>
