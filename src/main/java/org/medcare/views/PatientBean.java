@@ -1,166 +1,74 @@
 package org.medcare.views;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.medcare.enums.Gender;
 import org.medcare.models.Patient;
 import org.medcare.service.PatientService;
+import org.primefaces.PrimeFaces;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
 import java.util.List;
 
 @Named
 @ViewScoped
 public class PatientBean implements Serializable {
 
-    private Patient patient = new Patient();
-    private Patient selectedPatient;
-    private String dateOfBirthStr;
-    private String searchTerm = "";
-    private List<Patient> patients;
-    private List<Patient> filteredPatients;
-    private boolean editMode = false;
-
     @Inject
     private PatientService patientService;
 
-    @Inject
-    private UserBean userBean;
+    private List<Patient> patients;
+    private Patient selectedPatient;
 
     @PostConstruct
     public void init() {
-        loadPatients();
+        patients = patientService.getAll();
     }
 
-    public void loadPatients() {
-        patients = patientService.getAllPatients();
-        filteredPatients = patients;
+    public void openNew() {
+        this.selectedPatient = new Patient();
     }
 
-    public String register() {
-        try {
-            if (dateOfBirthStr != null && !dateOfBirthStr.isEmpty()) {
-                patient.setDateOfBirth(LocalDate.parse(dateOfBirthStr));
-            }
-
-            if (patientService.registerPatient(patient, userBean.getUser().getUsername())) {
-                resetForm();
-                loadPatients();
-                return "patients.xhtml?faces-redirect=true";
-            }
-            return null; // Stay on same page if validation fails
-
-        } catch (DateTimeParseException e) {
-//            patientService.addErrorMessage("Invalid Date", "Please enter date in YYYY-MM-DD format.");
-            return null;
-        }
-    }
-
-    public String update() {
-        try {
-            if (dateOfBirthStr != null && !dateOfBirthStr.isEmpty()) {
-                patient.setDateOfBirth(LocalDate.parse(dateOfBirthStr));
-            }
-
-            if (patientService.updatePatient(patient, userBean.getUser().getUsername())) {
-                resetForm();
-                loadPatients();
-                editMode = false;
-                return "patients.xhtml?faces-redirect=true";
-            }
-            return null;
-
-        } catch (DateTimeParseException e) {
-            System.out.println("Invalid date format, Please enter date in YYYY-MM-DD format.");
-//            patientService.addErrorMessage("Invalid Date", "Please enter date in YYYY-MM-DD format.");
-            return null;
-        }
-    }
-
-    public void edit(Patient p) {
-        this.patient = new Patient();
-        // Copy properties to avoid direct reference issues
-//        this.patient.setPatientID(p.getPatientID());
-        this.patient.setFirstName(p.getFirstName());
-        this.patient.setLastName(p.getLastName());
-        this.patient.setDateOfBirth(p.getDateOfBirth());
-        this.patient.setGender(p.getGender());
-        this.patient.setAddress(p.getAddress());
-        this.patient.setPhoneNumber(p.getPhoneNumber());
-        this.patient.setEmail(p.getEmail());
-        this.patient.setEmergencyContact(p.getEmergencyContact());
-
-        this.dateOfBirthStr = p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : "";
-        this.editMode = true;
-    }
-
-    public String delete(int id) {
-        Patient p = patientService.getPatient(id);
-        if (p != null && patientService.deletePatient(p, userBean.getUser().getUsername())) {
-            loadPatients();
-        }
-        return "patients.xhtml?faces-redirect=true";
-    }
-
-    public void search() {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            filteredPatients = patients;
+    public void savePatient() {
+        if (this.selectedPatient.getPatientId() == 0) {
+            patientService.save(this.selectedPatient);
+            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Registered");
         } else {
-            filteredPatients = patientService.searchPatients(searchTerm.trim());
+            patientService.save(this.selectedPatient);
+            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Updated");
+        }
+        // Refresh list from DB and update UI
+        patients = patientService.getAll();
+        // This JS is for PrimeFaces to update components after an AJAX request
+        PrimeFaces.current().ajax().update("form:dt-patients");
+    }
+
+    public void deletePatient() {
+        if (this.selectedPatient != null) {
+            patientService.delete(this.selectedPatient);
+            this.patients.remove(this.selectedPatient);
+            this.selectedPatient = null;
+            addMessage(FacesMessage.SEVERITY_WARN, "Removed", "Patient has been deleted.");
+        } else {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No patient selected for deletion.");
         }
     }
 
-    public void clearSearch() {
-        searchTerm = "";
-        filteredPatients = patients;
+    private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 
-    public void cancelEdit() {
-        resetForm();
-        editMode = false;
+    public Gender[] getGenders() {
+        return Gender.values();
     }
 
-    private void resetForm() {
-        patient = new Patient();
-        dateOfBirthStr = "";
-        selectedPatient = null;
-    }
-
-    public void viewDetails(Patient p) {
-        selectedPatient = p;
-    }
-
-    // Utility methods for UI
-    public List<Gender> getGenderOptions() {
-        return Arrays.asList(Gender.values());
-    }
-
-    public String getPatientAge(LocalDate dateOfBirth) {
-        if (dateOfBirth == null) return "N/A";
-        return String.valueOf(LocalDate.now().getYear() - dateOfBirth.getYear());
-    }
-
-    // Getters and Setters
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
-
+    // --- Standard Getters and Setters ---
+    public List<Patient> getPatients() { return patients; }
+    public void setPatients(List<Patient> patients) { this.patients = patients; }
     public Patient getSelectedPatient() { return selectedPatient; }
     public void setSelectedPatient(Patient selectedPatient) { this.selectedPatient = selectedPatient; }
-
-    public List<Patient> getPatients() { return patients; }
-    public List<Patient> getFilteredPatients() { return filteredPatients; }
-
-    public String getDateOfBirthStr() { return dateOfBirthStr; }
-    public void setDateOfBirthStr(String dateOfBirthStr) { this.dateOfBirthStr = dateOfBirthStr; }
-
-    public String getSearchTerm() { return searchTerm; }
-    public void setSearchTerm(String searchTerm) { this.searchTerm = searchTerm; }
-
-    public boolean isEditMode() { return editMode; }
-    public void setEditMode(boolean editMode) { this.editMode = editMode; }
 }
