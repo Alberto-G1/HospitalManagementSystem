@@ -1,64 +1,50 @@
 package org.medcare.models;
 
 import jakarta.persistence.*;
-import org.medcare.enums.AppointmentStatus;
-
-//import javax.persistence.*;
-import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "appointments")
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int appointmentID;
+    private int appointmentId;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Patient patient;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Doctor doctor;
 
     @Column(nullable = false)
-    private Date appointmentDate;
+    private LocalDate date;
 
     @Column(nullable = false)
-    private Time appointmentTime;
+    private LocalTime time;
 
-    @Column(length = 255)
+    @Column
     private String reason;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private AppointmentStatus status = AppointmentStatus.SCHEDULED;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdBy;
 
-    // Constructors
-    public Appointment() {}
-
-    public Appointment(Patient p, Doctor d, String r) {
-        this.patient = p;
-        this.doctor = d;
-        this.reason = r;
-    }
 
     // Getters and setters
-    public int getAppointmentID() { return appointmentID; }
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+    public int getAppointmentId() { return appointmentId; }
     public Patient getPatient() { return patient; }
     public void setPatient(Patient patient) { this.patient = patient; }
     public Doctor getDoctor() { return doctor; }
     public void setDoctor(Doctor doctor) { this.doctor = doctor; }
-    public Date getAppointmentDate() { return appointmentDate; }
-    public void setAppointmentDate(Date appointmentDate) { this.appointmentDate = appointmentDate; }
-    public Time getAppointmentTime() { return appointmentTime; }
-    public void setAppointmentTime(Time appointmentTime) { this.appointmentTime = appointmentTime; }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public LocalTime getTime() { return time; }
+    public void setTime(LocalTime time) { this.time = time; }
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }
-    public AppointmentStatus getStatus() { return status; }
-    public void setStatus(AppointmentStatus status) { this.status = status; }
-
-    public void setAppointmentID(int appointmentID) {
-    }
 }

@@ -3,7 +3,6 @@ package org.medcare.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import org.medcare.dao.GenericDAO;
-import org.medcare.models.ActivityLog;
 
 import java.util.List;
 
