@@ -5,24 +5,20 @@
 
 <hibernate-configuration>
     <session-factory>
-        <!-- DB Connection Settings -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost:3306/hospital_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/medicare_db?useSSL=false&amp;serverTimezone=UTC</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">Grande123</property>
+        <property name="hibernate.current_session_context_class">thread</property>
 
-        <!-- Hibernate Settings -->
-<!--        <property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>-->
-        <property name="hibernate.hbm2ddl.auto">update</property> <!-- use update/create-drop in dev -->
-
-        <!-- Logging -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="show_sql">true</property>
         <property name="format_sql">true</property>
 
-        <!-- Annotated Model Classes -->
+        <mapping class="org.medcare.models.User"/>
         <mapping class="org.medcare.models.Patient"/>
         <mapping class="org.medcare.models.Doctor"/>
         <mapping class="org.medcare.models.Appointment"/>
-        <mapping class="org.medcare.models.User"/>
     </session-factory>
 </hibernate-configuration>
