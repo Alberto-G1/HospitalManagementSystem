@@ -1,67 +1,47 @@
 package org.medcare.dao;
 
-import org.medcare.utils.HibernateUtil;
-import org.hibernate.HibernateException;
+import jakarta.transaction.Transactional;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
+import org.hibernate.SessionFactory;
+import org.medcare.utils.HibernateUtil;
 
 import java.util.List;
 
-public abstract class GenericDAO<T> {
+public class GenericDAO<T> {
     private final Class<T> clazz;
+    private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
     public GenericDAO(Class<T> clazz) {
         this.clazz = clazz;
     }
 
-    public void save(T entity) {
-        Transaction tx = null;
-        Session session = null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            session.saveOrUpdate(entity);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+    @Transactional
+    public void saveOrUpdate(T entity) {
+        Session session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
+        session.saveOrUpdate(entity);
+        session.getTransaction().commit();
     }
 
+    @Transactional
     public void delete(T entity) {
-        Transaction tx = null;
-        Session session = null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            session.delete(entity);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+        Session session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
+        session.delete(entity);
+        session.getTransaction().commit();
     }
 
     public T findById(int id) {
-        Session session = null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            return (T) session.get(clazz, id);
-        } finally {
-            System.out.println("Got the id");
-        }
+        Session session = sessionFactory.openSession();
+        T result = session.get(clazz, id);
+        session.close();
+        return result;
     }
 
     public List<T> findAll() {
-        Session session = null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            return session.createQuery("FROM " + clazz.getSimpleName()).list();
-        } catch (HibernateException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static class PatientDAO {
+        Session session = sessionFactory.openSession();
+        List<T> list = session.createQuery("from " + clazz.getSimpleName(), clazz).list();
+        session.close();
+        return list;
     }
 }
