@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Appointments - MedCare HMS</title>
+    <style>
+        /* Base Styling - Targets only PrimeFaces-generated HTML */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* PanelGrid Styling */
+        .ui-panelgrid td {
+            padding: 12px 15px;
+            border: none !important;
+        }
+
+        .ui-panelgrid .ui-outputlabel {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* DataTable Styling */
+        .ui-datatable {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .ui-datatable thead th {
+            background-color: #3498db !important;
+            color: white !important;
+            padding: 15px;
+            font-weight: 500;
+            border: none !important;
+        }
+
+        .ui-datatable tbody td {
+            padding: 12px 15px;
+            border-color: #e0e0e0 !important;
+            vertical-align: middle;
+        }
+
+        .ui-datatable tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .ui-datatable tbody tr:hover {
+            background-color: #f0f8ff !important;
+        }
+
+        /* Input Styling */
+        .ui-inputfield {
+            width: 100%;
+            padding: 10px 15px !important;
+            border: 1px solid #ddd !important;
+            border-radius: 4px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .ui-inputfield:focus {
+            border-color: #3498db !important;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2) !important;
+            outline: none !important;
+        }
+
+        /* Button Styling */
+        .ui-button {
+            padding: 10px 20px !important;
+            border-radius: 4px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            border: none !important;
+        }
+
+        .ui-button.ui-button-danger {
+            background-color: #e74c3c !important;
+            color: white !important;
+        }
+
+        .ui-button.ui-button-success {
+            background-color: #3498db !important;
+            color: white !important;
+        }
+
+        .ui-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+        }
+
+        /* Header Styling */
+        .ui-widget-header {
+            border: none !important;
+            background: transparent !important;
+            color: #2c3e50 !important;
+            font-size: 1.5em !important;
+            padding: 10px 0 !important;
+            margin-bottom: 20px !important;
+            border-bottom: 2px solid #3498db !important;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .ui-datatable table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</h:head>
+<h:body>
+    <!-- Original JSF Components - UNTOUCHED -->
+    <h:form>
+        <h2>Appointments</h2>
+        <p:dataTable value="#{appointmentBean.appointments}" var="a">
+            <p:column headerText="Patient">#{a.patient.firstName} #{a.patient.lastName}</p:column>
+            <p:column headerText="Doctor">#{a.doctor.firstName} #{a.doctor.lastName}</p:column>
+            <p:column headerText="Date">#{a.date}</p:column>
+            <p:column headerText="Time">#{a.time}</p:column>
+            <p:column headerText="Actions">
+                <p:commandButton value="Delete" action="#{appointmentBean.delete(a.appointmentId)}" update="@form" />
+            </p:column>
+        </p:dataTable>
+
+        <h3>Book Appointment</h3>
+        <p:panelGrid columns="2">
+            <p:outputLabel value="Patient" />
+            <p:selectOneMenu value="#{appointmentBean.appointment.patient}">
+                <f:selectItems value="#{appointmentBean.patients}" var="p"
+                               itemLabel="#{p.firstName} #{p.lastName}" itemValue="#{p}" />
+            </p:selectOneMenu>
+
+            <p:outputLabel value="Doctor" />
+            <p:selectOneMenu value="#{appointmentBean.appointment.doctor}">
+                <f:selectItems value="#{appointmentBean.doctors}" var="d"
+                               itemLabel="#{d.firstName} #{d.lastName}" itemValue="#{d}" />
+            </p:selectOneMenu>
+
+            <p:outputLabel value="Date (YYYY-MM-DD)" />
+            <p:inputText value="#{appointmentBean.dateStr}" />
+
+            <p:outputLabel value="Time (HH:MM)" />
+            <p:inputText value="#{appointmentBean.timeStr}" />
+
+            <p:outputLabel value="Reason" />
+            <p:inputText value="#{appointmentBean.appointment.reason}" />
+        </p:panelGrid>
+
+        <p:commandButton value="Book" action="#{appointmentBean.save}" update="@form" />
+    </h:form>
+</h:body>
+</html>

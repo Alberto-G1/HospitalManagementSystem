@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+    <title>My Profile - MedCare HMS</title>
+</h:head>
+<h:body>
+    <!-- Include the main menu for consistent navigation -->
+    <ui:include src="/app/menu.xhtml" />
+
+    <div class="card" style="margin: 20px;">
+        <h:form id="profileForm">
+            <h2>My Doctor Profile</h2>
+            <p>Use this page to view and update your professional information.</p>
+            <hr/>
+
+            <p:growl id="messages" showDetail="true"/>
+
+            <!-- Render the panel only if a profile can be loaded or created -->
+            <p:panel header="Edit Your Details" style="margin-top: 20px;"
+                     rendered="#{not empty doctorProfileBean.currentDoctorProfile}">
+
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+
+                    <p:outputLabel for="username" value="Account Username"/>
+                    <h:outputText id="username" value="#{doctorProfileBean.currentDoctorProfile.user.username}" style="font-weight: bold;"/>
+
+                    <p:outputLabel for="email" value="Account Email"/>
+                    <h:outputText id="email" value="#{doctorProfileBean.currentDoctorProfile.user.email}" style="font-weight: bold;"/>
+
+                    <p:outputLabel for="firstName" value="First Name"/>
+                    <p:inputText id="firstName" value="#{doctorProfileBean.currentDoctorProfile.firstName}"
+                                 required="true" requiredMessage="First name is required."/>
+
+                    <p:outputLabel for="lastName" value="Last Name"/>
+                    <p:inputText id="lastName" value="#{doctorProfileBean.currentDoctorProfile.lastName}"
+                                 required="true" requiredMessage="Last name is required."/>
+
+                    <p:outputLabel for="speciality" value="Speciality"/>
+                    <p:inputText id="speciality" value="#{doctorProfileBean.currentDoctorProfile.speciality}"
+                                 required="true" requiredMessage="Speciality is required."/>
+
+                    <p:outputLabel for="phone" value="Phone Number"/>
+                    <p:inputText id="phone" value="#{doctorProfileBean.currentDoctorProfile.phoneNumber}"
+                                 required="true" requiredMessage="Phone number is required."/>
+                </p:panelGrid>
+
+                <p:commandButton value="Save Changes"
+                                 actionListener="#{doctorProfileBean.updateProfile}"
+                                 update=":profileForm:messages"
+                                 icon="pi pi-save"
+                                 style="margin-top: 20px;"/>
+            </p:panel>
+
+            <!-- Show a message if for some reason the profile could not be loaded -->
+            <p:panel header="Profile Not Found" rendered="#{empty doctorProfileBean.currentDoctorProfile}">
+                <h:outputText value="Could not load your doctor profile. This might be because your account is not of the 'DOCTOR' role. Please contact an administrator." />
+            </p:panel>
+        </h:form>
+    </div>
+</h:body>
+</html>
