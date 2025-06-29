@@ -1,211 +1,98 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
-<h:head>
-    <title>Dashboard - MedCare HMS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&amp;display=swap" rel="stylesheet" />
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8fafc;
-            color: #333;
-            overflow-x: hidden;
-        }
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
 
-        /* Menu bar styling */
-        .dashboard-menu {
-            background: linear-gradient(135deg, #16697A, #489FB5);
-            padding: 0 20px;
-            margin-bottom: 30px;
-            border: none;
-            border-radius: 0;
-        }
+    <ui:define name="pageTitle">Dashboard</ui:define>
 
-        /* Dashboard container */
-        .dashboard-container {
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Welcome card */
-        .welcome-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-            border-left: 5px solid #82C0CC;
-        }
-
-        .welcome-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 2rem;
-            color: #16697A;
-            margin-top: 0;
-        }
-
-        /* Stats grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin: 30px 0;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-        }
-
-        .stat-card.patients::before { background: #2196F3; }
-        .stat-card.doctors::before { background: #4CAF50; }
-        .stat-card.appointments::before { background: #FFC107; }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        }
-
-        .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-
-        .stat-card.patients .stat-icon { color: #2196F3; }
-        .stat-card.doctors .stat-icon { color: #4CAF50; }
-        .stat-card.appointments .stat-icon { color: #FFC107; }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 10px 0;
-            color: #16697A;
-        }
-
-        .stat-label {
-            font-size: 1.1rem;
-            color: #666;
-            margin-top: 10px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome-title {
-                font-size: 1.8rem;
-            }
-
-            .stat-card {
-                padding: 20px;
-            }
-        }
-    </style>
-</h:head>
-<h:body>
-    <!-- Menu bar -->
-    <p:menubar styleClass="dashboard-menu">
-        <p:menuitem value="Patients" outcome="/app/patients.xhtml"
-                    rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}" />
-        <p:menuitem value="Doctors" outcome="/app/doctors.xhtml"
-                    rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}" />
-        <p:menuitem value="Appointments" outcome="/app/appointments.xhtml" />
-        <p:menuitem value="My Profile" outcome="/app/doctorProfile.xhtml"
-                    rendered="#{userBean.user.role == 'DOCTOR'}" />
-        <p:menuitem value="Logout" action="#{userBean.logout}"
-                    style="margin-left: auto; color: white;" icon="pi pi-power-off" />
-    </p:menubar>
-
-    <div class="dashboard-container">
+    <ui:define name="content">
         <!-- Welcome card -->
-        <div class="welcome-card">
-            <h2 class="welcome-title">Welcome, #{userBean.user.username}</h2>
-            <p style="color: #666; font-size: 1.1rem;">Role: <strong>#{userBean.user.role}</strong></p>
+        <div class="card">
+            <h2 style="font-size: 2rem; color: #1e3a8a; margin-top: 0;">Welcome, #{userBean.user.username}!</h2>
+            <p style="color: #666; font-size: 1.1rem; margin-top: -1rem;">Here's a quick overview of the hospital's status.</p>
         </div>
 
         <!-- Admin and Receptionist Dashboard -->
         <ui:fragment rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}">
-            <h3 style="color: #16697A; font-size: 1.5rem;">System Overview</h3>
-            <div class="stats-grid">
-                <div class="stat-card patients">
-                    <i class="pi pi-users stat-icon"></i>
-                    <span class="stat-number">#{dashboardBean.patientCount}</span>
-                    <span class="stat-label">Total Patients</span>
+            <div class="p-grid stats-grid">
+                <div class="p-col-12 p-md-6 p-lg-4">
+                    <div class="card stat-card patients">
+                        <i class="pi pi-users stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.patientCount}</span>
+                        <span class="stat-label">Total Patients</span>
+                    </div>
                 </div>
-                <div class="stat-card doctors">
-                    <i class="pi pi-user-md stat-icon"></i>
-                    <span class="stat-number">#{dashboardBean.doctorCount}</span>
-                    <span class="stat-label">Total Doctors</span>
+                <div class="p-col-12 p-md-6 p-lg-4">
+                    <div class="card stat-card doctors">
+                        <i class="pi pi-user-md stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.doctorCount}</span>
+                        <span class="stat-label">Total Doctors</span>
+                    </div>
                 </div>
-                <div class="stat-card appointments">
-                    <i class="pi pi-calendar stat-icon"></i>
-                    <span class="stat-number">#{dashboardBean.appointmentCount}</span>
-                    <span class="stat-label">Scheduled Appointments</span>
+                <div class="p-col-12 p-md-6 p-lg-4">
+                    <div class="card stat-card appointments">
+                        <i class="pi pi-calendar stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.appointmentCount}</span>
+                        <span class="stat-label">Scheduled Appointments</span>
+                    </div>
                 </div>
             </div>
         </ui:fragment>
 
         <!-- Doctor Dashboard -->
         <ui:fragment rendered="#{userBean.user.role == 'DOCTOR'}">
-            <h3 style="color: #16697A; font-size: 1.5rem;">Your Overview</h3>
-            <div class="stats-grid">
-                <div class="stat-card patients">
-                    <i class="pi pi-users stat-icon"></i>
-                    <span class="stat-number">#{dashboardBean.patientCount}</span>
-                    <span class="stat-label">Your Patients</span>
-                </div>
-                <div class="stat-card appointments">
-                    <i class="pi pi-calendar stat-icon"></i>
-                    <span class="stat-number">#{dashboardBean.appointmentCount}</span>
-                    <span class="stat-label">Upcoming Appointments</span>
-                </div>
+            <div class="p-grid stats-grid">
+                <!-- Doctor-specific stats can go here -->
             </div>
-            <p style="margin-top: 20px; color: #666; font-size: 1.1rem;">
-                Use the menu to view your appointments or update your profile information.
-            </p>
+            <div class="card">
+                <h3>Your Quick Actions</h3>
+                <p:button value="View My Appointments" outcome="/app/appointments" icon="pi pi-calendar" styleClass="ui-button-info"/>
+                <p:button value="Update My Profile" outcome="/app/doctorProfile" icon="pi pi-user-edit" styleClass="ui-button-secondary" style="margin-left: 10px;"/>
+            </div>
         </ui:fragment>
-    </div>
 
-    <script>
-        // Simple animation for cards on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.stat-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease ' + (index * 0.2) + 's, transform 0.5s ease ' + (index * 0.2) + 's';
-                setTimeout(function() {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 100);
-            });
-        });
-    </script>
-</h:body>
-</html>
+        <h:outputStylesheet>
+            .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            }
+            .stat-card {
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-left: 5px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            }
+            .stat-card.patients { border-color: #3b82f6; }
+            .stat-card.doctors { border-color: #10b981; }
+            .stat-card.appointments { border-color: #f59e0b; }
+
+            .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            }
+            .stat-card.patients .stat-icon { color: #3b82f6; }
+            .stat-card.doctors .stat-icon { color: #10b981; }
+            .stat-card.appointments .stat-icon { color: #f59e0b; }
+
+            .stat-number {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #111827;
+            }
+            .stat-label {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            }
+        </h:outputStylesheet>
+    </ui:define>
+</ui:composition>

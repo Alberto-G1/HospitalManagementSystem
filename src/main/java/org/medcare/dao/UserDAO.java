@@ -13,7 +13,17 @@ public class UserDAO extends GenericDAO<User> {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("FROM User WHERE username = :username", User.class)
                     .setParameter("username", username)
-                    .uniqueResult();
+                    .uniqueResultOptional()
+                    .orElse(null);
+        }
+    }
+
+    public User findByEmail(String email) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM User WHERE email = :email", User.class)
+                    .setParameter("email", email)
+                    .uniqueResultOptional()
+                    .orElse(null);
         }
     }
 }

@@ -46,6 +46,12 @@ public class Patient {
     @Column(length = 50)
     private String emergencyContact;
 
+    // NEW FIELD: Tracks which user created this patient record.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdBy;
+
+
     // --- Getters and Setters ---
     public int getPatientId() { return patientId; }
     public void setPatientId(int patientId) { this.patientId = patientId; }
@@ -65,4 +71,6 @@ public class Patient {
     public void setAddress(String address) { this.address = address; }
     public String getEmergencyContact() { return emergencyContact; }
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 }

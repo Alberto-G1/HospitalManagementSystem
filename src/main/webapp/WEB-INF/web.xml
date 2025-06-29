@@ -9,6 +9,11 @@
     <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
   </listener>
 
+  <!-- Application Bootstrap Listener -->
+  <listener>
+    <listener-class>org.medcare.config.ApplicationInitializer</listener-class>
+  </listener>
+
   <!-- JSF servlet -->
   <servlet>
     <servlet-name>FacesServlet</servlet-name>
@@ -34,5 +39,15 @@
     <filter-name>LoginFilter</filter-name>
     <url-pattern>/app/*</url-pattern>
   </filter-mapping>
+
+  <!-- PrimeFaces Configuration -->
+  <context-param>
+    <param-name>primefaces.THEME</param-name>
+    <param-value>saga</param-value>
+  </context-param>
+  <context-param>
+    <param-name>primefaces.FONT_AWESOME</param-name>
+    <param-value>true</param-value>
+  </context-param>
 
 </web-app>

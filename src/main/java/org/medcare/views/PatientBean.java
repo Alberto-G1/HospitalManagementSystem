@@ -21,6 +21,9 @@ public class PatientBean implements Serializable {
     @Inject
     private PatientService patientService;
 
+    @Inject
+    private UserBean userBean; // To get the logged-in user
+
     private List<Patient> patients;
     private Patient selectedPatient;
 
@@ -34,18 +37,27 @@ public class PatientBean implements Serializable {
     }
 
     public void savePatient() {
-        if (this.selectedPatient.getPatientId() == 0) {
-            patientService.save(this.selectedPatient);
-            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Registered");
-        } else {
-            patientService.save(this.selectedPatient);
-            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Updated");
+        boolean isNew = (this.selectedPatient.getPatientId() == 0);
+        try {
+            if (isNew) {
+                // Set the creator of the patient record
+                this.selectedPatient.setCreatedBy(userBean.getUser());
+                patientService.save(this.selectedPatient);
+                addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Registered");
+            } else {
+                patientService.save(this.selectedPatient);
+                addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Updated");
+            }
+            // Refresh list from DB and update UI
+            patients = patientService.getAll();
+            PrimeFaces.current().executeScript("PF('managePatientDialog').hide()");
+            PrimeFaces.current().ajax().update("form:messages", "form:dt-patients");
+        } catch (Exception e) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "An error occurred while saving.");
+            e.printStackTrace();
         }
-        // Refresh list from DB and update UI
-        patients = patientService.getAll();
-        // This JS is for PrimeFaces to update components after an AJAX request
-        PrimeFaces.current().ajax().update("form:dt-patients");
     }
+
 
     public void deletePatient() {
         if (this.selectedPatient != null) {
