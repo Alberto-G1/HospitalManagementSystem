@@ -1,10 +1,9 @@
 package org.medcare.dao;
 
-import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.medcare.utils.HibernateUtil;
-
 import java.util.List;
 
 public class GenericDAO<T> {
@@ -15,33 +14,45 @@ public class GenericDAO<T> {
         this.clazz = clazz;
     }
 
-    @Transactional
+    // Transactions are now better handled at the Service layer.
+    // This method remains for direct DAO-level operations.
     public void saveOrUpdate(T entity) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-        session.saveOrUpdate(entity);
-        session.getTransaction().commit();
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            session.saveOrUpdate(entity);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
-    @Transactional
     public void delete(T entity) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-        session.delete(entity);
-        session.getTransaction().commit();
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            session.delete(entity);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
     public T findById(int id) {
-        Session session = sessionFactory.openSession();
-        T result = session.get(clazz, id);
-        session.close();
-        return result;
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(clazz, id);
+        }
     }
 
     public List<T> findAll() {
-        Session session = sessionFactory.openSession();
-        List<T> list = session.createQuery("from " + clazz.getSimpleName(), clazz).list();
-        session.close();
-        return list;
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery("FROM " + clazz.getSimpleName(), clazz).list();
+        }
     }
 }
