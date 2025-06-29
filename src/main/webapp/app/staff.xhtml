@@ -1,0 +1,143 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="pageTitle">Staff Management</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="messages" showDetail="true" life="6000"/>
+            <div class="card">
+                <p:tabView>
+                    <!-- DOCTORS TAB -->
+                    <p:tab title="Doctors" id="doctor-tab">
+                        <p:toolbar>
+                            <p:toolbarGroup>
+                                <p:commandButton value="New Doctor" icon="pi pi-plus"
+                                                 actionListener="#{staffManagementBean.openNewDoctor}"
+                                                 update=":dialogs:manage-doctor-content"
+                                                 oncomplete="PF('manageDoctorDialog').show()"
+                                                 styleClass="ui-button-success" process="@this"/>
+                            </p:toolbarGroup>
+                        </p:toolbar>
+                        <p:dataTable id="dt-doctors" var="doc" value="#{staffManagementBean.doctors}" style="margin-top:20px;"
+                                     paginator="true" rows="10" rowKey="#{doc.doctorId}"
+                                     selection="#{staffManagementBean.selectedDoctor}" selectionMode="single">
+                            <p:column headerText="Name" sortBy="#{doc.firstName}">#{doc.firstName} #{doc.lastName}</p:column>
+                            <p:column headerText="Speciality" sortBy="#{doc.speciality}">#{doc.speciality}</p:column>
+                            <p:column headerText="Phone" sortBy="#{doc.phoneNumber}">#{doc.phoneNumber}</p:column>
+                            <p:column headerText="Username" sortBy="#{doc.user.username}">#{doc.user.username}</p:column>
+                            <p:column headerText="Actions" style="width:5rem;text-align:center;">
+                                <p:commandButton icon="pi pi-trash" title="Deactivate" oncomplete="PF('deleteDoctorDialog').show()"
+                                                 styleClass="ui-button-danger rounded-button" process="@this">
+                                    <f:setPropertyActionListener value="#{doc}" target="#{staffManagementBean.selectedDoctor}"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+
+                    <!-- RECEPTIONISTS TAB -->
+                    <p:tab title="Receptionists" id="receptionist-tab">
+                        <p:toolbar>
+                            <p:toolbarGroup>
+                                <p:commandButton value="New Receptionist" icon="pi pi-plus"
+                                                 actionListener="#{staffManagementBean.openNewReceptionist}"
+                                                 update=":dialogs:manage-receptionist-content"
+                                                 oncomplete="PF('manageReceptionistDialog').show()"
+                                                 styleClass="ui-button-success" process="@this"/>
+                            </p:toolbarGroup>
+                        </p:toolbar>
+                        <p:dataTable id="dt-receptionists" var="rec" value="#{staffManagementBean.receptionists}" style="margin-top:20px;"
+                                     paginator="true" rows="10" rowKey="#{rec.receptionistId}"
+                                     selection="#{staffManagementBean.selectedReceptionist}" selectionMode="single">
+                            <p:column headerText="Name">#{rec.firstName} #{rec.lastName}</p:column>
+                            <p:column headerText="Phone">#{rec.phoneNumber}</p:column>
+                            <p:column headerText="Username">#{rec.user.username}</p:column>
+                            <p:column headerText="Actions" style="width:5rem;text-align:center;">
+                                <p:commandButton icon="pi pi-trash" title="Deactivate" oncomplete="PF('deleteReceptionistDialog').show()"
+                                                 styleClass="ui-button-danger rounded-button" process="@this">
+                                    <f:setPropertyActionListener value="#{rec}" target="#{staffManagementBean.selectedReceptionist}"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+                </p:tabView>
+            </div>
+        </h:form>
+
+        <h:form id="dialogs">
+            <!-- Doctor Dialog -->
+            <p:dialog header="New Doctor" widgetVar="manageDoctorDialog" modal="true" width="700">
+                <p:outputPanel id="manage-doctor-content" class="ui-fluid">
+                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty staffManagementBean.selectedDoctor}">
+                        <p:outputLabel styleClass="font-bold" value="User Credentials"/>
+                        <p:outputLabel/>
+                        <p:outputLabel for="d_user" value="Username"/>
+                        <p:inputText id="d_user" value="#{staffManagementBean.newUser.username}" required="true"/>
+                        <p:outputLabel for="d_email" value="Email"/>
+                        <p:inputText id="d_email" value="#{staffManagementBean.newUser.email}" required="true" type="email"/>
+                        <p:outputLabel for="d_pass" value="Initial Password"/>
+                        <p:inputText id="d_pass" value="#{staffManagementBean.initialPassword}" readonly="true"/>
+
+                        <p:outputLabel styleClass="font-bold" value="Profile Information"/>
+                        <p:outputLabel/>
+                        <p:outputLabel for="d_fname" value="First Name"/>
+                        <p:inputText id="d_fname" value="#{staffManagementBean.selectedDoctor.firstName}" required="true"/>
+                        <p:outputLabel for="d_lname" value="Last Name"/>
+                        <p:inputText id="d_lname" value="#{staffManagementBean.selectedDoctor.lastName}" required="true"/>
+                        <p:outputLabel for="d_spec" value="Speciality"/>
+                        <p:inputText id="d_spec" value="#{staffManagementBean.selectedDoctor.speciality}" required="true"/>
+                        <p:outputLabel for="d_phone" value="Phone"/>
+                        <p:inputText id="d_phone" value="#{staffManagementBean.selectedDoctor.phoneNumber}" required="true"/>
+                    </p:panelGrid>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{staffManagementBean.saveDoctor}" process="manage-doctor-content @this"/>
+                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageDoctorDialog').hide()" class="ui-button-secondary"/>
+                </f:facet>
+            </p:dialog>
+
+            <!-- Receptionist Dialog -->
+            <p:dialog header="New Receptionist" widgetVar="manageReceptionistDialog" modal="true" width="700">
+                <p:outputPanel id="manage-receptionist-content" class="ui-fluid">
+                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty staffManagementBean.selectedReceptionist}">
+                        <p:outputLabel styleClass="font-bold" value="User Credentials"/>
+                        <p:outputLabel/>
+                        <p:outputLabel for="r_user" value="Username"/>
+                        <p:inputText id="r_user" value="#{staffManagementBean.newUser.username}" required="true"/>
+                        <p:outputLabel for="r_email" value="Email"/>
+                        <p:inputText id="r_email" value="#{staffManagementBean.newUser.email}" required="true" type="email"/>
+                        <p:outputLabel for="r_pass" value="Initial Password"/>
+                        <p:inputText id="r_pass" value="#{staffManagementBean.initialPassword}" readonly="true"/>
+
+                        <p:outputLabel styleClass="font-bold" value="Profile Information"/>
+                        <p:outputLabel/>
+                        <p:outputLabel for="r_fname" value="First Name"/>
+                        <p:inputText id="r_fname" value="#{staffManagementBean.selectedReceptionist.firstName}" required="true"/>
+                        <p:outputLabel for="r_lname" value="Last Name"/>
+                        <p:inputText id="r_lname" value="#{staffManagementBean.selectedReceptionist.lastName}" required="true"/>
+                        <p:outputLabel for="r_phone" value="Phone"/>
+                        <p:inputText id="r_phone" value="#{staffManagementBean.selectedReceptionist.phoneNumber}" required="true"/>
+                    </p:panelGrid>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{staffManagementBean.saveReceptionist}" process="manage-receptionist-content @this"/>
+                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageReceptionistDialog').hide()" class="ui-button-secondary"/>
+                </f:facet>
+            </p:dialog>
+
+            <!-- Confirm Dialogs -->
+            <p:confirmDialog widgetVar="deleteDoctorDialog" message="Deactivate this doctor's account? They will no longer be able to log in." header="Confirm Deactivation" severity="alert">
+                <p:commandButton value="Yes, Deactivate" actionListener="#{staffManagementBean.deleteDoctor}" update="form" oncomplete="PF('deleteDoctorDialog').hide()"/>
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteDoctorDialog').hide()"/>
+            </p:confirmDialog>
+            <p:confirmDialog widgetVar="deleteReceptionistDialog" message="Deactivate this receptionist's account?" header="Confirm Deactivation" severity="alert">
+                <p:commandButton value="Yes, Deactivate" actionListener="#{staffManagementBean.deleteReceptionist}" update="form" oncomplete="PF('deleteReceptionistDialog').hide()"/>
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteReceptionistDialog').hide()"/>
+            </p:confirmDialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

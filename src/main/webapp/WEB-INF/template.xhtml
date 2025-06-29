@@ -22,15 +22,19 @@
                 <p:menu>
                     <p:menuitem value="Dashboard" outcome="/app/dashboard" icon="pi pi-home"/>
                     <p:menuitem value="Patients" outcome="/app/patients" icon="pi pi-users"
-                                rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}"/>
-                    <p:menuitem value="Doctors" outcome="/app/doctors" icon="pi pi-user-md"
-                                rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}"/>
-                    <p:menuitem value="Appointments" outcome="/app/appointments" icon="pi pi-calendar"/>
-                    <p:menuitem value="User Management" outcome="/app/users" icon="pi pi-users-cog"
+                                rendered="#{userBean.user.role != 'ADMIN'}"/>
+                    <p:menuitem value="Staff Management" outcome="/app/staff" icon="pi pi-users-cog"
                                 rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:menuitem value="Appointments" outcome="/app/appointments" icon="pi pi-calendar"/>
+
+                    <!-- Profile link for Doctor -->
                     <p:menuitem value="My Profile" outcome="/app/doctorProfile" icon="pi pi-id-card"
                                 rendered="#{userBean.user.role == 'DOCTOR'}"/>
+                    <!-- Profile link for Receptionist -->
+                    <p:menuitem value="My Profile" outcome="/app/receptionistProfile" icon="pi pi-id-card"
+                                rendered="#{userBean.user.role == 'RECEPTIONIST'}"/>
                 </p:menu>
+                <!-- ... -->
             </h:form>
         </div>
 
