@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>#{pageTitle} - MedCare HMS</title>
+    <h:outputStylesheet name="css/theme.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+</h:head>
+<h:body>
+    <div class="layout-wrapper">
+        <!-- Sidebar -->
+        <div class="layout-sidebar">
+            <div class="sidebar-header">
+                <img src="#{resource['images/logo/HMS-logo.png']}" alt="Logo" height="50"/>
+                <span class="sidebar-title">MedCare HMS</span>
+            </div>
+            <h:form>
+                <p:menu>
+                    <p:menuitem value="Dashboard" outcome="/app/dashboard" icon="pi pi-home"/>
+                    <p:menuitem value="Patients" outcome="/app/patients" icon="pi pi-users"
+                                rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}"/>
+                    <p:menuitem value="Doctors" outcome="/app/doctors" icon="pi pi-user-md"
+                                rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}"/>
+                    <p:menuitem value="Appointments" outcome="/app/appointments" icon="pi pi-calendar"/>
+                    <p:menuitem value="User Management" outcome="/app/users" icon="pi pi-users-cog"
+                                rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:menuitem value="My Profile" outcome="/app/doctorProfile" icon="pi pi-id-card"
+                                rendered="#{userBean.user.role == 'DOCTOR'}"/>
+                </p:menu>
+            </h:form>
+        </div>
+
+        <!-- Main Content -->
+        <div class="layout-main">
+            <!-- Topbar -->
+            <div class="layout-topbar">
+                <div class="topbar-left">
+                    <span class="page-title">#{pageTitle}</span>
+                </div>
+                <div class="topbar-right">
+                    <h:form>
+                        <span class="user-info">
+                            Welcome, <strong>#{userBean.user.username}</strong> (#{userBean.user.role})
+                        </span>
+                        <p:commandButton value="Logout" action="#{userBean.logout}" icon="pi pi-power-off" styleClass="ui-button-danger"/>
+                    </h:form>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="layout-content">
+                <ui:insert name="content">
+                    Default Content
+                </ui:insert>
+            </div>
+        </div>
+    </div>
+</h:body>
+</html>
