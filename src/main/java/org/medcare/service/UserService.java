@@ -15,7 +15,25 @@ public class UserService {
     @Inject
     private UserDAO userDAO;
 
-    // ... (hashPassword and checkPassword methods remain the same)
+    /**
+     * This is the default constructor used by CDI.
+     * It does nothing, as CDI will handle injecting the userDAO.
+     */
+    public UserService() {
+        // This constructor is for CDI.
+    }
+
+    /**
+     * A special constructor for our ApplicationInitializer which runs outside of CDI.
+     * This ensures that when we call 'new UserService(true)', we get a working instance.
+     * @param manual - A flag to indicate manual instantiation.
+     */
+    public UserService(boolean manual) {
+        if (manual) {
+            // Manually create the dependency since @Inject won't work here.
+            this.userDAO = new UserDAO();
+        }
+    }
 
     private String hashPassword(String password) {
         try {
@@ -38,9 +56,8 @@ public class UserService {
         userDAO.saveOrUpdate(user);
     }
 
-    // Authenticate now implicitly checks for active users via the DAO method
     public User authenticate(String username, String plainPassword) {
-        User found = userDAO.findByUsername(username); // This now finds active users only
+        User found = userDAO.findByUsername(username);
         if (found != null && checkPassword(plainPassword, found.getPassword())) {
             return found;
         }
@@ -54,11 +71,22 @@ public class UserService {
         }
     }
 
-    // Other methods...
-    public User findByUsername(String username) { return userDAO.findByUsername(username); }
-    public User findByUsernameIncludeInactive(String username) { return userDAO.findByUsernameIncludeInactive(username); }
-    public User findByEmail(String email) { return userDAO.findByEmail(email); }
-    public List<User> getAll() { return userDAO.findAll(); }
-    public void saveOrUpdate(User user) { userDAO.saveOrUpdate(user); }
-    public User findById(int id) { return userDAO.findById(id); }
+    public User findByUsername(String username) {
+        return userDAO.findByUsername(username);
+    }
+    public User findByUsernameIncludeInactive(String username) {
+        return userDAO.findByUsernameIncludeInactive(username);
+    }
+    public User findByEmail(String email) {
+        return userDAO.findByEmail(email);
+    }
+    public List<User> getAll() {
+        return userDAO.findAll();
+    }
+    public void saveOrUpdate(User user) {
+        userDAO.saveOrUpdate(user);
+    }
+    public User findById(int id) {
+        return userDAO.findById(id);
+    }
 }

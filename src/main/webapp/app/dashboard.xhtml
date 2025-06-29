@@ -14,24 +14,53 @@
             <p style="color: #666; font-size: 1.1rem; margin-top: -1rem;">Here's a quick overview of the hospital's status.</p>
         </div>
 
-        <!-- Admin and Receptionist Dashboard -->
-        <ui:fragment rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}">
+        <!-- Admin Dashboard (Only admin sees all staff counts) -->
+        <ui:fragment rendered="#{userBean.user.role == 'ADMIN'}">
             <div class="p-grid stats-grid">
-                <div class="p-col-12 p-md-6 p-lg-4">
+                <div class="p-col-12 p-md-6 p-lg-3">
                     <div class="card stat-card patients">
                         <i class="pi pi-users stat-icon"></i>
                         <span class="stat-number">#{dashboardBean.patientCount}</span>
                         <span class="stat-label">Total Patients</span>
                     </div>
                 </div>
-                <div class="p-col-12 p-md-6 p-lg-4">
+                <div class="p-col-12 p-md-6 p-lg-3">
                     <div class="card stat-card doctors">
                         <i class="pi pi-user-md stat-icon"></i>
                         <span class="stat-number">#{dashboardBean.doctorCount}</span>
                         <span class="stat-label">Total Doctors</span>
                     </div>
                 </div>
-                <div class="p-col-12 p-md-6 p-lg-4">
+                <!-- ================= NEW CARD FOR RECEPTIONISTS ================= -->
+                <div class="p-col-12 p-md-6 p-lg-3">
+                    <div class="card stat-card receptionists">
+                        <i class="pi pi-briefcase stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.receptionistCount}</span>
+                        <span class="stat-label">Total Receptionists</span>
+                    </div>
+                </div>
+                <!-- ========================================================== -->
+                <div class="p-col-12 p-md-6 p-lg-3">
+                    <div class="card stat-card appointments">
+                        <i class="pi pi-calendar stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.appointmentCount}</span>
+                        <span class="stat-label">Scheduled Appointments</span>
+                    </div>
+                </div>
+            </div>
+        </ui:fragment>
+
+        <!-- Receptionist Dashboard (Sees patients and appointments) -->
+        <ui:fragment rendered="#{userBean.user.role == 'RECEPTIONIST'}">
+            <div class="p-grid stats-grid">
+                <div class="p-col-12 p-md-6">
+                    <div class="card stat-card patients">
+                        <i class="pi pi-users stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.patientCount}</span>
+                        <span class="stat-label">Total Patients</span>
+                    </div>
+                </div>
+                <div class="p-col-12 p-md-6">
                     <div class="card stat-card appointments">
                         <i class="pi pi-calendar stat-icon"></i>
                         <span class="stat-number">#{dashboardBean.appointmentCount}</span>
@@ -43,9 +72,7 @@
 
         <!-- Doctor Dashboard -->
         <ui:fragment rendered="#{userBean.user.role == 'DOCTOR'}">
-            <div class="p-grid stats-grid">
-                <!-- Doctor-specific stats can go here -->
-            </div>
+            <!-- For now, the doctor dashboard is simple -->
             <div class="card">
                 <h3>Your Quick Actions</h3>
                 <p:button value="View My Appointments" outcome="/app/appointments" icon="pi pi-calendar" styleClass="ui-button-info"/>
@@ -56,8 +83,8 @@
         <h:outputStylesheet>
             .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted for 4 columns */
+            gap: 1.5rem;
             }
             .stat-card {
             text-align: center;
@@ -72,6 +99,7 @@
             }
             .stat-card.patients { border-color: #3b82f6; }
             .stat-card.doctors { border-color: #10b981; }
+            .stat-card.receptionists { border-color: #8b5cf6; } /* New color */
             .stat-card.appointments { border-color: #f59e0b; }
 
             .stat-icon {
@@ -80,6 +108,7 @@
             }
             .stat-card.patients .stat-icon { color: #3b82f6; }
             .stat-card.doctors .stat-icon { color: #10b981; }
+            .stat-card.receptionists .stat-icon { color: #8b5cf6; } /* New color */
             .stat-card.appointments .stat-icon { color: #f59e0b; }
 
             .stat-number {

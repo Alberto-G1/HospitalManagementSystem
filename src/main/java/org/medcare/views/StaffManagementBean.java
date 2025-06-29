@@ -40,6 +40,8 @@ public class StaffManagementBean implements Serializable {
     public void init() {
         doctors = doctorService.getAll();
         receptionists = receptionistService.getAll();
+        // Initialize newUser to prevent NullPointerException in dialogs before 'openNew'
+        newUser = new User();
     }
 
     public void openNewDoctor() {
@@ -60,14 +62,18 @@ public class StaffManagementBean implements Serializable {
         if (isUsernameOrEmailTaken(newUser.getUsername(), newUser.getEmail())) return;
 
         try {
+            // Set user to active by default
+            newUser.setActive(true);
             userService.createUser(newUser, initialPassword);
+
+            // It's better to refetch the user to ensure it has the generated ID
             User createdUser = userService.findByUsernameIncludeInactive(newUser.getUsername());
 
             selectedDoctor.setUser(createdUser);
             doctorService.save(selectedDoctor);
 
             doctors = doctorService.getAll(); // Refresh list
-            addMessage(FacesMessage.SEVERITY_INFO, "Doctor Created", "Password: " + initialPassword);
+            addMessage(FacesMessage.SEVERITY_INFO, "Doctor Created", "Username: " + newUser.getUsername() + " | Password: " + initialPassword);
             PrimeFaces.current().executeScript("PF('manageDoctorDialog').hide()");
             PrimeFaces.current().ajax().update("form:messages", "form:doctor-tab:dt-doctors");
         } catch (Exception e) {
@@ -80,14 +86,17 @@ public class StaffManagementBean implements Serializable {
         if (isUsernameOrEmailTaken(newUser.getUsername(), newUser.getEmail())) return;
 
         try {
+            // Set user to active by default
+            newUser.setActive(true);
             userService.createUser(newUser, initialPassword);
+
             User createdUser = userService.findByUsernameIncludeInactive(newUser.getUsername());
 
             selectedReceptionist.setUser(createdUser);
             receptionistService.save(selectedReceptionist);
 
             receptionists = receptionistService.getAll(); // Refresh list
-            addMessage(FacesMessage.SEVERITY_INFO, "Receptionist Created", "Password: " + initialPassword);
+            addMessage(FacesMessage.SEVERITY_INFO, "Receptionist Created", "Username: " + newUser.getUsername() + " | Password: " + initialPassword);
             PrimeFaces.current().executeScript("PF('manageReceptionistDialog').hide()");
             PrimeFaces.current().ajax().update("form:messages", "form:receptionist-tab:dt-receptionists");
         } catch (Exception e) {
@@ -100,6 +109,7 @@ public class StaffManagementBean implements Serializable {
         if (selectedDoctor != null) {
             doctorService.softDelete(selectedDoctor);
             doctors.remove(selectedDoctor);
+            selectedDoctor = null; // Deselect
             addMessage(FacesMessage.SEVERITY_WARN, "Doctor Deactivated", "The doctor's account has been deactivated.");
         }
     }
@@ -108,6 +118,7 @@ public class StaffManagementBean implements Serializable {
         if (selectedReceptionist != null) {
             receptionistService.softDelete(selectedReceptionist);
             receptionists.remove(selectedReceptionist);
+            selectedReceptionist = null; // Deselect
             addMessage(FacesMessage.SEVERITY_WARN, "Receptionist Deactivated", "The receptionist's account has been deactivated.");
         }
     }
@@ -133,17 +144,55 @@ public class StaffManagementBean implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 
-    // Getters & Setters...
-    public List<Doctor> getDoctors() { return doctors; }
-    public void setDoctors(List<Doctor> doctors) { this.doctors = doctors; }
-    public List<Receptionist> getReceptionists() { return receptionists; }
-    public void setReceptionists(List<Receptionist> receptionists) { this.receptionists = receptionists; }
-    public Doctor getSelectedDoctor() { return selectedDoctor; }
-    public void setSelectedDoctor(Doctor selectedDoctor) { this.selectedDoctor = selectedDoctor; }
-    public Receptionist getSelectedReceptionist() { return selectedReceptionist; }
-    public void setSelectedReceptionist(Receptionist selectedReceptionist) { this.selectedReceptionist = selectedReceptionist; }
-    public User getNewUser() { return newUser; }
-    public void setNewUser(User newUser) { this.newUser = newUser; }
-    public String getInitialPassword() { return initialPassword; }
-    public void setInitialPassword(String initialPassword) { this.initialPassword = initialPassword; }
+    // ===================================================================
+    // GETTERS AND SETTERS - THE MISSING PIECE
+    // ===================================================================
+
+    public List<Doctor> getDoctors() {
+        return doctors;
+    }
+
+    public void setDoctors(List<Doctor> doctors) {
+        this.doctors = doctors;
+    }
+
+    public List<Receptionist> getReceptionists() {
+        return receptionists;
+    }
+
+    public void setReceptionists(List<Receptionist> receptionists) {
+        this.receptionists = receptionists;
+    }
+
+    public Doctor getSelectedDoctor() {
+        return selectedDoctor;
+    }
+
+    public void setSelectedDoctor(Doctor selectedDoctor) {
+        this.selectedDoctor = selectedDoctor;
+    }
+
+    public Receptionist getSelectedReceptionist() {
+        return selectedReceptionist;
+    }
+
+    public void setSelectedReceptionist(Receptionist selectedReceptionist) {
+        this.selectedReceptionist = selectedReceptionist;
+    }
+
+    public User getNewUser() {
+        return newUser;
+    }
+
+    public void setNewUser(User newUser) {
+        this.newUser = newUser;
+    }
+
+    public String getInitialPassword() {
+        return initialPassword;
+    }
+
+    public void setInitialPassword(String initialPassword) {
+        this.initialPassword = initialPassword;
+    }
 }
