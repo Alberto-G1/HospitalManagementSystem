@@ -1,22 +1,16 @@
 package org.medcare.config;
+
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import org.medcare.enums.Role;
 import org.medcare.models.User;
 import org.medcare.service.UserService;
 
-/**
- * Initializes the application on startup.
- * Currently used to bootstrap the initial admin user if it doesn't exist.
- */
 @WebListener
 public class ApplicationInitializer implements ServletContextListener {
 
-    // CDI doesn't work in a listener by default in some environments,
-    // so we'll instantiate the service manually. For a robust app,
-    // you might use programmatic CDI lookup.
-    private final UserService userService = new UserService();
+    // Use the special constructor to create a service instance with its dependencies.
+    private final UserService userService = new UserService(true);
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -27,26 +21,27 @@ public class ApplicationInitializer implements ServletContextListener {
     }
 
     private void bootstrapAdminUser() {
-        // We cannot use @Inject here directly in a standard ServletContextListener
-        // with basic Weld setup. We'll manually create the dependency chain.
-        // In a full Java EE container, injection would work.
-        User existingAdmin = userService.findByUsername("admin");
+        // Now userService.userDAO will be properly initialized.
+        User existingAdmin = userService.findByUsernameIncludeInactive("admin");
 
         if (existingAdmin == null) {
             System.out.println("Admin user not found. Creating initial admin account...");
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@medcare.com");
-            admin.setRole(Role.ADMIN);
+            admin.setRole(org.medcare.enums.Role.ADMIN);
+            admin.setActive(true);
 
-            // In a real scenario, this default password should be configured securely.
-            String defaultPassword = "admin123";
-
-            userService.createUser(admin, defaultPassword);
+            userService.createUser(admin, "admin123");
             System.out.println(">>> Initial admin user 'admin' with password 'admin123' created successfully. <<<");
-            System.out.println(">>> PLEASE CHANGE THIS PASSWORD IN A PRODUCTION ENVIRONMENT. <<<");
         } else {
             System.out.println("Admin user already exists. Skipping bootstrap.");
+            // Ensure the admin account is always active on startup
+            if (!existingAdmin.isActive()) {
+                existingAdmin.setActive(true);
+                userService.saveOrUpdate(existingAdmin);
+                System.out.println(">>> Reactivated the existing admin account. <<<");
+            }
         }
     }
 

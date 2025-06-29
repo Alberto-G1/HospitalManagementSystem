@@ -1,7 +1,7 @@
 /* General Layout */
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f8fafc;
+    background-color: black;
     margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -186,4 +186,23 @@ body {
 
 .ui-inputfield, .ui-selectonemenu, .ui-datepicker {
     width: 100%;
+}
+/* ================================================= */
+/*  FIX FOR SCROLLABLE DIALOGS                       */
+/* ================================================= */
+
+/*
+  Targets the content area of any dialog with our custom class.
+  - 'max-height': Prevents the content from growing taller than 70% of the viewport height.
+                  This ensures the header and footer are always visible.
+  - 'overflow-y: auto': Adds a vertical scrollbar ONLY when the content exceeds the max-height.
+*/
+.scrollable-dialog .ui-dialog-content {
+    max-height: 70vh; /* vh = viewport height unit */
+    overflow-y: auto;
+}
+
+/* Optional: Add some padding to the bottom of the content to create space above the footer buttons */
+.scrollable-dialog .ui-dialog-content .ui-panelgrid {
+    padding-bottom: 1rem;
 }
