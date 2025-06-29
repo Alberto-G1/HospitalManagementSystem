@@ -1,0 +1,35 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="pageTitle">My Profile</ui:define>
+
+    <ui:define name="content">
+        <div class="card">
+            <h:form id="profileForm">
+                <p:growl id="messages" showDetail="true"/>
+
+                <p:panel header="Edit Your Details" rendered="#{not empty receptionistProfileBean.currentProfile}">
+                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                        <p:outputLabel value="Account Username"/>
+                        <h:outputText value="#{receptionistProfileBean.currentProfile.user.username}" styleClass="font-bold"/>
+
+                        <p:outputLabel for="firstName" value="First Name"/>
+                        <p:inputText id="firstName" value="#{receptionistProfileBean.currentProfile.firstName}" required="true"/>
+
+                        <p:outputLabel for="lastName" value="Last Name"/>
+                        <p:inputText id="lastName" value="#{receptionistProfileBean.currentProfile.lastName}" required="true"/>
+
+                        <p:outputLabel for="phone" value="Phone Number"/>
+                        <p:inputText id="phone" value="#{receptionistProfileBean.currentProfile.phoneNumber}" required="true"/>
+                    </p:panelGrid>
+
+                    <p:commandButton value="Save Changes" actionListener="#{receptionistProfileBean.updateProfile}"
+                                     update="messages" icon="pi pi-save" style="margin-top: 20px;"/>
+                </p:panel>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

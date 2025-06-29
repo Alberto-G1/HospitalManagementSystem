@@ -50,12 +50,14 @@
                                          styleClass="edit-button rounded-button ui-button-info">
                             <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
                         </p:commandButton>
+
+                        <!-- This button is only visible to Admin and Doctor -->
                         <p:commandButton icon="pi pi-trash" title="Delete"
                                          styleClass="ui-button-danger rounded-button"
                                          process="@this"
                                          style="margin-left: .5rem;"
                                          oncomplete="PF('deletePatientDialog').show()"
-                                         rendered="#{userBean.user.role == 'ADMIN'}">
+                                         rendered="#{userBean.user.role != 'RECEPTIONIST'}">
                             <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
                         </p:commandButton>
                     </p:column>
