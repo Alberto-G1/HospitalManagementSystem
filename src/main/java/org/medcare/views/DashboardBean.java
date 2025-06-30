@@ -33,7 +33,7 @@ public class DashboardBean {
         patientCount = patientService.getAll().size();
         doctorCount = doctorService.getAll().size();
         receptionistCount = receptionistService.getAll().size(); // 4. INITIALIZE THE COUNT
-        appointmentCount = appointmentService.getAll().size();
+        appointmentCount = appointmentService.getAllActive().size();
     }
 
     // Getters for the counts

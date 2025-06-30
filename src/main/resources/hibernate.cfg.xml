@@ -21,5 +21,6 @@
         <mapping class="org.medcare.models.Doctor"/>
         <mapping class="org.medcare.models.Appointment"/>
         <mapping class="org.medcare.models.Receptionist"/>
+        <mapping class="org.medcare.models.AppointmentArchive"/>
     </session-factory>
 </hibernate-configuration>
