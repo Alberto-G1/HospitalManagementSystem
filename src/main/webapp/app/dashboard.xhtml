@@ -53,14 +53,22 @@
         <!-- Receptionist Dashboard (Sees patients and appointments) -->
         <ui:fragment rendered="#{userBean.user.role == 'RECEPTIONIST'}">
             <div class="p-grid stats-grid">
-                <div class="p-col-12 p-md-6">
+                <div class="p-col-12 p-md-6 p-lg-4">
                     <div class="card stat-card patients">
                         <i class="pi pi-users stat-icon"></i>
                         <span class="stat-number">#{dashboardBean.patientCount}</span>
                         <span class="stat-label">Total Patients</span>
                     </div>
                 </div>
-                <div class="p-col-12 p-md-6">
+                <!-- DOCTOR COUNT FOR RECEPTIONIST -->
+                <div class="p-col-12 p-md-6 p-lg-4">
+                    <div class="card stat-card doctors">
+                        <i class="pi pi-user-md stat-icon"></i>
+                        <span class="stat-number">#{dashboardBean.doctorCount}</span>
+                        <span class="stat-label">Total Doctors</span>
+                    </div>
+                </div>
+                <div class="p-col-12 p-md-6 p-lg-4">
                     <div class="card stat-card appointments">
                         <i class="pi pi-calendar stat-icon"></i>
                         <span class="stat-number">#{dashboardBean.appointmentCount}</span>
