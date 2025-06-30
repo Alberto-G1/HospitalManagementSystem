@@ -7,10 +7,12 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.medcare.enums.Gender;
+import org.medcare.enums.Role;
 import org.medcare.models.Patient;
+import org.medcare.models.PatientArchive;
+import org.medcare.models.User;
 import org.medcare.service.PatientService;
 import org.primefaces.PrimeFaces;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,55 +20,51 @@ import java.util.List;
 @ViewScoped
 public class PatientBean implements Serializable {
 
-    @Inject
-    private PatientService patientService;
+    @Inject private PatientService patientService;
+    @Inject private UserBean userBean;
 
-    @Inject
-    private UserBean userBean; // To get the logged-in user
-
-    private List<Patient> patients;
+    private List<Patient> activePatients;
+    private List<PatientArchive> archivedPatients;
     private Patient selectedPatient;
 
     @PostConstruct
     public void init() {
-        patients = patientService.getAll();
+        activePatients = patientService.getAllActive();
+        // Only Admin and Receptionist can see archived records
+        if (userBean.getUser().getRole() == Role.ADMIN || userBean.getUser().getRole() == Role.RECEPTIONIST) {
+            archivedPatients = patientService.getAllArchived();
+        }
     }
 
     public void openNew() {
-        this.selectedPatient = new Patient();
+        selectedPatient = new Patient();
     }
 
     public void savePatient() {
-        boolean isNew = (this.selectedPatient.getPatientId() == 0);
+        User currentUser = userBean.getUser();
+        boolean isNew = (selectedPatient.getPatientId() == 0);
+
         try {
             if (isNew) {
-                // Set the creator of the patient record
-                this.selectedPatient.setCreatedBy(userBean.getUser());
-                patientService.save(this.selectedPatient);
+                patientService.createPatient(selectedPatient, currentUser);
                 addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Registered");
             } else {
-                patientService.save(this.selectedPatient);
+                patientService.updatePatient(selectedPatient, currentUser);
                 addMessage(FacesMessage.SEVERITY_INFO, "Success", "Patient Updated");
             }
-            // Refresh list from DB and update UI
-            patients = patientService.getAll();
+            init(); // Refresh lists
             PrimeFaces.current().executeScript("PF('managePatientDialog').hide()");
-            PrimeFaces.current().ajax().update("form:messages", "form:dt-patients");
         } catch (Exception e) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "An error occurred while saving.");
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Operation failed.");
             e.printStackTrace();
         }
     }
 
-
     public void deletePatient() {
-        if (this.selectedPatient != null) {
-            patientService.delete(this.selectedPatient);
-            this.patients.remove(this.selectedPatient);
-            this.selectedPatient = null;
-            addMessage(FacesMessage.SEVERITY_WARN, "Removed", "Patient has been deleted.");
-        } else {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No patient selected for deletion.");
+        if (selectedPatient != null) {
+            patientService.archivePatient(selectedPatient.getPatientId(), userBean.getUser());
+            init(); // Refresh lists
+            addMessage(FacesMessage.SEVERITY_WARN, "Patient Archived", "The patient record has been moved to the archive.");
         }
     }
 
@@ -78,9 +76,11 @@ public class PatientBean implements Serializable {
         return Gender.values();
     }
 
-    // --- Standard Getters and Setters ---
-    public List<Patient> getPatients() { return patients; }
-    public void setPatients(List<Patient> patients) { this.patients = patients; }
+    // --- Getters and Setters ---
+    public List<Patient> getActivePatients() { return activePatients; }
+    public void setActivePatients(List<Patient> activePatients) { this.activePatients = activePatients; }
+    public List<PatientArchive> getArchivedPatients() { return archivedPatients; }
+    public void setArchivedPatients(List<PatientArchive> archivedPatients) { this.archivedPatients = archivedPatients; }
     public Patient getSelectedPatient() { return selectedPatient; }
     public void setSelectedPatient(Patient selectedPatient) { this.selectedPatient = selectedPatient; }
 }
