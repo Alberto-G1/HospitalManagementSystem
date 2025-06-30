@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
@@ -6,122 +5,120 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 template="/WEB-INF/template.xhtml">
 
-    <ui:define name="pageTitle">Patient Management</ui:define>
+    <ui:define name="pageTitle">Patient Records</ui:define>
 
     <ui:define name="content">
-        <h:form id="form">
+        <h:form id="patientForm">
+            <p:growl id="messages" showDetail="true" life="5000"/>
             <div class="card">
-                <p:growl id="messages" showDetail="true" life="4000"/>
-
                 <p:toolbar>
                     <p:toolbarGroup>
                         <p:commandButton value="New Patient" icon="pi pi-plus"
                                          actionListener="#{patientBean.openNew}"
-                                         update=":dialogs:manage-patient-content"
+                                         update=":patientForm:managePatientContent"
                                          oncomplete="PF('managePatientDialog').show()"
-                                         styleClass="ui-button-success" process="@this">
-                            <p:resetInput target=":dialogs:manage-patient-content"/>
-                        </p:commandButton>
+                                         styleClass="ui-button-success" process="@this"/>
                     </p:toolbarGroup>
                 </p:toolbar>
 
-                <p:dataTable id="dt-patients" var="patient" value="#{patientBean.patients}"
-                             widgetVar="dtPatients" paginator="true" rows="10"
+                <p:dataTable id="dt-patients" var="patient" value="#{patientBean.activePatients}"
+                             paginator="true" rows="10" style="margin-top:20px;"
                              selectionMode="single" selection="#{patientBean.selectedPatient}"
-                             rowKey="#{patient.patientId}" reflow="true" style="margin-top: 20px;">
-
-                    <p:column headerText="Name" sortBy="#{patient.firstName}" filterBy="#{patient.firstName}" filterMatchMode="contains">
-                        <h:outputText value="#{patient.firstName} #{patient.lastName}"/>
-                    </p:column>
-                    <p:column headerText="Phone" sortBy="#{patient.phoneNumber}">
-                        <h:outputText value="#{patient.phoneNumber}"/>
-                    </p:column>
-                    <p:column headerText="Email" sortBy="#{patient.email}">
-                        <h:outputText value="#{patient.email}"/>
-                    </p:column>
-                    <p:column headerText="Registered By" sortBy="#{patient.createdBy.username}" rendered="#{userBean.user.role == 'ADMIN'}">
+                             rowKey="#{patient.patientId}" emptyMessage="No active patients found.">
+                    <f:facet name="header">Active Patient Records</f:facet>
+                    <p:column headerText="Name" sortBy="#{patient.lastName}">#{patient.firstName} #{patient.lastName}</p:column>
+                    <p:column headerText="Phone" sortBy="#{patient.phoneNumber}">#{patient.phoneNumber}</p:column>
+                    <p:column headerText="Email" sortBy="#{patient.email}">#{patient.email}</p:column>
+                    <p:column headerText="Created By" sortBy="#{patient.createdBy.username}" rendered="#{userBean.user.role == 'ADMIN'}">
                         <h:outputText value="#{patient.createdBy.username}"/>
                     </p:column>
-                    <p:column exportable="false" style="width:7rem;text-align:center;">
-                        <p:commandButton icon="pi pi-pencil" title="Edit"
-                                         update=":dialogs:manage-patient-content"
-                                         oncomplete="PF('managePatientDialog').show()"
-                                         process="@this"
-                                         styleClass="edit-button rounded-button ui-button-info">
+                    <p:column headerText="Last Updated" sortBy="#{patient.lastUpdatedAt}" rendered="#{userBean.user.role == 'ADMIN'}">
+                        <h:outputText value="#{patient.lastUpdatedAt}">
+                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yy HH:mm"/>
+                        </h:outputText>
+                        <h:outputText value=" by #{patient.lastUpdatedBy.username}" rendered="#{not empty patient.lastUpdatedBy}"/>
+                    </p:column>
+                    <p:column style="width:7rem;text-align:center;">
+                        <p:commandButton icon="pi pi-pencil" title="Edit/View Details"
+                                         update=":patientForm:managePatientContent"
+                                         oncomplete="PF('managePatientDialog').show()" process="@this"
+                                         styleClass="ui-button-info rounded-button">
                             <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
                         </p:commandButton>
-
-                        <!-- This button is only visible to Admin and Doctor -->
-                        <p:commandButton icon="pi pi-trash" title="Delete"
-                                         styleClass="ui-button-danger rounded-button"
-                                         process="@this"
-                                         style="margin-left: .5rem;"
+                        <!-- Admin and Receptionist can delete -->
+                        <p:commandButton icon="pi pi-trash" title="Delete Patient" process="@this"
+                                         styleClass="ui-button-danger rounded-button" style="margin-left:.5rem"
                                          oncomplete="PF('deletePatientDialog').show()"
-                                         rendered="#{userBean.user.role != 'RECEPTIONIST'}">
+                                         rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}">
                             <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
                         </p:commandButton>
                     </p:column>
                 </p:dataTable>
+
+                <!-- Archived Patients Table -->
+                <p:dataTable id="dt-archives" var="archive" value="#{patientBean.archivedPatients}"
+                             paginator="true" rows="5" style="margin-top:40px;"
+                             rendered="#{userBean.user.role != 'DOCTOR' and not empty patientBean.archivedPatients}"
+                             emptyMessage="No archived patients found.">
+                    <f:facet name="header">Archived Patient Records</f:facet>
+                    <p:column headerText="Name">#{archive.firstName} #{archive.lastName}</p:column>
+                    <p:column headerText="Phone">#{archive.phoneNumber}</p:column>
+                    <p:column headerText="Archived By">
+                        #{archive.archivedBy.username} on <h:outputText value="#{archive.archivedAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yy HH:mm"/></h:outputText>
+                    </p:column>
+                </p:dataTable>
             </div>
-        </h:form>
 
-        <h:form id="dialogs">
-            <p:dialog header="Patient Details" widgetVar="managePatientDialog" modal="true"
-                      showEffect="fade" hideEffect="fade" responsive="true" width="700">
-                <p:outputPanel id="manage-patient-content" class="ui-fluid">
-                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank"
-                                 rendered="#{not empty patientBean.selectedPatient}">
+            <!-- DIALOGS -->
+            <p:dialog header="Patient Details" widgetVar="managePatientDialog" modal="true" width="800" responsive="true">
+                <p:outputPanel id="managePatientContent" class="ui-fluid">
+                    <p:scrollPanel mode="native" style="height:65vh;">
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty patientBean.selectedPatient}">
+                            <p:outputLabel for="firstName" value="First Name"/>
+                            <p:inputText id="firstName" value="#{patientBean.selectedPatient.firstName}" required="true"/>
 
-                        <p:outputLabel for="firstName" value="First Name"/>
-                        <p:inputText id="firstName" value="#{patientBean.selectedPatient.firstName}" required="true"/>
+                            <p:outputLabel for="lastName" value="Last Name"/>
+                            <p:inputText id="lastName" value="#{patientBean.selectedPatient.lastName}" required="true"/>
 
-                        <p:outputLabel for="lastName" value="Last Name"/>
-                        <p:inputText id="lastName" value="#{patientBean.selectedPatient.lastName}" required="true"/>
+                            <p:outputLabel for="dob" value="Date of Birth"/>
+                            <p:datePicker id="dob" value="#{patientBean.selectedPatient.dateOfBirth}" required="true" navigator="true" yearRange="c-120:c" monthNavigator="true" yearNavigator="true" showWeek="true"/>
 
-                        <p:outputLabel for="dob" value="Date of Birth"/>
-                        <p:datePicker id="dob" value="#{patientBean.selectedPatient.dateOfBirth}" required="true"
-                                      navigator="true" yearRange="c-120:c" pattern="yyyy-MM-dd"/>
+                            <p:outputLabel for="gender" value="Gender"/>
+                            <p:selectOneMenu id="gender" value="#{patientBean.selectedPatient.gender}" required="true">
+                                <f:selectItem itemLabel="Select..." noSelectionOption="true"/>
+                                <f:selectItems value="#{patientBean.genders}" var="g" itemLabel="#{g}" itemValue="#{g}"/>
+                            </p:selectOneMenu>
 
-                        <p:outputLabel for="gender" value="Gender"/>
-                        <p:selectOneMenu id="gender" value="#{patientBean.selectedPatient.gender}" required="true">
-                            <f:selectItem itemLabel="Select..." noSelectionOption="true"/>
-                            <f:selectItems value="#{patientBean.genders}" var="g" itemLabel="#{g}" itemValue="#{g}"/>
-                        </p:selectOneMenu>
+                            <p:outputLabel for="phone" value="Phone Number"/>
+                            <p:inputText id="phone" value="#{patientBean.selectedPatient.phoneNumber}" required="true"/>
 
-                        <p:outputLabel for="phone" value="Phone Number"/>
-                        <p:inputText id="phone" value="#{patientBean.selectedPatient.phoneNumber}" required="true"/>
+                            <p:outputLabel for="email" value="Email (Optional)"/>
+                            <p:inputText id="email" value="#{patientBean.selectedPatient.email}" type="email"/>
 
-                        <p:outputLabel for="email" value="Email (Optional)"/>
-                        <p:inputText id="email" value="#{patientBean.selectedPatient.email}" type="email"/>
+                            <p:outputLabel for="address" value="Address (Optional)"/>
+                            <p:inputTextarea id="address" value="#{patientBean.selectedPatient.address}" rows="2"/>
 
-                        <p:outputLabel for="address" value="Address (Optional)"/>
-                        <p:inputTextarea id="address" value="#{patientBean.selectedPatient.address}" rows="3"/>
+                            <p:outputLabel for="emergency" value="Emergency Contact (Optional)"/>
+                            <p:inputText id="emergency" value="#{patientBean.selectedPatient.emergencyContact}"/>
 
-                        <p:outputLabel for="emergency" value="Emergency Contact (Optional)"/>
-                        <p:inputText id="emergency" value="#{patientBean.selectedPatient.emergencyContact}"/>
-                    </p:panelGrid>
+                            <p:outputLabel for="history" value="Medical History" style="grid-column: 1 / 3;"/>
+                            <p:inputTextarea id="history" value="#{patientBean.selectedPatient.medicalHistory}" rows="5" style="grid-column: 1 / 3;"/>
+                        </p:panelGrid>
+                    </p:scrollPanel>
                 </p:outputPanel>
-
                 <f:facet name="footer">
-                    <p:commandButton value="Save" icon="pi pi-check"
-                                     actionListener="#{patientBean.savePatient}"
-                                     update=":form:dt-patients :form:messages"
-                                     process="manage-patient-content @this"/>
-                    <p:commandButton value="Cancel" icon="pi pi-times"
-                                     onclick="PF('managePatientDialog').hide()"
+                    <p:commandButton value="Save" icon="pi pi-check" action="#{patientBean.savePatient}"
+                                     process="managePatientContent @this" update=":patientForm"/>
+                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('managePatientDialog').hide()"
                                      class="ui-button-secondary" type="button"/>
                 </f:facet>
             </p:dialog>
 
-            <p:confirmDialog widgetVar="deletePatientDialog" header="Confirm Deletion" severity="alert">
-                <f:facet name="message">
-                    Are you sure you want to delete patient #{patientBean.selectedPatient.firstName} #{patientBean.selectedPatient.lastName}?
-                </f:facet>
-                <p:commandButton value="Yes, Delete" actionListener="#{patientBean.deletePatient}"
-                                 update=":form:dt-patients :form:messages"
-                                 oncomplete="PF('deletePatientDialog').hide()" />
-                <p:commandButton value="No" type="button" styleClass="ui-button-secondary"
-                                 onclick="PF('deletePatientDialog').hide()"/>
+            <p:confirmDialog widgetVar="deletePatientDialog" header="Confirm Archive" severity="alert"
+                             message="Are you sure you want to delete and archive this patient's record?">
+                <p:commandButton value="Yes, Archive" action="#{patientBean.deletePatient}"
+                                 process="@this" update=":patientForm"/>
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deletePatientDialog').hide()"/>
             </p:confirmDialog>
         </h:form>
     </ui:define>

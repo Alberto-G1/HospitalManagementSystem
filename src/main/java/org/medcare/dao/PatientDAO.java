@@ -14,7 +14,13 @@ public class PatientDAO extends GenericDAO<Patient> {
     @Override
     public List<Patient> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("FROM Patient WHERE active = true ORDER BY lastName, firstName", Patient.class).list();
+            return session.createQuery(
+                    "SELECT p FROM Patient p " +
+                            "LEFT JOIN FETCH p.createdBy " +
+                            "LEFT JOIN FETCH p.lastUpdatedBy " +
+                            "WHERE p.active = true ORDER BY p.lastName, p.firstName",
+                    Patient.class
+            ).list();
         }
     }
 }
