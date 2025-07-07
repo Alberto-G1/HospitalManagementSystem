@@ -1,169 +1,663 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
 <h:head>
-    <title>Login - MedCare HMS</title>
+    <title>Login - MedCare HMS</title>f
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <style>
-        /* Using your provided beautiful styles */
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f9fc;
-            background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80');
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image:
+                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%),
+                    url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             color: #333;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
         }
 
         .auth-container {
-            max-width: 450px;
-            width: 90%;
+            max-width: 650px; /* Made wider as requested */
+            width: 95%;
             margin: 2rem auto;
-            padding: 2.5rem;
-            background-color: rgba(255, 255, 255, 0.97);
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem 2.5rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow:
+                    0 25px 50px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
             text-align: center;
-            animation: fadeIn 0.8s ease-out;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 2;
         }
 
         .brand-header {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .logo-container {
+            position: relative;
+            margin-bottom: 1.5rem;
         }
 
         .logo-img {
-            height: 100px;
+            height: 120px;
             width: auto;
             object-fit: contain;
-            margin-bottom: 1rem;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
         }
 
         .brand-name {
             font-family: 'Montserrat', sans-serif;
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: #16697A;
+            background: linear-gradient(135deg, #16697A, #489FB5, #82C0CC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .auth-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #489FB5;
-            margin-bottom: 1.5rem;
+            margin: 0.5rem 0 0 0;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .welcome-text {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+            font-weight: 400;
         }
 
         .auth-form {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
             text-align: left;
+            position: relative;
         }
 
         .input-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #495057;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-label i {
+            color: #489FB5;
+            font-size: 1rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
         .input-field {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .input-field:focus {
             border-color: #82C0CC;
-            box-shadow: 0 0 0 3px rgba(130, 192, 204, 0.2);
+            box-shadow:
+                    0 0 0 4px rgba(130, 192, 204, 0.15),
+                    0 5px 20px rgba(0, 0, 0, 0.1);
             outline: none;
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #489FB5;
+            background: rgba(72, 159, 181, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
         }
 
         .auth-button {
-            width: 100%;
-            padding: 0.9rem;
+            padding: 0.8rem 2rem; /* Made smaller as requested */
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .primary-button {
             background: linear-gradient(135deg, #16697A, #489FB5);
             color: white;
+            box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3);
+        }
+
+        .primary-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(22, 105, 122, 0.4);
+            background: linear-gradient(135deg, #1a7a8a, #52a9c5);
         }
 
         .tertiary-button {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
             color: #495057;
-            border: 1px solid #dee2e6;
+            border: 2px solid #dee2e6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
 
-        .auth-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .tertiary-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #ffffff, #f1f3f4);
+            border-color: #82C0CC;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .auth-button:active {
+            transform: translateY(-1px);
+        }
+
+        .decorative-elements {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(130, 192, 204, 0.1), rgba(72, 159, 181, 0.1));
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .decorative-elements::before {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.1), rgba(72, 159, 181, 0.1));
+            border-radius: 50%;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Security Badge */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px;
+            color: #059669;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .security-badge i {
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-container {
+                max-width: 90%;
+                padding: 2rem 1.5rem;
+            }
+
+            .brand-name {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .auth-button {
+                width: 100%;
+            }
+        }
+
+        /* Loading animation for buttons */
+        .auth-button.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .auth-button.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </h:head>
+
 <h:body>
     <div class="auth-container">
-        <h:form>
+        <div class="decorative-elements"></div>
+
+        <h:form id="loginForm">
             <div class="brand-header">
-                <img src="#{resource['images/logo/HMS-logo.png']}" alt="MedCare HMS Logo" class="logo-img" />
-                <h1 class="brand-name">MEDCARE HMS</h1>
-                <h2 class="auth-title">System Access</h2>
+                <div class="logo-container floating">
+                    <img src="#{resource['images/logo/HMS-logo.png']}" alt="MedCare HMS Logo" class="logo-img" />
+                </div>
+                <h1 class="brand-name">MedCare HMS</h1>
+                <h2 class="auth-title">System Access Portal</h2>
+                <p class="welcome-text">Welcome back! Please sign in to your account</p>
             </div>
 
             <p:growl id="messages" showDetail="true" life="5000" />
 
             <div class="auth-form">
                 <div class="input-group">
-                    <label for="username" class="input-label">Username</label>
-                    <p:inputText id="username" value="#{userBean.usernameInput}" required="true"
-                                 requiredMessage="Username is required."
-                                 styleClass="input-field" placeholder="Enter your username" />
+                    <label for="username" class="input-label">
+                        <i class="fas fa-user"></i>
+                        Username
+                    </label>
+                    <div class="input-wrapper">
+                        <p:inputText id="username"
+                                     value="#{userBean.usernameInput}"
+                                     required="true"
+                                     requiredMessage="Username is required."
+                                     styleClass="input-field"
+                                     placeholder="Enter your username"
+                                     autocomplete="username" />
+                    </div>
                 </div>
 
                 <div class="input-group">
-                    <label for="password" class="input-label">Password</label>
-                    <p:password id="password" value="#{userBean.passwordInput}" required="true"
-                                requiredMessage="Password is required."
-                                styleClass="input-field" placeholder="Enter your password" feedback="false" />
+                    <label for="password" class="input-label">
+                        <i class="fas fa-lock"></i>
+                        Password
+                    </label>
+                    <div class="input-wrapper password-wrapper">
+                        <p:password id="password"
+                                    value="#{userBean.passwordInput}"
+                                    required="true"
+                                    requiredMessage="Password is required."
+                                    styleClass="input-field"
+                                    placeholder="Enter your password"
+                                    feedback="false"
+                                    toggleMask="true"
+                                    autocomplete="current-password" />
+                    </div>
                 </div>
 
-                <p:commandButton value="Login" action="#{userBean.login}"
-                                 styleClass="auth-button primary-button" icon="pi pi-sign-in"
-                                 update="@form" />
+                <div class="button-group">
+                    <p:commandButton value="Sign In"
+                                     action="#{userBean.login}"
+                                     styleClass="auth-button primary-button"
+                                     icon="fas fa-sign-in-alt"
+                                     update="@form"
+                                     onstart="this.classList.add('loading')"
+                                     oncomplete="this.classList.remove('loading')" />
+
+                    <p:commandButton value="Back to Home"
+                                     outcome="welcome"
+                                     action ="welcome"
+                                     immediate="true"
+                                     styleClass="auth-button tertiary-button"
+                                     icon="fas fa-home" />
+                </div>
             </div>
 
-            <p:commandButton value="Back to Home" outcome="welcome" immediate="true"
-                             styleClass="auth-button tertiary-button" icon="pi pi-home" />
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Secured with 256-bit SSL encryption</span>
+            </div>
+
         </h:form>
     </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus effects to input fields
+            const inputs = document.querySelectorAll('.input-field');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add ripple effect to buttons
+            const buttons = document.querySelectorAll('.auth-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add floating animation delay for logo
+            const logo = document.querySelector('.floating');
+            if (logo) {
+                logo.style.animationDelay = '0.5s';
+            }
+
+            // Enhanced form validation feedback
+            const form = document.getElementById('loginForm');
+            if (form) {
+                const inputs = form.querySelectorAll('.input-field');
+                inputs.forEach(input => {
+                    input.addEventListener('invalid', function() {
+                        this.style.borderColor = '#e74c3c';
+                        this.style.boxShadow = '0 0 0 4px rgba(231, 76, 60, 0.15)';
+                    });
+
+                    input.addEventListener('input', function() {
+                        if (this.validity.valid) {
+                            this.style.borderColor = '#27ae60';
+                            this.style.boxShadow = '0 0 0 4px rgba(39, 174, 96, 0.15)';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    <style>
+        /* Ripple effect styles */
+        .auth-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced password toggle styling for PrimeFaces */
+        .ui-password .ui-password-panel {
+            display: none !important;
+        }
+
+        .ui-password-input {
+            padding-right: 45px !important;
+        }
+
+        /* Custom styling for PrimeFaces components */
+        .ui-inputtext {
+            width: 100% !important;
+            padding: 1rem 1.2rem !important;
+            border: 2px solid #e9ecef !important;
+            border-radius: 12px !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            font-size: 1rem !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .ui-inputtext:focus {
+            border-color: #82C0CC !important;
+            box-shadow:
+                    0 0 0 4px rgba(130, 192, 204, 0.15),
+                    0 5px 20px rgba(0, 0, 0, 0.1) !important;
+            outline: none !important;
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 1) !important;
+        }
+
+        .ui-button {
+            padding: 0.8rem 2rem !important;
+            border: none !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            min-width: 140px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+        }
+
+        .ui-button.primary-button {
+            background: linear-gradient(135deg, #16697A, #489FB5) !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3) !important;
+        }
+
+        .ui-button.primary-button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(22, 105, 122, 0.4) !important;
+            background: linear-gradient(135deg, #1a7a8a, #52a9c5) !important;
+        }
+
+        .ui-button.tertiary-button {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+            color: #495057 !important;
+            border: 2px solid #dee2e6 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .ui-button.tertiary-button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+            background: linear-gradient(135deg, #ffffff, #f1f3f4) !important;
+            border-color: #82C0CC !important;
+        }
+
+        /* PrimeFaces Growl styling */
+        .ui-growl {
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 9999 !important;
+        }
+
+        .ui-growl-item {
+            border-radius: 10px !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        .ui-growl-item-container {
+            border-radius: 10px !important;
+        }
+
+        /* Loading state enhancement */
+        .ui-button.loading {
+            pointer-events: none !important;
+            opacity: 0.7 !important;
+        }
+
+        .ui-button.loading .ui-button-text::after {
+            content: '' !important;
+            position: absolute !important;
+            width: 16px !important;
+            height: 16px !important;
+            margin: auto !important;
+            border: 2px solid transparent !important;
+            border-top-color: currentColor !important;
+            border-radius: 50% !important;
+            animation: spin 1s linear infinite !important;
+            right: 10px !important;
+        }
+
+        /* Enhanced mobile responsiveness */
+        @media (max-width: 480px) {
+            .auth-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .brand-name {
+                font-size: 1.8rem;
+            }
+
+            .auth-title {
+                font-size: 1.1rem;
+            }
+
+            .input-field, .ui-inputtext {
+                padding: 0.9rem 1rem !important;
+                font-size: 0.95rem !important;
+            }
+
+            .auth-button, .ui-button {
+                padding: 0.7rem 1.5rem !important;
+                font-size: 0.9rem !important;
+                min-width: 120px !important;
+            }
+        }
+    </style>
 </h:body>
 </html>

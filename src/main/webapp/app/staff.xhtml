@@ -237,88 +237,90 @@
                       styleClass="enhanced-dialog">
                 <p:outputPanel id="manage-doctor-content" class="ui-fluid">
                     <p:scrollPanel mode="native" style="height:65vh;">
-                        <div class="dialog-content" rendered="#{not empty staffManagementBean.selectedDoctor}">
-                            <!-- User Credentials Section -->
-                            <div class="form-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-key"></i>
-                                    🔐 User Credentials
-                                </h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <p:outputLabel for="d_user" value="👤 Username" styleClass="form-label"/>
-                                        <p:inputText id="d_user"
-                                                     value="#{staffManagementBean.newUser.username}"
-                                                     required="true"
-                                                     placeholder="Enter username"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="d_email" value="📧 Email Address" styleClass="form-label"/>
-                                        <p:inputText id="d_email"
-                                                     value="#{staffManagementBean.newUser.email}"
-                                                     required="true"
-                                                     type="email"
-                                                     placeholder="doctor@medcare.com"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group full-width">
-                                        <p:outputLabel for="d_pass" value="🔑 Initial Password" styleClass="form-label"/>
-                                        <p:inputText id="d_pass"
-                                                     value="#{staffManagementBean.initialPassword}"
-                                                     readonly="true"
-                                                     styleClass="enhanced-input readonly"/>
-                                        <small class="form-hint">
-                                            <i class="fas fa-info-circle"></i>
-                                            This is the temporary password. Doctor should change it on first login.
-                                        </small>
+                        <p:outputPanel rendered="#{not empty staffManagementBean.selectedDoctor}">
+                            <div class="dialog-content">
+                                <!-- User Credentials Section -->
+                                <div class="form-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-key"></i>
+                                        🔐 User Credentials
+                                    </h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <p:outputLabel for="d_user" value="👤 Username" styleClass="form-label"/>
+                                            <p:inputText id="d_user"
+                                                         value="#{staffManagementBean.newUser.username}"
+                                                         required="true"
+                                                         placeholder="Enter username"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="d_email" value="📧 Email Address" styleClass="form-label"/>
+                                            <p:inputText id="d_email"
+                                                         value="#{staffManagementBean.newUser.email}"
+                                                         required="true"
+                                                         type="email"
+                                                         placeholder="doctor@medcare.com"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <p:outputLabel for="d_pass" value="🔑 Initial Password" styleClass="form-label"/>
+                                            <p:inputText id="d_pass"
+                                                         value="#{staffManagementBean.initialPassword}"
+                                                         readonly="true"
+                                                         styleClass="enhanced-input readonly"/>
+                                            <small class="form-hint">
+                                                <i class="fas fa-info-circle"></i>
+                                                This is the temporary password. Doctor should change it on first login.
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Profile Information Section -->
-                            <div class="form-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-user-md"></i>
-                                    👨‍⚕️ Professional Information
-                                </h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <p:outputLabel for="d_fname" value="👤 First Name" styleClass="form-label"/>
-                                        <p:inputText id="d_fname"
-                                                     value="#{staffManagementBean.selectedDoctor.firstName}"
-                                                     required="true"
-                                                     placeholder="Enter first name"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="d_lname" value="👤 Last Name" styleClass="form-label"/>
-                                        <p:inputText id="d_lname"
-                                                     value="#{staffManagementBean.selectedDoctor.lastName}"
-                                                     required="true"
-                                                     placeholder="Enter last name"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="d_spec" value="🏥 Medical Speciality"
-                                                       styleClass="form-label"/>
-                                        <p:inputText id="d_spec"
-                                                     value="#{staffManagementBean.selectedDoctor.speciality}"
-                                                     required="true"
-                                                     placeholder="e.g., Cardiology, Pediatrics"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="d_phone" value="📞 Phone Number" styleClass="form-label"/>
-                                        <p:inputText id="d_phone"
-                                                     value="#{staffManagementBean.selectedDoctor.phoneNumber}"
-                                                     required="true"
-                                                     placeholder="+1 (555) 123-4567"
-                                                     styleClass="enhanced-input"/>
+                                <!-- Profile Information Section -->
+                                <div class="form-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-user-md"></i>
+                                        👨‍⚕️ Professional Information
+                                    </h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <p:outputLabel for="d_fname" value="👤 First Name" styleClass="form-label"/>
+                                            <p:inputText id="d_fname"
+                                                         value="#{staffManagementBean.selectedDoctor.firstName}"
+                                                         required="true"
+                                                         placeholder="Enter first name"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="d_lname" value="👤 Last Name" styleClass="form-label"/>
+                                            <p:inputText id="d_lname"
+                                                         value="#{staffManagementBean.selectedDoctor.lastName}"
+                                                         required="true"
+                                                         placeholder="Enter last name"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="d_spec" value="🏥 Medical Speciality"
+                                                           styleClass="form-label"/>
+                                            <p:inputText id="d_spec"
+                                                         value="#{staffManagementBean.selectedDoctor.speciality}"
+                                                         required="true"
+                                                         placeholder="e.g., Cardiology, Pediatrics"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="d_phone" value="📞 Phone Number" styleClass="form-label"/>
+                                            <p:inputText id="d_phone"
+                                                         value="#{staffManagementBean.selectedDoctor.phoneNumber}"
+                                                         required="true"
+                                                         placeholder="+1 (555) 123-4567"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </p:outputPanel>
                     </p:scrollPanel>
                 </p:outputPanel>
                 <f:facet name="footer">
@@ -347,79 +349,81 @@
                       styleClass="enhanced-dialog">
                 <p:outputPanel id="manage-receptionist-content" class="ui-fluid">
                     <p:scrollPanel mode="native" style="height:65vh;">
-                        <div class="dialog-content" rendered="#{not empty staffManagementBean.selectedReceptionist}">
-                            <!-- User Credentials Section -->
-                            <div class="form-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-key"></i>
-                                    🔐 User Credentials
-                                </h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <p:outputLabel for="r_user" value="👤 Username" styleClass="form-label"/>
-                                        <p:inputText id="r_user"
-                                                     value="#{staffManagementBean.newUser.username}"
-                                                     required="true"
-                                                     placeholder="Enter username"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="r_email" value="📧 Email Address" styleClass="form-label"/>
-                                        <p:inputText id="r_email"
-                                                     value="#{staffManagementBean.newUser.email}"
-                                                     required="true"
-                                                     type="email"
-                                                     placeholder="receptionist@medcare.com"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group full-width">
-                                        <p:outputLabel for="r_pass" value="🔑 Initial Password" styleClass="form-label"/>
-                                        <p:inputText id="r_pass"
-                                                     value="#{staffManagementBean.initialPassword}"
-                                                     readonly="true"
-                                                     styleClass="enhanced-input readonly"/>
-                                        <small class="form-hint">
-                                            <i class="fas fa-info-circle"></i>
-                                            This is the temporary password. Staff should change it on first login.
-                                        </small>
+                        <p:outputPanel rendered="#{not empty staffManagementBean.selectedReceptionist}">
+                            <div class="dialog-content">
+                                <!-- User Credentials Section -->
+                                <div class="form-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-key"></i>
+                                        🔐 User Credentials
+                                    </h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <p:outputLabel for="r_user" value="👤 Username" styleClass="form-label"/>
+                                            <p:inputText id="r_user"
+                                                         value="#{staffManagementBean.newUser.username}"
+                                                         required="true"
+                                                         placeholder="Enter username"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="r_email" value="📧 Email Address" styleClass="form-label"/>
+                                            <p:inputText id="r_email"
+                                                         value="#{staffManagementBean.newUser.email}"
+                                                         required="true"
+                                                         type="email"
+                                                         placeholder="receptionist@medcare.com"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <p:outputLabel for="r_pass" value="🔑 Initial Password" styleClass="form-label"/>
+                                            <p:inputText id="r_pass"
+                                                         value="#{staffManagementBean.initialPassword}"
+                                                         readonly="true"
+                                                         styleClass="enhanced-input readonly"/>
+                                            <small class="form-hint">
+                                                <i class="fas fa-info-circle"></i>
+                                                This is the temporary password. Staff should change it on first login.
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Profile Information Section -->
-                            <div class="form-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-user-tie"></i>
-                                    👩‍💼 Personal Information
-                                </h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <p:outputLabel for="r_fname" value="👤 First Name" styleClass="form-label"/>
-                                        <p:inputText id="r_fname"
-                                                     value="#{staffManagementBean.selectedReceptionist.firstName}"
-                                                     required="true"
-                                                     placeholder="Enter first name"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="r_lname" value="👤 Last Name" styleClass="form-label"/>
-                                        <p:inputText id="r_lname"
-                                                     value="#{staffManagementBean.selectedReceptionist.lastName}"
-                                                     required="true"
-                                                     placeholder="Enter last name"
-                                                     styleClass="enhanced-input"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <p:outputLabel for="r_phone" value="📞 Phone Number" styleClass="form-label"/>
-                                        <p:inputText id="r_phone"
-                                                     value="#{staffManagementBean.selectedReceptionist.phoneNumber}"
-                                                     required="true"
-                                                     placeholder="+1 (555) 123-4567"
-                                                     styleClass="enhanced-input"/>
+                                <!-- Profile Information Section -->
+                                <div class="form-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-user-tie"></i>
+                                        👩‍💼 Personal Information
+                                    </h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <p:outputLabel for="r_fname" value="👤 First Name" styleClass="form-label"/>
+                                            <p:inputText id="r_fname"
+                                                         value="#{staffManagementBean.selectedReceptionist.firstName}"
+                                                         required="true"
+                                                         placeholder="Enter first name"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="r_lname" value="👤 Last Name" styleClass="form-label"/>
+                                            <p:inputText id="r_lname"
+                                                         value="#{staffManagementBean.selectedReceptionist.lastName}"
+                                                         required="true"
+                                                         placeholder="Enter last name"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <p:outputLabel for="r_phone" value="📞 Phone Number" styleClass="form-label"/>
+                                            <p:inputText id="r_phone"
+                                                         value="#{staffManagementBean.selectedReceptionist.phoneNumber}"
+                                                         required="true"
+                                                         placeholder="+1 (555) 123-4567"
+                                                         styleClass="enhanced-input"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </p:outputPanel>
                     </p:scrollPanel>
                 </p:outputPanel>
                 <f:facet name="footer">
@@ -461,6 +465,7 @@
                 <f:facet name="footer">
                     <p:commandButton value="🗑️ Yes, Deactivate"
                                      actionListener="#{staffManagementBean.deleteDoctor}"
+                                     process="@this"
                                      update="staffTabView:dt-doctors messages"
                                      oncomplete="PF('deleteDoctorDialog').hide()"
                                      styleClass="ui-button-danger enhanced-button"/>
@@ -492,6 +497,7 @@
                 <f:facet name="footer">
                     <p:commandButton value="🗑️ Yes, Deactivate"
                                      actionListener="#{staffManagementBean.deleteReceptionist}"
+                                     process="@this"
                                      update="staffTabView:dt-receptionists messages"
                                      oncomplete="PF('deleteReceptionistDialog').hide()"
                                      styleClass="ui-button-danger enhanced-button"/>
