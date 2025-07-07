@@ -56,7 +56,7 @@ public class AppointmentBean implements Serializable {
         }
 
         availableDoctors = doctorService.getAll(); // Lists only active doctors
-        availablePatients = patientService.getAll();
+        availablePatients = patientService.getAllActive();
     }
 
     public void openNew() {

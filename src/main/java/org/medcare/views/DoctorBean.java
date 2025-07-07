@@ -47,7 +47,7 @@ public class DoctorBean implements Serializable {
 
     public void deleteDoctor() {
         if (this.selectedDoctor != null) {
-            doctorService.delete(this.selectedDoctor);
+            doctorService.softDelete(this.selectedDoctor);
             doctors.remove(this.selectedDoctor);
             this.selectedDoctor = null;
             addMessage(FacesMessage.SEVERITY_WARN, "Removed", "Doctor has been deleted.");

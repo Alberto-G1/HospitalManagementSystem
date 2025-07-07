@@ -30,7 +30,7 @@ public class DashboardBean {
     @PostConstruct
     public void init() {
         // Fetch all the counts from the services
-        patientCount = patientService.getAll().size();
+        patientCount = patientService.getAllActive().size();
         doctorCount = doctorService.getAll().size();
         receptionistCount = receptionistService.getAll().size(); // 4. INITIALIZE THE COUNT
         appointmentCount = appointmentService.getAllActive().size();
