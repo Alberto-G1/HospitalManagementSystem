@@ -1,159 +1,334 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
-<h:head>
-    <title>Appointments - MedCare HMS</title>
-    <style>
-        /* Base Styling - Targets only PrimeFaces-generated HTML */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="pageTitle">Appointments</ui:define>
+
+    <ui:define name="content">
+        <h:form id="appointmentForm">
+            <p:growl id="messages" showDetail="true" life="5000" />
+
+            <div class="appointments-card">
+                <div class="card-header">
+                    <h3 class="card-title">Appointments Management</h3>
+                    <p class="card-subtitle">Manage and track patient appointments</p>
+
+                    <p:commandButton value="New Appointment" icon="pi pi-plus"
+                                     actionListener="#{appointmentBean.openNew}"
+                                     update=":appointmentForm:manageAppointmentContent"
+                                     oncomplete="PF('manageAppointmentDialog').show()"
+                                     styleClass="ui-button-success"
+                                     rendered="#{userBean.user.role != 'DOCTOR'}"/>
+                </div>
+
+                <div class="card-body">
+                    <p:dataTable id="dt-appointments" var="appt" value="#{appointmentBean.appointments}"
+                                 paginator="true" rows="10" styleClass="appointments-table"
+                                 emptyMessage="No active appointments found.">
+                        <f:facet name="header">
+                            <div class="table-header">Active Appointments</div>
+                        </f:facet>
+
+                        <p:column headerText="Patient">
+                            <div class="patient-info">
+                                <div class="patient-name">#{appt.patient.firstName} #{appt.patient.lastName}</div>
+                                <div class="patient-meta">ID: #{appt.patient.patientId}</div>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Doctor">
+                            <div class="doctor-info">
+                                <div class="doctor-name">Dr. #{appt.doctor.firstName} #{appt.doctor.lastName}</div>
+                                <div class="doctor-specialty">#{appt.doctor.speciality}</div>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Date &amp; Time">
+                            <div class="appointment-time">
+                                <div class="appointment-date">
+                                    <h:outputText value="#{appt.date}">
+                                        <f:convertDateTime type="localDate" pattern="EEE, dd MMM yyyy" />
+                                    </h:outputText>
+                                </div>
+                                <div class="appointment-hour">
+                                    <h:outputText value="#{appt.time}">
+                                        <f:convertDateTime type="localTime" pattern="h:mm a" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Status">
+                            <p:tag severity="#{appt.status == 'SCHEDULED' ? 'info' :
+                                            (appt.status == 'COMPLETED' ? 'success' :
+                                            (appt.status == 'CANCELED' ? 'danger' : 'warning'))}"
+                                   value="#{appt.status}" styleClass="status-tag"/>
+                        </p:column>
+
+                        <p:column headerText="Created" rendered="#{userBean.user.role == 'ADMIN'}">
+                            <div class="created-info">
+                                <div>By #{appt.createdBy.username}</div>
+                                <div class="created-time">
+                                    <h:outputText value="#{appt.createdAt}">
+                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yy HH:mm"/>
+                                    </h:outputText>
+                                </div>
+                            </div>
+                        </p:column>
+
+                        <p:column style="width:120px;text-align:center;">
+                            <div class="action-buttons">
+                                <p:commandButton icon="pi pi-check-square" title="Update Status"
+                                                 oncomplete="PF('statusDialog').show()" process="@this"
+                                                 styleClass="ui-button-info"
+                                                 rendered="#{userBean.user.role == 'DOCTOR'}">
+                                    <f:setPropertyActionListener value="#{appt}" target="#{appointmentBean.selectedAppointment}"/>
+                                </p:commandButton>
+
+                                <p:commandButton icon="pi pi-trash" title="Delete"
+                                                 oncomplete="PF('deleteDialog').show()" process="@this"
+                                                 styleClass="ui-button-danger"
+                                                 rendered="#{userBean.user.role != 'DOCTOR'}">
+                                    <f:setPropertyActionListener value="#{appt}" target="#{appointmentBean.selectedAppointment}"/>
+                                </p:commandButton>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:dataTable id="dt-archives" var="archive" value="#{appointmentBean.archivedAppointments}"
+                                 paginator="true" rows="5" styleClass="archives-table"
+                                 rendered="#{userBean.user.role == 'ADMIN' and not empty appointmentBean.archivedAppointments}"
+                                 emptyMessage="No archived appointments found.">
+                        <f:facet name="header">
+                            <div class="table-header">Archived Appointments</div>
+                        </f:facet>
+
+                        <p:column headerText="Patient">#{archive.patientName}</p:column>
+                        <p:column headerText="Doctor">Dr. #{archive.doctorName}</p:column>
+                        <p:column headerText="Date">
+                            <h:outputText value="#{archive.date}">
+                                <f:convertDateTime type="localDate" pattern="dd MMM yyyy" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Status">
+                            <p:tag severity="#{archive.status == 'SCHEDULED' ? 'info' :
+                                            (archive.status == 'COMPLETED' ? 'success' :
+                                            (archive.status == 'CANCELED' ? 'danger' : 'warning'))}"
+                                   value="#{archive.status}" styleClass="status-tag"/>
+                        </p:column>
+                        <p:column headerText="Archived By">
+                            <div class="archived-info">
+                                <div>By #{archive.archivedBy.username}</div>
+                                <div class="archived-time">
+                                    <h:outputText value="#{archive.archivedAt}">
+                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yy HH:mm"/>
+                                    </h:outputText>
+                                </div>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </div>
+
+            <!-- DIALOGS (unchanged from your original implementation) -->
+            <p:dialog header="Book New Appointment" widgetVar="manageAppointmentDialog" modal="true" width="600" responsive="true">
+                <p:outputPanel id="manageAppointmentContent" class="ui-fluid">
+                    <p:scrollPanel mode="native" style="height:50vh;">
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty appointmentBean.selectedAppointment}">
+                            <p:outputLabel for="patient" value="Patient"/>
+                            <p:selectOneMenu id="patient" value="#{appointmentBean.selectedAppointment.patient}"
+                                             converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="Patient is required.">
+                                <f:selectItem itemLabel="Select Patient" noSelectionOption="true" itemValue="#{null}"/>
+                                <f:selectItems value="#{appointmentBean.availablePatients}" var="p" itemValue="#{p}" itemLabel="#{p.firstName} #{p.lastName}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="doctor" value="Doctor"/>
+                            <p:selectOneMenu id="doctor" value="#{appointmentBean.selectedAppointment.doctor}"
+                                             converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="Doctor is required.">
+                                <f:selectItem itemLabel="Select Doctor" noSelectionOption="true" itemValue="#{null}"/>
+                                <f:selectItems value="#{appointmentBean.availableDoctors}" var="d" itemValue="#{d}" itemLabel="Dr. #{d.firstName} #{d.lastName} (#{d.speciality})"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="date" value="Date"/>
+                            <p:datePicker id="date" value="#{appointmentBean.selectedAppointment.date}" required="true" mindate="#{java.time.LocalDate.now()}"/>
+
+                            <p:outputLabel for="time" value="Time"/>
+                            <p:datePicker id="time" value="#{appointmentBean.selectedAppointment.time}" required="true" pattern="HH:mm" timeOnly="true"/>
+
+                            <p:outputLabel for="reason" value="Reason for Visit"/>
+                            <p:inputTextarea id="reason" value="#{appointmentBean.selectedAppointment.reason}" rows="3"/>
+                        </p:panelGrid>
+                    </p:scrollPanel>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton value="Book Appointment" icon="pi pi-check" action="#{appointmentBean.saveAppointment}"
+                                     process="manageAppointmentContent @this"
+                                     update="messages dt-appointments"/>
+                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageAppointmentDialog').hide()"
+                                     class="ui-button-secondary" type="button"/>
+                </f:facet>
+            </p:dialog>
+
+            <p:dialog header="Update Status" widgetVar="statusDialog" modal="true" width="400">
+                <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty appointmentBean.selectedAppointment}">
+                    <p:outputLabel for="status" value="New Status"/>
+                    <p:selectOneMenu id="status" value="#{appointmentBean.selectedAppointment.status}">
+                        <f:selectItems value="#{appointmentBean.appointmentStatuses}" var="s" itemLabel="#{s}" itemValue="#{s}"/>
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <f:facet name="footer">
+                    <p:commandButton value="Update" icon="pi pi-save" action="#{appointmentBean.updateStatus}"
+                                     process="@this status" update="messages dt-appointments"/>
+                </f:facet>
+            </p:dialog>
+
+            <p:confirmDialog widgetVar="deleteDialog" header="Confirm Deletion" severity="alert"
+                             message="Are you sure you want to delete and archive this appointment?">
+                <p:commandButton value="Yes, Delete" action="#{appointmentBean.deleteAppointment}"
+                                 process="@this" update="messages dt-appointments dt-archives"/>
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteDialog').hide()"/>
+            </p:confirmDialog>
+        </h:form>
+
+        <h:outputStylesheet>
+            /* Appointments Card */
+            .appointments-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            }
+
+            .card-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            }
+
+            .card-title {
+            font-size: 1.5rem;
             margin: 0;
-            padding: 20px;
-            color: #333;
-        }
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            }
 
-        /* PanelGrid Styling */
-        .ui-panelgrid td {
-            padding: 12px 15px;
-            border: none !important;
-        }
+            .card-subtitle {
+            margin: 0.25rem 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+            }
 
-        .ui-panelgrid .ui-outputlabel {
-            font-weight: 500;
-            color: #2c3e50;
-        }
+            .card-body {
+            padding: 1.5rem;
+            }
 
-        /* DataTable Styling */
-        .ui-datatable {
+            /* Tables */
+            .table-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #16697A;
+            padding: 0.5rem 0;
+            }
+
+            .appointments-table, .archives-table {
+            border: 1px solid #eee;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .ui-datatable thead th {
-            background-color: #3498db !important;
-            color: white !important;
-            padding: 15px;
-            font-weight: 500;
-            border: none !important;
-        }
-
-        .ui-datatable tbody td {
-            padding: 12px 15px;
-            border-color: #e0e0e0 !important;
-            vertical-align: middle;
-        }
-
-        .ui-datatable tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .ui-datatable tbody tr:hover {
-            background-color: #f0f8ff !important;
-        }
-
-        /* Input Styling */
-        .ui-inputfield {
-            width: 100%;
-            padding: 10px 15px !important;
-            border: 1px solid #ddd !important;
-            border-radius: 4px !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .ui-inputfield:focus {
-            border-color: #3498db !important;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2) !important;
-            outline: none !important;
-        }
-
-        /* Button Styling */
-        .ui-button {
-            padding: 10px 20px !important;
-            border-radius: 4px !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-            border: none !important;
-        }
-
-        .ui-button.ui-button-danger {
-            background-color: #e74c3c !important;
-            color: white !important;
-        }
-
-        .ui-button.ui-button-success {
-            background-color: #3498db !important;
-            color: white !important;
-        }
-
-        .ui-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-        }
-
-        /* Header Styling */
-        .ui-widget-header {
-            border: none !important;
-            background: transparent !important;
-            color: #2c3e50 !important;
-            font-size: 1.5em !important;
-            padding: 10px 0 !important;
-            margin-bottom: 20px !important;
-            border-bottom: 2px solid #3498db !important;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .ui-datatable table {
-                display: block;
-                overflow-x: auto;
             }
-        }
-    </style>
-</h:head>
-<h:body>
-    <!-- Original JSF Components - UNTOUCHED -->
-    <h:form>
-        <h2>Appointments</h2>
-        <p:dataTable value="#{appointmentBean.appointments}" var="a">
-            <p:column headerText="Patient">#{a.patient.firstName} #{a.patient.lastName}</p:column>
-            <p:column headerText="Doctor">#{a.doctor.firstName} #{a.doctor.lastName}</p:column>
-            <p:column headerText="Date">#{a.date}</p:column>
-            <p:column headerText="Time">#{a.time}</p:column>
-            <p:column headerText="Actions">
-                <p:commandButton value="Delete" action="#{appointmentBean.delete(a.appointmentId)}" update="@form" />
-            </p:column>
-        </p:dataTable>
 
-        <h3>Book Appointment</h3>
-        <p:panelGrid columns="2">
-            <p:outputLabel value="Patient" />
-            <p:selectOneMenu value="#{appointmentBean.appointment.patient}">
-                <f:selectItems value="#{appointmentBean.patients}" var="p"
-                               itemLabel="#{p.firstName} #{p.lastName}" itemValue="#{p}" />
-            </p:selectOneMenu>
+            .appointments-table th, .archives-table th {
+            background: #f8f9fa !important;
+            color: #16697A !important;
+            font-weight: 600 !important;
+            border-bottom: 2px solid #eee !important;
+            }
 
-            <p:outputLabel value="Doctor" />
-            <p:selectOneMenu value="#{appointmentBean.appointment.doctor}">
-                <f:selectItems value="#{appointmentBean.doctors}" var="d"
-                               itemLabel="#{d.firstName} #{d.lastName}" itemValue="#{d}" />
-            </p:selectOneMenu>
+            .appointments-table tr:hover, .archives-table tr:hover {
+            background-color: #f5f9ff !important;
+            }
 
-            <p:outputLabel value="Date (YYYY-MM-DD)" />
-            <p:inputText value="#{appointmentBean.dateStr}" />
+            /* Patient/Doctor Info */
+            .patient-info, .doctor-info {
+            display: flex;
+            flex-direction: column;
+            }
 
-            <p:outputLabel value="Time (HH:MM)" />
-            <p:inputText value="#{appointmentBean.timeStr}" />
+            .patient-name, .doctor-name {
+            font-weight: 500;
+            }
 
-            <p:outputLabel value="Reason" />
-            <p:inputText value="#{appointmentBean.appointment.reason}" />
-        </p:panelGrid>
+            .patient-meta, .doctor-specialty {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+            }
 
-        <p:commandButton value="Book" action="#{appointmentBean.save}" update="@form" />
-    </h:form>
-</h:body>
-</html>
+            /* Appointment Time */
+            .appointment-time {
+            display: flex;
+            flex-direction: column;
+            }
+
+            .appointment-date {
+            font-weight: 500;
+            }
+
+            .appointment-hour {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+            }
+
+            /* Status Tags */
+            .status-tag {
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            }
+
+            /* Created/Archived Info */
+            .created-info, .archived-info {
+            display: flex;
+            flex-direction: column;
+            }
+
+            .created-time, .archived-time {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+            }
+
+            /* Action Buttons */
+            .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+            .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            }
+
+            .appointments-table td, .archives-table td {
+            padding: 0.75rem !important;
+            }
+
+            .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+            }
+            }
+        </h:outputStylesheet>
+    </ui:define>
+</ui:composition>

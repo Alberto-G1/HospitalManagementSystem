@@ -3,161 +3,1022 @@
                 xmlns:f="http://xmlns.jcp.org/f/core"
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="/WEB-INF/template.xhtml">
+                template="/WEB-INF/template.xhtml"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://xmlns.jcp.org/jsf/facelets ">
 
-    <ui:define name="pageTitle">Staff Management</ui:define>
+    <ui:define name="pageTitle">👥 Staff Management</ui:define>
 
     <ui:define name="content">
+        <!-- Enhanced Staff Management Header -->
+        <div class="fade-in" style="margin-bottom: 2rem;">
+            <div class="stats-grid"
+                 style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-icon doctors">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">👨‍⚕️ Total Doctors</div>
+                        <div class="stat-value">#{staffManagementBean.doctors.size()}</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon patients">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">👩‍💼 Receptionists</div>
+                        <div class="stat-value">#{staffManagementBean.receptionists.size()}</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon appointments">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">👥 Total Staff</div>
+                        <div class="stat-value">
+                            #{staffManagementBean.doctors.size() + staffManagementBean.receptionists.size()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ================================================================ -->
         <!--  MERGED INTO A SINGLE FORM TO PREVENT COMPONENT NOT FOUND ERRORS -->
         <!-- ================================================================ -->
         <h:form id="staffForm">
-            <p:growl id="messages" showDetail="true" life="6000"/>
-            <div class="card">
-                <!-- GIVE THE TABVIEW AN ID FOR STABLE REFERENCING -->
-                <p:tabView id="staffTabView">
-                    <!-- DOCTORS TAB -->
-                    <p:tab title="Doctors" id="doctor-tab">
-                        <p:toolbar>
-                            <p:toolbarGroup>
-                                <p:commandButton value="New Doctor" icon="pi pi-plus"
-                                                 actionListener="#{staffManagementBean.openNewDoctor}"
-                                                 update=":staffForm:manage-doctor-content"
-                                                 oncomplete="PF('manageDoctorDialog').show()"
-                                                 styleClass="ui-button-success" process="@this"/>
-                            </p:toolbarGroup>
-                        </p:toolbar>
-                        <p:dataTable id="dt-doctors" var="doc" value="#{staffManagementBean.doctors}" style="margin-top:20px;"
-                                     paginator="true" rows="10" rowKey="#{doc.doctorId}"
-                                     selection="#{staffManagementBean.selectedDoctor}" selectionMode="single"
-                                     emptyMessage="No doctors found.">
-                            <p:column headerText="Name" sortBy="#{doc.firstName}">#{doc.firstName} #{doc.lastName}</p:column>
-                            <p:column headerText="Speciality" sortBy="#{doc.speciality}">#{doc.speciality}</p:column>
-                            <p:column headerText="Phone" sortBy="#{doc.phoneNumber}">#{doc.phoneNumber}</p:column>
-                            <p:column headerText="Username" sortBy="#{doc.user.username}">#{doc.user.username}</p:column>
-                            <p:column headerText="Actions" style="width:5rem;text-align:center;">
-                                <p:commandButton icon="pi pi-trash" title="Deactivate" oncomplete="PF('deleteDoctorDialog').show()"
-                                                 styleClass="ui-button-danger rounded-button" process="@this">
-                                    <f:setPropertyActionListener value="#{doc}" target="#{staffManagementBean.selectedDoctor}"/>
-                                </p:commandButton>
-                            </p:column>
-                        </p:dataTable>
-                    </p:tab>
+            <p:growl id="messages" showDetail="true" life="6000"
+                     styleClass="enhanced-growl"/>
 
-                    <!-- RECEPTIONISTS TAB -->
-                    <p:tab title="Receptionists" id="receptionist-tab">
-                        <p:toolbar>
-                            <p:toolbarGroup>
-                                <p:commandButton value="New Receptionist" icon="pi pi-plus"
-                                                 actionListener="#{staffManagementBean.openNewReceptionist}"
-                                                 update=":staffForm:manage-receptionist-content"
-                                                 oncomplete="PF('manageReceptionistDialog').show()"
-                                                 styleClass="ui-button-success" process="@this"/>
-                            </p:toolbarGroup>
-                        </p:toolbar>
-                        <p:dataTable id="dt-receptionists" var="rec" value="#{staffManagementBean.receptionists}" style="margin-top:20px;"
-                                     paginator="true" rows="10" rowKey="#{rec.receptionistId}"
-                                     selection="#{staffManagementBean.selectedReceptionist}" selectionMode="single"
-                                     emptyMessage="No receptionists found.">
-                            <p:column headerText="Name">#{rec.firstName} #{rec.lastName}</p:column>
-                            <p:column headerText="Phone">#{rec.phoneNumber}</p:column>
-                            <p:column headerText="Username">#{rec.user.username}</p:column>
-                            <p:column headerText="Actions" style="width:5rem;text-align:center;">
-                                <p:commandButton icon="pi pi-trash" title="Deactivate" oncomplete="PF('deleteReceptionistDialog').show()"
-                                                 styleClass="ui-button-danger rounded-button" process="@this">
-                                    <f:setPropertyActionListener value="#{rec}" target="#{staffManagementBean.selectedReceptionist}"/>
-                                </p:commandButton>
-                            </p:column>
-                        </p:dataTable>
-                    </p:tab>
-                </p:tabView>
+            <!-- Enhanced Main Card -->
+            <div class="ui-card fade-in">
+                <div class="ui-card-header">
+                    <i class="fas fa-users-cog" style="margin-right: 10px;"></i>
+                    👥 Staff Management Dashboard
+                </div>
+                <div class="ui-card-body">
+                    <!-- Enhanced TabView -->
+                    <p:tabView id="staffTabView" styleClass="enhanced-tabview">
+
+                        <!-- DOCTORS TAB -->
+                        <p:tab title="👨‍⚕️ Doctors" id="doctor-tab">
+                            <!-- Enhanced Toolbar -->
+                            <div class="enhanced-toolbar" style="margin-bottom: 1.5rem;">
+                                <div class="toolbar-left">
+                                    <h3 style="color: #16697A; margin: 0; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-stethoscope"></i>
+                                        👨‍⚕️ Medical Staff Directory
+                                    </h3>
+                                </div>
+                                <div class="toolbar-right">
+                                    <p:commandButton value="➕ Add New Doctor"
+                                                     icon="fas fa-plus"
+                                                     actionListener="#{staffManagementBean.openNewDoctor}"
+                                                     update=":staffForm:manage-doctor-content"
+                                                     oncomplete="PF('manageDoctorDialog').show()"
+                                                     styleClass="ui-button-success enhanced-button"
+                                                     process="@this"/>
+                                </div>
+                            </div>
+
+                            <!-- Enhanced DataTable -->
+                            <div class="enhanced-datatable-wrapper">
+                                <p:dataTable id="dt-doctors"
+                                             var="doc"
+                                             value="#{staffManagementBean.doctors}"
+                                             styleClass="enhanced-datatable"
+                                             paginator="true"
+                                             rows="10"
+                                             rowKey="#{doc.doctorId}"
+                                             selection="#{staffManagementBean.selectedDoctor}"
+                                             selectionMode="single"
+                                             emptyMessage="🔍 No doctors found in the system."
+                                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                             currentPageReportTemplate="Showing {startRecord} to {endRecord} of {totalRecords} doctors"
+                                             rowsPerPageTemplate="5,10,15,20">
+
+                                    <p:column headerText="👤 Doctor Name" sortBy="#{doc.firstName}"
+                                              styleClass="name-column">
+                                        <div class="staff-info">
+                                            <div class="staff-avatar">
+                                                <i class="fas fa-user-md"></i>
+                                            </div>
+                                            <div class="staff-details">
+                                                <div class="staff-name">#{doc.firstName} #{doc.lastName}</div>
+                                                <div class="staff-subtitle">Medical Doctor</div>
+                                            </div>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="🏥 Speciality" sortBy="#{doc.speciality}">
+                                        <span class="specialty-badge">
+                                            <i class="fas fa-certificate" style="margin-right: 5px;"></i>
+                                            #{doc.speciality}
+                                        </span>
+                                    </p:column>
+
+                                    <p:column headerText="📞 Contact" sortBy="#{doc.phoneNumber}">
+                                        <div class="contact-info">
+                                            <i class="fas fa-phone" style="color: #16697A; margin-right: 5px;"></i>
+                                            #{doc.phoneNumber}
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="👤 Username" sortBy="#{doc.user.username}">
+                                        <span class="username-badge">
+                                            <i class="fas fa-at" style="margin-right: 5px;"></i>
+                                            #{doc.user.username}
+                                        </span>
+                                    </p:column>
+
+                                    <p:column headerText="⚡ Actions" style="width:120px;text-align:center;">
+                                        <p:commandButton icon="fas fa-trash-alt"
+                                                         title="🗑️ Deactivate Doctor"
+                                                         oncomplete="PF('deleteDoctorDialog').show()"
+                                                         styleClass="ui-button-danger ui-button-rounded action-button"
+                                                         process="@this">
+                                            <f:setPropertyActionListener value="#{doc}"
+                                                                         target="#{staffManagementBean.selectedDoctor}"/>
+                                        </p:commandButton>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+                        </p:tab>
+
+                        <!-- RECEPTIONISTS TAB -->
+                        <p:tab title="👩‍💼 Receptionists" id="receptionist-tab">
+                            <!-- Enhanced Toolbar -->
+                            <div class="enhanced-toolbar" style="margin-bottom: 1.5rem;">
+                                <div class="toolbar-left">
+                                    <h3 style="color: #16697A; margin: 0; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-user-tie"></i>
+                                        👩‍💼 Reception Staff Directory
+                                    </h3>
+                                </div>
+                                <div class="toolbar-right">
+                                    <p:commandButton value="➕ Add New Receptionist"
+                                                     icon="fas fa-plus"
+                                                     actionListener="#{staffManagementBean.openNewReceptionist}"
+                                                     update=":staffForm:manage-receptionist-content"
+                                                     oncomplete="PF('manageReceptionistDialog').show()"
+                                                     styleClass="ui-button-success enhanced-button"
+                                                     process="@this"/>
+                                </div>
+                            </div>
+
+                            <!-- Enhanced DataTable -->
+                            <div class="enhanced-datatable-wrapper">
+                                <p:dataTable id="dt-receptionists"
+                                             var="rec"
+                                             value="#{staffManagementBean.receptionists}"
+                                             styleClass="enhanced-datatable"
+                                             paginator="true"
+                                             rows="10"
+                                             rowKey="#{rec.receptionistId}"
+                                             selection="#{staffManagementBean.selectedReceptionist}"
+                                             selectionMode="single"
+                                             emptyMessage="🔍 No receptionists found in the system."
+                                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                             currentPageReportTemplate="Showing {startRecord} to {endRecord} of {totalRecords} receptionists"
+                                             rowsPerPageTemplate="5,10,15,20">
+
+                                    <p:column headerText="👤 Staff Name" styleClass="name-column">
+                                        <div class="staff-info">
+                                            <div class="staff-avatar receptionist">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <div class="staff-details">
+                                                <div class="staff-name">#{rec.firstName} #{rec.lastName}</div>
+                                                <div class="staff-subtitle">Receptionist</div>
+                                            </div>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="📞 Contact">
+                                        <div class="contact-info">
+                                            <i class="fas fa-phone" style="color: #16697A; margin-right: 5px;"></i>
+                                            #{rec.phoneNumber}
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="👤 Username">
+                                        <span class="username-badge">
+                                            <i class="fas fa-at" style="margin-right: 5px;"></i>
+                                            #{rec.user.username}
+                                        </span>
+                                    </p:column>
+
+                                    <p:column headerText="⚡ Actions" style="width:120px;text-align:center;">
+                                        <p:commandButton icon="fas fa-trash-alt"
+                                                         title="🗑️ Deactivate Receptionist"
+                                                         oncomplete="PF('deleteReceptionistDialog').show()"
+                                                         styleClass="ui-button-danger ui-button-rounded action-button"
+                                                         process="@this">
+                                            <f:setPropertyActionListener value="#{rec}"
+                                                                         target="#{staffManagementBean.selectedReceptionist}"/>
+                                        </p:commandButton>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+                        </p:tab>
+                    </p:tabView>
+                </div>
             </div>
 
-            <!-- Dialogs are now inside the same form -->
-
-            <!-- Doctor Dialog -->
-            <p:dialog header="New Doctor" widgetVar="manageDoctorDialog" modal="true" width="700" responsive="true">
+            <!-- Enhanced Doctor Dialog -->
+            <p:dialog header="👨‍⚕️ Doctor Registration"
+                      widgetVar="manageDoctorDialog"
+                      modal="true"
+                      width="800"
+                      responsive="true"
+                      styleClass="enhanced-dialog">
                 <p:outputPanel id="manage-doctor-content" class="ui-fluid">
                     <p:scrollPanel mode="native" style="height:65vh;">
-                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty staffManagementBean.selectedDoctor}">
-                            <p:outputLabel styleClass="font-bold" value="User Credentials"/>
-                            <p:outputLabel/>
-                            <p:outputLabel for="d_user" value="Username"/>
-                            <p:inputText id="d_user" value="#{staffManagementBean.newUser.username}" required="true"/>
-                            <p:outputLabel for="d_email" value="Email"/>
-                            <p:inputText id="d_email" value="#{staffManagementBean.newUser.email}" required="true" type="email"/>
-                            <p:outputLabel for="d_pass" value="Initial Password"/>
-                            <p:inputText id="d_pass" value="#{staffManagementBean.initialPassword}" readonly="true"/>
+                        <div class="dialog-content" rendered="#{not empty staffManagementBean.selectedDoctor}">
+                            <!-- User Credentials Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-key"></i>
+                                    🔐 User Credentials
+                                </h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <p:outputLabel for="d_user" value="👤 Username" styleClass="form-label"/>
+                                        <p:inputText id="d_user"
+                                                     value="#{staffManagementBean.newUser.username}"
+                                                     required="true"
+                                                     placeholder="Enter username"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="d_email" value="📧 Email Address" styleClass="form-label"/>
+                                        <p:inputText id="d_email"
+                                                     value="#{staffManagementBean.newUser.email}"
+                                                     required="true"
+                                                     type="email"
+                                                     placeholder="doctor@medcare.com"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <p:outputLabel for="d_pass" value="🔑 Initial Password" styleClass="form-label"/>
+                                        <p:inputText id="d_pass"
+                                                     value="#{staffManagementBean.initialPassword}"
+                                                     readonly="true"
+                                                     styleClass="enhanced-input readonly"/>
+                                        <small class="form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            This is the temporary password. Doctor should change it on first login.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <p:outputLabel styleClass="font-bold" value="Profile Information"/>
-                            <p:outputLabel/>
-                            <p:outputLabel for="d_fname" value="First Name"/>
-                            <p:inputText id="d_fname" value="#{staffManagementBean.selectedDoctor.firstName}" required="true"/>
-                            <p:outputLabel for="d_lname" value="Last Name"/>
-                            <p:inputText id="d_lname" value="#{staffManagementBean.selectedDoctor.lastName}" required="true"/>
-                            <p:outputLabel for="d_spec" value="Speciality"/>
-                            <p:inputText id="d_spec" value="#{staffManagementBean.selectedDoctor.speciality}" required="true"/>
-                            <p:outputLabel for="d_phone" value="Phone"/>
-                            <p:inputText id="d_phone" value="#{staffManagementBean.selectedDoctor.phoneNumber}" required="true"/>
-                        </p:panelGrid>
+                            <!-- Profile Information Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-user-md"></i>
+                                    👨‍⚕️ Professional Information
+                                </h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <p:outputLabel for="d_fname" value="👤 First Name" styleClass="form-label"/>
+                                        <p:inputText id="d_fname"
+                                                     value="#{staffManagementBean.selectedDoctor.firstName}"
+                                                     required="true"
+                                                     placeholder="Enter first name"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="d_lname" value="👤 Last Name" styleClass="form-label"/>
+                                        <p:inputText id="d_lname"
+                                                     value="#{staffManagementBean.selectedDoctor.lastName}"
+                                                     required="true"
+                                                     placeholder="Enter last name"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="d_spec" value="🏥 Medical Speciality"
+                                                       styleClass="form-label"/>
+                                        <p:inputText id="d_spec"
+                                                     value="#{staffManagementBean.selectedDoctor.speciality}"
+                                                     required="true"
+                                                     placeholder="e.g., Cardiology, Pediatrics"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="d_phone" value="📞 Phone Number" styleClass="form-label"/>
+                                        <p:inputText id="d_phone"
+                                                     value="#{staffManagementBean.selectedDoctor.phoneNumber}"
+                                                     required="true"
+                                                     placeholder="+1 (555) 123-4567"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </p:scrollPanel>
                 </p:outputPanel>
                 <f:facet name="footer">
-                    <!-- CORRECTED UPDATE ATTRIBUTE -->
-                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{staffManagementBean.saveDoctor}"
-                                     process="manage-doctor-content @this"
-                                     update="messages staffTabView:dt-doctors"/>
-                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageDoctorDialog').hide()" class="ui-button-secondary" type="button"/>
+                    <div class="dialog-footer">
+                        <p:commandButton value="💾 Save Doctor"
+                                         icon="fas fa-check"
+                                         actionListener="#{staffManagementBean.saveDoctor}"
+                                         process="manage-doctor-content @this"
+                                         update="messages staffTabView:dt-doctors"
+                                         styleClass="ui-button-success enhanced-button"/>
+                        <p:commandButton value="❌ Cancel"
+                                         icon="fas fa-times"
+                                         onclick="PF('manageDoctorDialog').hide()"
+                                         styleClass="ui-button-secondary enhanced-button"
+                                         type="button"/>
+                    </div>
                 </f:facet>
             </p:dialog>
 
-            <!-- Receptionist Dialog -->
-            <p:dialog header="New Receptionist" widgetVar="manageReceptionistDialog" modal="true" width="700" responsive="true">
+            <!-- Enhanced Receptionist Dialog -->
+            <p:dialog header="👩‍💼 Receptionist Registration"
+                      widgetVar="manageReceptionistDialog"
+                      modal="true"
+                      width="800"
+                      responsive="true"
+                      styleClass="enhanced-dialog">
                 <p:outputPanel id="manage-receptionist-content" class="ui-fluid">
                     <p:scrollPanel mode="native" style="height:65vh;">
-                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty staffManagementBean.selectedReceptionist}">
-                            <!-- content -->
-                            <p:outputLabel styleClass="font-bold" value="User Credentials"/>
-                            <p:outputLabel/>
-                            <p:outputLabel for="r_user" value="Username"/>
-                            <p:inputText id="r_user" value="#{staffManagementBean.newUser.username}" required="true"/>
-                            <p:outputLabel for="r_email" value="Email"/>
-                            <p:inputText id="r_email" value="#{staffManagementBean.newUser.email}" required="true" type="email"/>
-                            <p:outputLabel for="r_pass" value="Initial Password"/>
-                            <p:inputText id="r_pass" value="#{staffManagementBean.initialPassword}" readonly="true"/>
+                        <div class="dialog-content" rendered="#{not empty staffManagementBean.selectedReceptionist}">
+                            <!-- User Credentials Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-key"></i>
+                                    🔐 User Credentials
+                                </h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <p:outputLabel for="r_user" value="👤 Username" styleClass="form-label"/>
+                                        <p:inputText id="r_user"
+                                                     value="#{staffManagementBean.newUser.username}"
+                                                     required="true"
+                                                     placeholder="Enter username"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="r_email" value="📧 Email Address" styleClass="form-label"/>
+                                        <p:inputText id="r_email"
+                                                     value="#{staffManagementBean.newUser.email}"
+                                                     required="true"
+                                                     type="email"
+                                                     placeholder="receptionist@medcare.com"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <p:outputLabel for="r_pass" value="🔑 Initial Password" styleClass="form-label"/>
+                                        <p:inputText id="r_pass"
+                                                     value="#{staffManagementBean.initialPassword}"
+                                                     readonly="true"
+                                                     styleClass="enhanced-input readonly"/>
+                                        <small class="form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            This is the temporary password. Staff should change it on first login.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <p:outputLabel styleClass="font-bold" value="Profile Information"/>
-                            <p:outputLabel/>
-                            <p:outputLabel for="r_fname" value="First Name"/>
-                            <p:inputText id="r_fname" value="#{staffManagementBean.selectedReceptionist.firstName}" required="true"/>
-                            <p:outputLabel for="r_lname" value="Last Name"/>
-                            <p:inputText id="r_lname" value="#{staffManagementBean.selectedReceptionist.lastName}" required="true"/>
-                            <p:outputLabel for="r_phone" value="Phone"/>
-                            <p:inputText id="r_phone" value="#{staffManagementBean.selectedReceptionist.phoneNumber}" required="true"/>
-                        </p:panelGrid>
+                            <!-- Profile Information Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-user-tie"></i>
+                                    👩‍💼 Personal Information
+                                </h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <p:outputLabel for="r_fname" value="👤 First Name" styleClass="form-label"/>
+                                        <p:inputText id="r_fname"
+                                                     value="#{staffManagementBean.selectedReceptionist.firstName}"
+                                                     required="true"
+                                                     placeholder="Enter first name"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="r_lname" value="👤 Last Name" styleClass="form-label"/>
+                                        <p:inputText id="r_lname"
+                                                     value="#{staffManagementBean.selectedReceptionist.lastName}"
+                                                     required="true"
+                                                     placeholder="Enter last name"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p:outputLabel for="r_phone" value="📞 Phone Number" styleClass="form-label"/>
+                                        <p:inputText id="r_phone"
+                                                     value="#{staffManagementBean.selectedReceptionist.phoneNumber}"
+                                                     required="true"
+                                                     placeholder="+1 (555) 123-4567"
+                                                     styleClass="enhanced-input"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </p:scrollPanel>
                 </p:outputPanel>
                 <f:facet name="footer">
-                    <!-- CORRECTED UPDATE ATTRIBUTE -->
-                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{staffManagementBean.saveReceptionist}"
-                                     process="manage-receptionist-content @this"
-                                     update="messages staffTabView:dt-receptionists"/>
-                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageReceptionistDialog').hide()" class="ui-button-secondary" type="button"/>
+                    <div class="dialog-footer">
+                        <p:commandButton value="💾 Save Receptionist"
+                                         icon="fas fa-check"
+                                         actionListener="#{staffManagementBean.saveReceptionist}"
+                                         process="manage-receptionist-content @this"
+                                         update="messages staffTabView:dt-receptionists"
+                                         styleClass="ui-button-success enhanced-button"/>
+                        <p:commandButton value="❌ Cancel"
+                                         icon="fas fa-times"
+                                         onclick="PF('manageReceptionistDialog').hide()"
+                                         styleClass="ui-button-secondary enhanced-button"
+                                         type="button"/>
+                    </div>
                 </f:facet>
             </p:dialog>
 
-            <!-- Confirm Dialogs -->
-            <p:confirmDialog widgetVar="deleteDoctorDialog" message="Deactivate this doctor's account? They will no longer be able to log in." header="Confirm Deactivation" severity="alert">
-                <p:commandButton value="Yes, Deactivate" actionListener="#{staffManagementBean.deleteDoctor}"
-                                 update="staffTabView:dt-doctors messages" oncomplete="PF('deleteDoctorDialog').hide()"/>
-                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteDoctorDialog').hide()"/>
-            </p:confirmDialog>
-            <p:confirmDialog widgetVar="deleteReceptionistDialog" message="Deactivate this receptionist's account?" header="Confirm Deactivation" severity="alert">
-                <p:commandButton value="Yes, Deactivate" actionListener="#{staffManagementBean.deleteReceptionist}"
-                                 update="staffTabView:dt-receptionists messages" oncomplete="PF('deleteReceptionistDialog').hide()"/>
-                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteReceptionistDialog').hide()"/>
+            <!-- Enhanced Confirm Dialogs -->
+            <p:confirmDialog widgetVar="deleteDoctorDialog"
+                             message="⚠️ Are you sure you want to deactivate this doctor's account? They will no longer be able to log in to the system."
+                             header="🗑️ Confirm Doctor Deactivation"
+                             severity="alert"
+                             styleClass="enhanced-confirm-dialog">
+                <div class="confirm-dialog-content">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="warning-text">
+                        <p><strong>This action will:</strong></p>
+                        <ul>
+                            <li>🚫 Disable login access</li>
+                            <li>📋 Preserve medical records</li>
+                            <li>⏸️ Suspend active appointments</li>
+                        </ul>
+                    </div>
+                </div>
+                <f:facet name="footer">
+                    <p:commandButton value="🗑️ Yes, Deactivate"
+                                     actionListener="#{staffManagementBean.deleteDoctor}"
+                                     update="staffTabView:dt-doctors messages"
+                                     oncomplete="PF('deleteDoctorDialog').hide()"
+                                     styleClass="ui-button-danger enhanced-button"/>
+                    <p:commandButton value="❌ Cancel"
+                                     type="button"
+                                     styleClass="ui-button-secondary enhanced-button"
+                                     onclick="PF('deleteDoctorDialog').hide()"/>
+                </f:facet>
             </p:confirmDialog>
 
+            <p:confirmDialog widgetVar="deleteReceptionistDialog"
+                             message="⚠️ Are you sure you want to deactivate this receptionist's account?"
+                             header="🗑️ Confirm Receptionist Deactivation"
+                             severity="alert"
+                             styleClass="enhanced-confirm-dialog">
+                <div class="confirm-dialog-content">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="warning-text">
+                        <p><strong>This action will:</strong></p>
+                        <ul>
+                            <li>🚫 Disable login access</li>
+                            <li>📋 Preserve work records</li>
+                            <li>⏸️ Transfer active responsibilities</li>
+                        </ul>
+                    </div>
+                </div>
+                <f:facet name="footer">
+                    <p:commandButton value="🗑️ Yes, Deactivate"
+                                     actionListener="#{staffManagementBean.deleteReceptionist}"
+                                     update="staffTabView:dt-receptionists messages"
+                                     oncomplete="PF('deleteReceptionistDialog').hide()"
+                                     styleClass="ui-button-danger enhanced-button"/>
+                    <p:commandButton value="❌ Cancel"
+                                     type="button"
+                                     styleClass="ui-button-secondary enhanced-button"
+                                     onclick="PF('deleteReceptionistDialog').hide()"/>
+                </f:facet>
+            </p:confirmDialog>
         </h:form>
+
+        <!-- Enhanced Custom Styles -->
+        <style>
+            /* Enhanced Staff Page Specific Styles */
+            .enhanced-toolbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem;
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                border-radius: 12px;
+                border: 1px solid rgba(22, 105, 122, 0.1);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            }
+
+            .enhanced-datatable-wrapper {
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+            }
+
+            .staff-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .staff-avatar {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.2rem;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            }
+
+            .staff-avatar.receptionist {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            }
+
+            .staff-details {
+                flex: 1;
+            }
+
+            .staff-name {
+                font-weight: 600;
+                color: #16697A;
+                font-size: 1rem;
+                margin-bottom: 2px;
+            }
+
+            .staff-subtitle {
+                font-size: 0.8rem;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .specialty-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.5rem 1rem;
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                color: #0369a1;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                border: 1px solid rgba(3, 105, 161, 0.2);
+            }
+
+            .contact-info {
+                display: flex;
+                align-items: center;
+                font-weight: 500;
+                color: #374151;
+            }
+
+            .username-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.4rem 0.8rem;
+                background: rgba(22, 105, 122, 0.1);
+                color: #16697A;
+                border-radius: 15px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                border: 1px solid rgba(22, 105, 122, 0.2);
+            }
+
+            .action-button {
+                width: 40px !important;
+                height: 40px !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .enhanced-dialog .ui-dialog-content {
+                padding: 0 !important;
+            }
+
+            .dialog-content {
+                padding: 1.5rem;
+            }
+
+            .form-section {
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+                background: rgba(248, 250, 252, 0.5);
+                border-radius: 12px;
+                border: 1px solid rgba(226, 232, 240, 0.5);
+            }
+
+            .section-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #16697A;
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .form-group.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-label {
+                font-weight: 600 !important;
+                color: #374151 !important;
+                font-size: 0.95rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+
+            .enhanced-input {
+                padding: 0.75rem 1rem !important;
+                border: 2px solid #e5e7eb !important;
+                border-radius: 8px !important;
+                font-size: 0.95rem !important;
+                transition: all 0.3s ease !important;
+                background: white !important;
+            }
+
+            .enhanced-input:focus {
+                border-color: #16697A !important;
+                box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1) !important;
+                outline: none !important;
+            }
+
+            .enhanced-input.readonly {
+                background: #f9fafb !important;
+                color: #6b7280 !important;
+                cursor: not-allowed !important;
+            }
+
+            .form-hint {
+                color: #6b7280;
+                font-size: 0.8rem;
+                margin-top: 0.25rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .dialog-footer {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1rem;
+                padding: 1.5rem;
+                background: rgba(248, 250, 252, 0.5);
+                border-top: 1px solid rgba(226, 232, 240, 0.5);
+            }
+
+            .enhanced-button {
+                padding: 0.75rem 1.5rem !important;
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s ease !important;
+                border: none !important;
+                cursor: pointer !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 0.5rem !important;
+            }
+
+            .enhanced-button:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .enhanced-confirm-dialog .ui-dialog-content {
+                padding: 2rem !important;
+            }
+
+            .confirm-dialog-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .warning-icon {
+                font-size: 3rem;
+                color: #f59e0b;
+                animation: pulse 2s infinite;
+            }
+
+            .warning-text {
+                max-width: 400px;
+            }
+
+            .warning-text ul {
+                text-align: left;
+                margin: 1rem 0;
+                padding-left: 1.5rem;
+            }
+
+            .warning-text li {
+                margin: 0.5rem 0;
+                color: #6b7280;
+            }
+
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.7;
+                }
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .enhanced-toolbar {
+                    flex-direction: column;
+                    gap: 1rem;
+                    text-align: center;
+                }
+
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .staff-info {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .dialog-footer {
+                    flex-direction: column;
+                }
+
+                .enhanced-button {
+                    width: 100% !important;
+                    justify-content: center !important;
+                }
+            }
+
+            /* Tab View Enhancements */
+            .ui-tabs .ui-tabs-nav li {
+                margin-right: 0.5rem;
+            }
+
+            .ui-tabs .ui-tabs-nav li a {
+                padding: 1rem 1.5rem !important;
+                border-radius: 8px 8px 0 0 !important;
+                font-weight: 600 !important;
+                color: #6b7280 !important;
+                background: rgba(248, 250, 252, 0.5) !important;
+                border: 1px solid rgba(226, 232, 240, 0.5) !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .ui-tabs .ui-tabs-nav li.ui-state-active a {
+                background: white !important;
+                color: #16697A !important;
+                border-bottom-color: white !important;
+            }
+
+            .ui-tabs .ui-tabs-nav li:hover a {
+                background: rgba(22, 105, 122, 0.05) !important;
+                color: #16697A !important;
+            }
+
+            /* DataTable Header Enhancements */
+            .ui-datatable thead th {
+                background: linear-gradient(135deg, #16697A 0%, #1a5f6b 100%) !important;
+                color: white !important;
+                font-weight: 600 !important;
+                padding: 1rem !important;
+                border: none !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                font-size: 0.85rem !important;
+            }
+
+            .ui-datatable tbody td {
+                padding: 1rem !important;
+                border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+                vertical-align: middle !important;
+            }
+
+            .ui-datatable tbody tr:hover {
+                background: rgba(22, 105, 122, 0.03) !important;
+            }
+
+            /* Status Indicators */
+            .status-active {
+                color: #10b981;
+                font-weight: 600;
+            }
+
+            .status-inactive {
+                color: #ef4444;
+                font-weight: 600;
+            }
+
+            /* Loading States */
+            .ui-datatable-loading-overlay {
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(5px) !important;
+            }
+
+            /* Scrollbar Styling */
+            .ui-scrollpanel .ui-scrollpanel-wrapper {
+                border: none !important;
+            }
+
+            .ui-scrollpanel .ui-scrollpanel-content {
+                padding-right: 1rem !important;
+            }
+
+            /* Message Styling */
+            .ui-messages {
+                margin-bottom: 1.5rem;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .ui-messages-info {
+                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+                border: 1px solid #3b82f6 !important;
+                color: #1e40af !important;
+            }
+
+            .ui-messages-warn {
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+                border: 1px solid #f59e0b !important;
+                color: #92400e !important;
+            }
+
+            .ui-messages-error {
+                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+                border: 1px solid #ef4444 !important;
+                color: #dc2626 !important;
+            }
+        </style>
+
+        <!-- Enhanced JavaScript for Better UX -->
+        <script>
+            // Enhanced dialog management
+            function openDoctorDialog() {
+                PF('manageDoctorDialog').show();
+                // Focus on first input after dialog opens
+                setTimeout(() => {
+                    document.getElementById('staffForm:d_user').focus();
+                }, 300);
+            }
+
+            function openReceptionistDialog() {
+                PF('manageReceptionistDialog').show();
+                // Focus on first input after dialog opens
+                setTimeout(() => {
+                    document.getElementById('staffForm:r_user').focus();
+                }, 300);
+            }
+
+            // Enhanced form validation
+            function validateForm(formType) {
+                let isValid = true;
+                const requiredFields = document.querySelectorAll(`#${formType} input[required]`);
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.style.borderColor = '#ef4444';
+                        isValid = false;
+                    } else {
+                        field.style.borderColor = '#e5e7eb';
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Auto-hide messages after 5 seconds
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(() => {
+                    const messages = document.querySelector('.ui-messages');
+                    if (messages) {
+                        messages.style.transition = 'opacity 0.5s ease';
+                        messages.style.opacity = '0';
+                        setTimeout(() => {
+                            messages.style.display = 'none';
+                        }, 500);
+                    }
+                }, 5000);
+            });
+
+            // Enhanced search functionality
+            function enhancedSearch(searchTerm, tableId) {
+                const table = document.getElementById(tableId);
+                const rows = table.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const matches = text.includes(searchTerm.toLowerCase());
+                    row.style.display = matches ? '' : 'none';
+                });
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function (e) {
+                // Ctrl/Cmd + N for new doctor
+                if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key === 'n') {
+                    e.preventDefault();
+                    openDoctorDialog();
+                }
+
+                // Escape to close dialogs
+                if (e.key === 'Escape') {
+                    PF('manageDoctorDialog').hide();
+                    PF('manageReceptionistDialog').hide();
+                    PF('deleteDoctorDialog').hide();
+                    PF('deleteReceptionistDialog').hide();
+                }
+            });
+
+            // Enhanced loading states
+            function showLoading(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.style.opacity = '0.6';
+                    element.style.pointerEvents = 'none';
+                }
+            }
+
+            function hideLoading(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.style.opacity = '1';
+                    element.style.pointerEvents = 'auto';
+                }
+            }
+
+            // Smooth animations for better UX
+            function animateSuccess(message) {
+                // Create temporary success notification
+                const notification = document.createElement('div');
+                notification.className = 'success-notification';
+                notification.innerHTML = `<i class="fas fa-check-circle"></i> <span>\${message}</span>`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 8px;
+                    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: 600;
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                `;
+
+                document.body.appendChild(notification);
+
+                // Animate in
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+
+                // Animate out and remove
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        </script>
     </ui:define>
 </ui:composition>

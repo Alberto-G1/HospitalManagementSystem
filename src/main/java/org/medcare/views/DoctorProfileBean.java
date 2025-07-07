@@ -9,20 +9,17 @@ import jakarta.inject.Named;
 import org.medcare.models.Doctor;
 import org.medcare.models.User;
 import org.medcare.service.DoctorService;
-
 import java.io.Serializable;
 
 @Named
 @ViewScoped
 public class DoctorProfileBean implements Serializable {
 
-    @Inject
-    private DoctorService doctorService;
-
-    @Inject
-    private UserBean userBean; // Get the currently logged-in user
+    @Inject private DoctorService doctorService;
+    @Inject private UserBean userBean;
 
     private Doctor currentDoctorProfile;
+    private boolean editMode = false; // Flag to toggle between view and edit modes
 
     @PostConstruct
     public void init() {
@@ -31,13 +28,11 @@ public class DoctorProfileBean implements Serializable {
             // Find the doctor profile associated with the logged-in user
             this.currentDoctorProfile = doctorService.findByUserId(currentUser.getUserId());
 
-            // If no profile exists yet, create a new one and link it to the user
+            // If no profile exists yet, create one and force edit mode
             if (this.currentDoctorProfile == null) {
                 this.currentDoctorProfile = new Doctor();
                 this.currentDoctorProfile.setUser(currentUser);
-                // Pre-populate with email from user account
-                this.currentDoctorProfile.setFirstName(""); // Or some default
-                this.currentDoctorProfile.setLastName("");
+                this.editMode = true; // Force edit mode if profile is new
             }
         }
     }
@@ -47,6 +42,7 @@ public class DoctorProfileBean implements Serializable {
             try {
                 doctorService.save(currentDoctorProfile);
                 addMessage(FacesMessage.SEVERITY_INFO, "Success", "Your profile has been updated.");
+                this.editMode = false; // Switch back to view mode after saving
             } catch (Exception e) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "Error", "An error occurred while saving your profile.");
                 e.printStackTrace();
@@ -54,16 +50,28 @@ public class DoctorProfileBean implements Serializable {
         }
     }
 
+    public void toggleEditMode() {
+        this.editMode = !this.editMode;
+    }
+
     private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 
-    // --- Getter and Setter ---
+    // --- Getters and Setters ---
     public Doctor getCurrentDoctorProfile() {
         return currentDoctorProfile;
     }
 
     public void setCurrentDoctorProfile(Doctor currentDoctorProfile) {
         this.currentDoctorProfile = currentDoctorProfile;
+    }
+
+    public boolean isEditMode() {
+        return editMode;
+    }
+
+    public void setEditMode(boolean editMode) {
+        this.editMode = editMode;
     }
 }

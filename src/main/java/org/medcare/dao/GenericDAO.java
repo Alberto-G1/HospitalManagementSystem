@@ -14,34 +14,16 @@ public class GenericDAO<T> {
         this.clazz = clazz;
     }
 
-    // Transactions are now better handled at the Service layer.
-    // This method remains for direct DAO-level operations.
     public void saveOrUpdate(T entity) {
-        Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
-            transaction = session.beginTransaction();
-            session.saveOrUpdate(entity);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+        executeWithinTransaction(session -> session.saveOrUpdate(entity));
+    }
+
+    public void save(T entity) {
+        executeWithinTransaction(session -> session.save(entity));
     }
 
     public void delete(T entity) {
-        Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
-            transaction = session.beginTransaction();
-            session.delete(entity);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+        executeWithinTransaction(session -> session.delete(entity));
     }
 
     public T findById(int id) {
@@ -54,5 +36,25 @@ public class GenericDAO<T> {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery("FROM " + clazz.getSimpleName(), clazz).list();
         }
+    }
+
+    /**
+     * Utility method to handle transactions for common operations.
+     */
+    private void executeWithinTransaction(EntityOperation operation) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            operation.accept(session);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        }
+    }
+
+    @FunctionalInterface
+    private interface EntityOperation {
+        void accept(Session session);
     }
 }
