@@ -1,5 +1,4 @@
 package org.medcare.service;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.medcare.dao.ReceptionistDAO;

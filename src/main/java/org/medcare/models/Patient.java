@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import org.medcare.enums.Gender;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Entity
 @Table(name = "patients")
@@ -109,4 +110,15 @@ public class Patient {
     public void setLastUpdatedBy(User lastUpdatedBy) { this.lastUpdatedBy = lastUpdatedBy; }
     public LocalDateTime getLastUpdatedAt() { return lastUpdatedAt; }
     public void setLastUpdatedAt(LocalDateTime lastUpdatedAt) { this.lastUpdatedAt = lastUpdatedAt; }
+
+    @OneToMany(mappedBy = "patient")
+    private Collection<Appointment> appointment;
+
+    public Collection<Appointment> getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(Collection<Appointment> appointment) {
+        this.appointment = appointment;
+    }
 }

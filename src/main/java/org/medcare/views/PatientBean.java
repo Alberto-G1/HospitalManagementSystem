@@ -14,6 +14,8 @@ import org.medcare.models.User;
 import org.medcare.service.PatientService;
 import org.primefaces.PrimeFaces;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Named
@@ -38,6 +40,7 @@ public class PatientBean implements Serializable {
 
     public void openNew() {
         selectedPatient = new Patient();
+        selectedPatient.setGender(Gender.MALLE);
     }
 
     public void savePatient() {
@@ -66,6 +69,11 @@ public class PatientBean implements Serializable {
             init(); // Refresh lists
             addMessage(FacesMessage.SEVERITY_WARN, "Patient Archived", "The patient record has been moved to the archive.");
         }
+    }
+
+    public int calculateAge(LocalDate dateOfBirth) {
+        if (dateOfBirth == null) return 0;
+        return Period.between(dateOfBirth, LocalDate.now()).getYears();
     }
 
     private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
