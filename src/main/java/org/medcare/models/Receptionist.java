@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "receptionists")
-public class Receptionist extends BaseModel {
+public class Receptionist extends BaseModel implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

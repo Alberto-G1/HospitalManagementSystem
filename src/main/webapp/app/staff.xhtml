@@ -1,16 +1,20 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:f="http://xmlns.jcp.org/f/core"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 template="/WEB-INF/template.xhtml"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://xmlns.jcp.org/jsf/facelets ">
+                xsi:schemaLocation="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:define name="metadata">
+        <h:outputStylesheet name="css/staff.css" library="resources"/>
+        <h:outputScript name="js/staff.js" library="resources"/>
+    </ui:define>
 
     <ui:define name="pageTitle">👥 Staff Management</ui:define>
 
     <ui:define name="content">
-        <!-- Enhanced Staff Management Header -->
         <div class="fade-in" style="margin-bottom: 2rem;">
             <div class="stats-grid"
                  style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
@@ -46,26 +50,19 @@
             </div>
         </div>
 
-        <!-- ================================================================ -->
-        <!--  MERGED INTO A SINGLE FORM TO PREVENT COMPONENT NOT FOUND ERRORS -->
-        <!-- ================================================================ -->
         <h:form id="staffForm">
-            <p:growl id="messages" showDetail="true" life="6000"
-                     styleClass="enhanced-growl"/>
+            <p:growl id="messages" showDetail="true" life="6000" styleClass="enhanced-growl"/>
 
-            <!-- Enhanced Main Card -->
             <div class="ui-card fade-in">
                 <div class="ui-card-header">
                     <i class="fas fa-users-cog" style="margin-right: 10px;"></i>
                     👥 Staff Management Dashboard
                 </div>
                 <div class="ui-card-body">
-                    <!-- Enhanced TabView -->
                     <p:tabView id="staffTabView" styleClass="enhanced-tabview">
 
                         <!-- DOCTORS TAB -->
                         <p:tab title="👨‍⚕️ Doctors" id="doctor-tab">
-                            <!-- Enhanced Toolbar -->
                             <div class="enhanced-toolbar" style="margin-bottom: 1.5rem;">
                                 <div class="toolbar-left">
                                     <h3 style="color: #16697A; margin: 0; display: flex; align-items: center; gap: 10px;">
@@ -80,11 +77,10 @@
                                                      update=":staffForm:manage-doctor-content"
                                                      oncomplete="PF('manageDoctorDialog').show()"
                                                      styleClass="ui-button-success enhanced-button"
-                                                     process="@this"/>
+                                                     immediate="true"/>
                                 </div>
                             </div>
 
-                            <!-- Enhanced DataTable -->
                             <div class="enhanced-datatable-wrapper">
                                 <p:dataTable id="dt-doctors"
                                              var="doc"
@@ -100,8 +96,7 @@
                                              currentPageReportTemplate="Showing {startRecord} to {endRecord} of {totalRecords} doctors"
                                              rowsPerPageTemplate="5,10,15,20">
 
-                                    <p:column headerText="👤 Doctor Name" sortBy="#{doc.firstName}"
-                                              styleClass="name-column">
+                                    <p:column headerText="👤 Doctor Name" sortBy="#{doc.firstName}" styleClass="name-column">
                                         <div class="staff-info">
                                             <div class="staff-avatar">
                                                 <i class="fas fa-user-md"></i>
@@ -134,14 +129,22 @@
                                         </span>
                                     </p:column>
 
-                                    <p:column headerText="⚡ Actions" style="width:120px;text-align:center;">
+                                    <p:column headerText="⚡ Actions" style="width:160px;text-align:center;">
+                                        <p:commandButton icon="fas fa-edit"
+                                                         title="✏️ Edit Doctor"
+                                                         actionListener="#{staffManagementBean.editDoctor(doc)}"
+                                                         update=":staffForm:manage-doctor-content"
+                                                         oncomplete="PF('manageDoctorDialog').show()"
+                                                         styleClass="ui-button-primary ui-button-rounded action-button"
+                                                         immediate="true">
+                                            <f:setPropertyActionListener value="#{doc}" target="#{staffManagementBean.selectedDoctor}"/>
+                                        </p:commandButton>
                                         <p:commandButton icon="fas fa-trash-alt"
                                                          title="🗑️ Deactivate Doctor"
                                                          oncomplete="PF('deleteDoctorDialog').show()"
                                                          styleClass="ui-button-danger ui-button-rounded action-button"
-                                                         process="@this">
-                                            <f:setPropertyActionListener value="#{doc}"
-                                                                         target="#{staffManagementBean.selectedDoctor}"/>
+                                                         immediate="true">
+                                            <f:setPropertyActionListener value="#{doc}" target="#{staffManagementBean.selectedDoctor}"/>
                                         </p:commandButton>
                                     </p:column>
                                 </p:dataTable>
@@ -150,7 +153,6 @@
 
                         <!-- RECEPTIONISTS TAB -->
                         <p:tab title="👩‍💼 Receptionists" id="receptionist-tab">
-                            <!-- Enhanced Toolbar -->
                             <div class="enhanced-toolbar" style="margin-bottom: 1.5rem;">
                                 <div class="toolbar-left">
                                     <h3 style="color: #16697A; margin: 0; display: flex; align-items: center; gap: 10px;">
@@ -165,11 +167,10 @@
                                                      update=":staffForm:manage-receptionist-content"
                                                      oncomplete="PF('manageReceptionistDialog').show()"
                                                      styleClass="ui-button-success enhanced-button"
-                                                     process="@this"/>
+                                                     immediate="true"/>
                                 </div>
                             </div>
 
-                            <!-- Enhanced DataTable -->
                             <div class="enhanced-datatable-wrapper">
                                 <p:dataTable id="dt-receptionists"
                                              var="rec"
@@ -211,14 +212,22 @@
                                         </span>
                                     </p:column>
 
-                                    <p:column headerText="⚡ Actions" style="width:120px;text-align:center;">
+                                    <p:column headerText="⚡ Actions" style="width:160px;text-align:center;">
+                                        <p:commandButton icon="fas fa-edit"
+                                                         title="✏️ Edit Receptionist"
+                                                         actionListener="#{staffManagementBean.editReceptionist(rec)}"
+                                                         update=":staffForm:manage-receptionist-content"
+                                                         oncomplete="PF('manageReceptionistDialog').show()"
+                                                         styleClass="ui-button-primary ui-button-rounded action-button"
+                                                         immediate="true">
+                                            <f:setPropertyActionListener value="#{rec}" target="#{staffManagementBean.selectedReceptionist}"/>
+                                        </p:commandButton>
                                         <p:commandButton icon="fas fa-trash-alt"
                                                          title="🗑️ Deactivate Receptionist"
                                                          oncomplete="PF('deleteReceptionistDialog').show()"
                                                          styleClass="ui-button-danger ui-button-rounded action-button"
-                                                         process="@this">
-                                            <f:setPropertyActionListener value="#{rec}"
-                                                                         target="#{staffManagementBean.selectedReceptionist}"/>
+                                                         immediate="true">
+                                            <f:setPropertyActionListener value="#{rec}" target="#{staffManagementBean.selectedReceptionist}"/>
                                         </p:commandButton>
                                     </p:column>
                                 </p:dataTable>
@@ -228,7 +237,7 @@
                 </div>
             </div>
 
-            <!-- Enhanced Doctor Dialog -->
+            <!-- Doctor Dialog -->
             <p:dialog header="👨‍⚕️ Doctor Registration"
                       widgetVar="manageDoctorDialog"
                       modal="true"
@@ -237,7 +246,7 @@
                       styleClass="enhanced-dialog">
                 <p:outputPanel id="manage-doctor-content" class="ui-fluid">
                     <p:scrollPanel mode="native" style="height:65vh;">
-                        <div class="dialog-content" rendered="#{not empty staffManagementBean.selectedDoctor}">
+                        <div class="dialog-content" rendered="#{staffManagementBean.selectedDoctor != null}">
                             <!-- User Credentials Section -->
                             <div class="form-section">
                                 <h4 class="section-title">
@@ -267,8 +276,9 @@
                                         <p:inputText id="d_pass"
                                                      value="#{staffManagementBean.initialPassword}"
                                                      readonly="true"
-                                                     styleClass="enhanced-input readonly"/>
-                                        <small class="form-hint">
+                                                     styleClass="enhanced-input readonly"
+                                                     rendered="#{staffManagementBean.initialPassword != null}"/>
+                                        <small class="form-hint" rendered="#{staffManagementBean.initialPassword != null}">
                                             <i class="fas fa-info-circle"></i>
                                             This is the temporary password. Doctor should change it on first login.
                                         </small>
@@ -300,8 +310,7 @@
                                                      styleClass="enhanced-input"/>
                                     </div>
                                     <div class="form-group">
-                                        <p:outputLabel for="d_spec" value="🏥 Medical Speciality"
-                                                       styleClass="form-label"/>
+                                        <p:outputLabel for="d_spec" value="🏥 Medical Speciality" styleClass="form-label"/>
                                         <p:inputText id="d_spec"
                                                      value="#{staffManagementBean.selectedDoctor.speciality}"
                                                      required="true"
@@ -313,12 +322,15 @@
                                         <p:inputText id="d_phone"
                                                      value="#{staffManagementBean.selectedDoctor.phoneNumber}"
                                                      required="true"
-                                                     placeholder="+1 (555) 123-4567"
+                                                     placeholder="+2567XXXXXXXX"
                                                      styleClass="enhanced-input"/>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <p:outputLabel value="Error: No doctor selected"
+                                       rendered="#{staffManagementBean.selectedDoctor == null}"
+                                       styleClass="error-message"/>
                     </p:scrollPanel>
                 </p:outputPanel>
                 <f:facet name="footer">
@@ -326,8 +338,8 @@
                         <p:commandButton value="💾 Save Doctor"
                                          icon="fas fa-check"
                                          actionListener="#{staffManagementBean.saveDoctor}"
-                                         process="manage-doctor-content @this"
-                                         update="messages staffTabView:dt-doctors"
+                                         process="@form"
+                                         update="staffForm:messages staffForm:staffTabView:dt-doctors"
                                          styleClass="ui-button-success enhanced-button"/>
                         <p:commandButton value="❌ Cancel"
                                          icon="fas fa-times"
@@ -338,7 +350,7 @@
                 </f:facet>
             </p:dialog>
 
-            <!-- Enhanced Receptionist Dialog -->
+            <!-- Receptionist Dialog -->
             <p:dialog header="👩‍💼 Receptionist Registration"
                       widgetVar="manageReceptionistDialog"
                       modal="true"
@@ -347,7 +359,7 @@
                       styleClass="enhanced-dialog">
                 <p:outputPanel id="manage-receptionist-content" class="ui-fluid">
                     <p:scrollPanel mode="native" style="height:65vh;">
-                        <div class="dialog-content" rendered="#{not empty staffManagementBean.selectedReceptionist}">
+                        <div class="dialog-content" rendered="#{staffManagementBean.selectedReceptionist != null}">
                             <!-- User Credentials Section -->
                             <div class="form-section">
                                 <h4 class="section-title">
@@ -377,8 +389,9 @@
                                         <p:inputText id="r_pass"
                                                      value="#{staffManagementBean.initialPassword}"
                                                      readonly="true"
-                                                     styleClass="enhanced-input readonly"/>
-                                        <small class="form-hint">
+                                                     styleClass="enhanced-input readonly"
+                                                     rendered="#{staffManagementBean.initialPassword != null}"/>
+                                        <small class="form-hint" rendered="#{staffManagementBean.initialPassword != null}">
                                             <i class="fas fa-info-circle"></i>
                                             This is the temporary password. Staff should change it on first login.
                                         </small>
@@ -414,12 +427,15 @@
                                         <p:inputText id="r_phone"
                                                      value="#{staffManagementBean.selectedReceptionist.phoneNumber}"
                                                      required="true"
-                                                     placeholder="+1 (555) 123-4567"
+                                                     placeholder="+2567XXXXXXXX"
                                                      styleClass="enhanced-input"/>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <p:outputLabel value="Error: No receptionist selected"
+                                       rendered="#{staffManagementBean.selectedReceptionist == null}"
+                                       styleClass="error-message"/>
                     </p:scrollPanel>
                 </p:outputPanel>
                 <f:facet name="footer">
@@ -427,8 +443,8 @@
                         <p:commandButton value="💾 Save Receptionist"
                                          icon="fas fa-check"
                                          actionListener="#{staffManagementBean.saveReceptionist}"
-                                         process="manage-receptionist-content @this"
-                                         update="messages staffTabView:dt-receptionists"
+                                         process="@form"
+                                         update="staffForm:messages staffForm:staffTabView:dt-receptionists"
                                          styleClass="ui-button-success enhanced-button"/>
                         <p:commandButton value="❌ Cancel"
                                          icon="fas fa-times"
@@ -439,7 +455,7 @@
                 </f:facet>
             </p:dialog>
 
-            <!-- Enhanced Confirm Dialogs -->
+            <!-- Confirm Dialogs -->
             <p:confirmDialog widgetVar="deleteDoctorDialog"
                              message="⚠️ Are you sure you want to deactivate this doctor's account? They will no longer be able to log in to the system."
                              header="🗑️ Confirm Doctor Deactivation"
@@ -461,7 +477,7 @@
                 <f:facet name="footer">
                     <p:commandButton value="🗑️ Yes, Deactivate"
                                      actionListener="#{staffManagementBean.deleteDoctor}"
-                                     update="staffTabView:dt-doctors messages"
+                                     update="staffForm:staffTabView:dt-doctors staffForm:messages"
                                      oncomplete="PF('deleteDoctorDialog').hide()"
                                      styleClass="ui-button-danger enhanced-button"/>
                     <p:commandButton value="❌ Cancel"
@@ -492,7 +508,7 @@
                 <f:facet name="footer">
                     <p:commandButton value="🗑️ Yes, Deactivate"
                                      actionListener="#{staffManagementBean.deleteReceptionist}"
-                                     update="staffTabView:dt-receptionists messages"
+                                     update="staffForm:staffTabView:dt-receptionists staffForm:messages"
                                      oncomplete="PF('deleteReceptionistDialog').hide()"
                                      styleClass="ui-button-danger enhanced-button"/>
                     <p:commandButton value="❌ Cancel"
@@ -502,523 +518,5 @@
                 </f:facet>
             </p:confirmDialog>
         </h:form>
-
-        <!-- Enhanced Custom Styles -->
-        <style>
-            /* Enhanced Staff Page Specific Styles */
-            .enhanced-toolbar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 1.5rem;
-                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-                border-radius: 12px;
-                border: 1px solid rgba(22, 105, 122, 0.1);
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            }
-
-            .enhanced-datatable-wrapper {
-                border-radius: 16px;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-            }
-
-            .staff-info {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .staff-avatar {
-                width: 45px;
-                height: 45px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 1.2rem;
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            }
-
-            .staff-avatar.receptionist {
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-            }
-
-            .staff-details {
-                flex: 1;
-            }
-
-            .staff-name {
-                font-weight: 600;
-                color: #16697A;
-                font-size: 1rem;
-                margin-bottom: 2px;
-            }
-
-            .staff-subtitle {
-                font-size: 0.8rem;
-                color: #64748b;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            .specialty-badge {
-                display: inline-flex;
-                align-items: center;
-                padding: 0.5rem 1rem;
-                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-                color: #0369a1;
-                border-radius: 20px;
-                font-size: 0.85rem;
-                font-weight: 500;
-                border: 1px solid rgba(3, 105, 161, 0.2);
-            }
-
-            .contact-info {
-                display: flex;
-                align-items: center;
-                font-weight: 500;
-                color: #374151;
-            }
-
-            .username-badge {
-                display: inline-flex;
-                align-items: center;
-                padding: 0.4rem 0.8rem;
-                background: rgba(22, 105, 122, 0.1);
-                color: #16697A;
-                border-radius: 15px;
-                font-size: 0.85rem;
-                font-weight: 500;
-                border: 1px solid rgba(22, 105, 122, 0.2);
-            }
-
-            .action-button {
-                width: 40px !important;
-                height: 40px !important;
-                padding: 0 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
-
-            .enhanced-dialog .ui-dialog-content {
-                padding: 0 !important;
-            }
-
-            .dialog-content {
-                padding: 1.5rem;
-            }
-
-            .form-section {
-                margin-bottom: 2rem;
-                padding: 1.5rem;
-                background: rgba(248, 250, 252, 0.5);
-                border-radius: 12px;
-                border: 1px solid rgba(226, 232, 240, 0.5);
-            }
-
-            .section-title {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                color: #16697A;
-                font-size: 1.1rem;
-                font-weight: 600;
-                margin-bottom: 1.5rem;
-                padding-bottom: 0.5rem;
-                border-bottom: 2px solid rgba(22, 105, 122, 0.1);
-            }
-
-            .form-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 1.5rem;
-            }
-
-            .form-group.full-width {
-                grid-column: 1 / -1;
-            }
-
-            .form-group {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .form-label {
-                font-weight: 600 !important;
-                color: #374151 !important;
-                font-size: 0.95rem !important;
-                margin-bottom: 0.5rem !important;
-            }
-
-            .enhanced-input {
-                padding: 0.75rem 1rem !important;
-                border: 2px solid #e5e7eb !important;
-                border-radius: 8px !important;
-                font-size: 0.95rem !important;
-                transition: all 0.3s ease !important;
-                background: white !important;
-            }
-
-            .enhanced-input:focus {
-                border-color: #16697A !important;
-                box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1) !important;
-                outline: none !important;
-            }
-
-            .enhanced-input.readonly {
-                background: #f9fafb !important;
-                color: #6b7280 !important;
-                cursor: not-allowed !important;
-            }
-
-            .form-hint {
-                color: #6b7280;
-                font-size: 0.8rem;
-                margin-top: 0.25rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .dialog-footer {
-                display: flex;
-                justify-content: flex-end;
-                gap: 1rem;
-                padding: 1.5rem;
-                background: rgba(248, 250, 252, 0.5);
-                border-top: 1px solid rgba(226, 232, 240, 0.5);
-            }
-
-            .enhanced-button {
-                padding: 0.75rem 1.5rem !important;
-                border-radius: 8px !important;
-                font-weight: 600 !important;
-                font-size: 0.9rem !important;
-                transition: all 0.3s ease !important;
-                border: none !important;
-                cursor: pointer !important;
-                display: inline-flex !important;
-                align-items: center !important;
-                gap: 0.5rem !important;
-            }
-
-            .enhanced-button:hover {
-                transform: translateY(-2px) !important;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-            }
-
-            .enhanced-confirm-dialog .ui-dialog-content {
-                padding: 2rem !important;
-            }
-
-            .confirm-dialog-content {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                gap: 1.5rem;
-            }
-
-            .warning-icon {
-                font-size: 3rem;
-                color: #f59e0b;
-                animation: pulse 2s infinite;
-            }
-
-            .warning-text {
-                max-width: 400px;
-            }
-
-            .warning-text ul {
-                text-align: left;
-                margin: 1rem 0;
-                padding-left: 1.5rem;
-            }
-
-            .warning-text li {
-                margin: 0.5rem 0;
-                color: #6b7280;
-            }
-
-            @keyframes pulse {
-                0%, 100% {
-                    opacity: 1;
-                }
-                50% {
-                    opacity: 0.7;
-                }
-            }
-
-            /* Responsive Design */
-            @media (max-width: 768px) {
-                .enhanced-toolbar {
-                    flex-direction: column;
-                    gap: 1rem;
-                    text-align: center;
-                }
-
-                .form-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .staff-info {
-                    flex-direction: column;
-                    text-align: center;
-                }
-
-                .dialog-footer {
-                    flex-direction: column;
-                }
-
-                .enhanced-button {
-                    width: 100% !important;
-                    justify-content: center !important;
-                }
-            }
-
-            /* Tab View Enhancements */
-            .ui-tabs .ui-tabs-nav li {
-                margin-right: 0.5rem;
-            }
-
-            .ui-tabs .ui-tabs-nav li a {
-                padding: 1rem 1.5rem !important;
-                border-radius: 8px 8px 0 0 !important;
-                font-weight: 600 !important;
-                color: #6b7280 !important;
-                background: rgba(248, 250, 252, 0.5) !important;
-                border: 1px solid rgba(226, 232, 240, 0.5) !important;
-                transition: all 0.3s ease !important;
-            }
-
-            .ui-tabs .ui-tabs-nav li.ui-state-active a {
-                background: white !important;
-                color: #16697A !important;
-                border-bottom-color: white !important;
-            }
-
-            .ui-tabs .ui-tabs-nav li:hover a {
-                background: rgba(22, 105, 122, 0.05) !important;
-                color: #16697A !important;
-            }
-
-            /* DataTable Header Enhancements */
-            .ui-datatable thead th {
-                background: linear-gradient(135deg, #16697A 0%, #1a5f6b 100%) !important;
-                color: white !important;
-                font-weight: 600 !important;
-                padding: 1rem !important;
-                border: none !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.5px !important;
-                font-size: 0.85rem !important;
-            }
-
-            .ui-datatable tbody td {
-                padding: 1rem !important;
-                border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
-                vertical-align: middle !important;
-            }
-
-            .ui-datatable tbody tr:hover {
-                background: rgba(22, 105, 122, 0.03) !important;
-            }
-
-            /* Status Indicators */
-            .status-active {
-                color: #10b981;
-                font-weight: 600;
-            }
-
-            .status-inactive {
-                color: #ef4444;
-                font-weight: 600;
-            }
-
-            /* Loading States */
-            .ui-datatable-loading-overlay {
-                background: rgba(255, 255, 255, 0.9) !important;
-                backdrop-filter: blur(5px) !important;
-            }
-
-            /* Scrollbar Styling */
-            .ui-scrollpanel .ui-scrollpanel-wrapper {
-                border: none !important;
-            }
-
-            .ui-scrollpanel .ui-scrollpanel-content {
-                padding-right: 1rem !important;
-            }
-
-            /* Message Styling */
-            .ui-messages {
-                margin-bottom: 1.5rem;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .ui-messages-info {
-                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
-                border: 1px solid #3b82f6 !important;
-                color: #1e40af !important;
-            }
-
-            .ui-messages-warn {
-                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-                border: 1px solid #f59e0b !important;
-                color: #92400e !important;
-            }
-
-            .ui-messages-error {
-                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
-                border: 1px solid #ef4444 !important;
-                color: #dc2626 !important;
-            }
-        </style>
-
-        <!-- Enhanced JavaScript for Better UX -->
-        <script>
-            // Enhanced dialog management
-            function openDoctorDialog() {
-                PF('manageDoctorDialog').show();
-                // Focus on first input after dialog opens
-                setTimeout(() => {
-                    document.getElementById('staffForm:d_user').focus();
-                }, 300);
-            }
-
-            function openReceptionistDialog() {
-                PF('manageReceptionistDialog').show();
-                // Focus on first input after dialog opens
-                setTimeout(() => {
-                    document.getElementById('staffForm:r_user').focus();
-                }, 300);
-            }
-
-            // Enhanced form validation
-            function validateForm(formType) {
-                let isValid = true;
-                const requiredFields = document.querySelectorAll(`#${formType} input[required]`);
-
-                requiredFields.forEach(field => {
-                    if (!field.value.trim()) {
-                        field.style.borderColor = '#ef4444';
-                        isValid = false;
-                    } else {
-                        field.style.borderColor = '#e5e7eb';
-                    }
-                });
-
-                return isValid;
-            }
-
-            // Auto-hide messages after 5 seconds
-            document.addEventListener('DOMContentLoaded', function () {
-                setTimeout(() => {
-                    const messages = document.querySelector('.ui-messages');
-                    if (messages) {
-                        messages.style.transition = 'opacity 0.5s ease';
-                        messages.style.opacity = '0';
-                        setTimeout(() => {
-                            messages.style.display = 'none';
-                        }, 500);
-                    }
-                }, 5000);
-            });
-
-            // Enhanced search functionality
-            function enhancedSearch(searchTerm, tableId) {
-                const table = document.getElementById(tableId);
-                const rows = table.querySelectorAll('tbody tr');
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    const matches = text.includes(searchTerm.toLowerCase());
-                    row.style.display = matches ? '' : 'none';
-                });
-            }
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function (e) {
-                // Ctrl/Cmd + N for new doctor
-                if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key === 'n') {
-                    e.preventDefault();
-                    openDoctorDialog();
-                }
-
-                // Escape to close dialogs
-                if (e.key === 'Escape') {
-                    PF('manageDoctorDialog').hide();
-                    PF('manageReceptionistDialog').hide();
-                    PF('deleteDoctorDialog').hide();
-                    PF('deleteReceptionistDialog').hide();
-                }
-            });
-
-            // Enhanced loading states
-            function showLoading(elementId) {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.style.opacity = '0.6';
-                    element.style.pointerEvents = 'none';
-                }
-            }
-
-            function hideLoading(elementId) {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.style.opacity = '1';
-                    element.style.pointerEvents = 'auto';
-                }
-            }
-
-            // Smooth animations for better UX
-            function animateSuccess(message) {
-                // Create temporary success notification
-                const notification = document.createElement('div');
-                notification.className = 'success-notification';
-                notification.innerHTML = `<i class="fas fa-check-circle"></i> <span>\${message}</span>`;
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                    color: white;
-                    padding: 1rem 1.5rem;
-                    border-radius: 8px;
-                    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-                    z-index: 9999;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    font-weight: 600;
-                    transform: translateX(100%);
-                    transition: transform 0.3s ease;
-                `;
-
-                document.body.appendChild(notification);
-
-                // Animate in
-                setTimeout(() => {
-                    notification.style.transform = 'translateX(0)';
-                }, 100);
-
-                // Animate out and remove
-                setTimeout(() => {
-                    notification.style.transform = 'translateX(100%)';
-                    setTimeout(() => {
-                        document.body.removeChild(notification);
-                    }, 300);
-                }, 3000);
-            }
-        </script>
     </ui:define>
 </ui:composition>

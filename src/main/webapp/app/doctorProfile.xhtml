@@ -11,24 +11,28 @@
             <p:growl id="messages" showDetail="true" life="4000"/>
 
             <div class="card" rendered="#{not empty doctorProfileBean.currentDoctorProfile}">
-                <p:toolbar>
+                <p:toolbar id="profileToolbar">
                     <p:toolbarGroup>
                         <p:commandButton value="Edit Profile" icon="pi pi-pencil"
                                          actionListener="#{doctorProfileBean.toggleEditMode}"
-                                         update="profilePanel"
+                                         update="profilePanel profileToolbar"
                                          rendered="#{not doctorProfileBean.editMode}"
-                                         styleClass="ui-button-info"/>
+                                         styleClass="ui-button-info"
+                                         process="@this"/>
+
                         <p:commandButton value="Save Changes" icon="pi pi-save"
                                          actionListener="#{doctorProfileBean.updateProfile}"
-                                         update="profilePanel messages"
+                                         process="profilePanel @this"
+                                         update="profilePanel profileToolbar messages"
                                          rendered="#{doctorProfileBean.editMode}"
                                          styleClass="ui-button-success"/>
+
                         <p:commandButton value="Cancel" icon="pi pi-times"
                                          actionListener="#{doctorProfileBean.toggleEditMode}"
-                                         update="profilePanel"
+                                         update="profilePanel profileToolbar"
                                          rendered="#{doctorProfileBean.editMode}"
                                          styleClass="ui-button-secondary"
-                                         process="@this"/>
+                                         process="@this" immediate="true"/>
                     </p:toolbarGroup>
                 </p:toolbar>
 
@@ -80,29 +84,15 @@
                 </p:panel>
             </div>
 
-            <!-- Message for when profile can't be found -->
             <p:panel header="Profile Not Found" rendered="#{empty doctorProfileBean.currentDoctorProfile}">
                 <h:outputText value="Could not load your doctor profile. This might be because your account is not of the 'DOCTOR' role. Please contact an administrator." />
             </p:panel>
         </h:form>
 
-        <!-- Page-specific CSS for better styling -->
         <h:outputStylesheet>
-            .profile-label {
-            font-weight: 600;
-            color: #4b5563;
-            text-align: right;
-            padding-right: 1rem;
-            }
-            .profile-value {
-            font-size: 1.1rem;
-            color: #111827;
-            font-weight: 500;
-            }
-            .profile-view .ui-grid-col-6 {
-            padding: 1rem;
-            border-bottom: 1px solid #f3f4f6;
-            }
+            .profile-label { font-weight: 600; color: #4b5563; text-align: right; padding-right: 1rem; }
+            .profile-value { font-size: 1.1rem; color: #111827; font-weight: 500; }
+            .profile-view .ui-grid-col-6 { padding: 1rem; border-bottom: 1px solid #f3f4f6; }
         </h:outputStylesheet>
     </ui:define>
 </ui:composition>
