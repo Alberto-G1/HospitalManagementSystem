@@ -15,22 +15,12 @@ public class UserService {
     @Inject
     private UserDAO userDAO;
 
-    /**
-     * This is the default constructor used by CDI.
-     * It does nothing, as CDI will handle injecting the userDAO.
-     */
     public UserService() {
-        // This constructor is for CDI.
+        // CDI constructor
     }
 
-    /**
-     * A special constructor for our ApplicationInitializer which runs outside of CDI.
-     * This ensures that when we call 'new UserService(true)', we get a working instance.
-     * @param manual - A flag to indicate manual instantiation.
-     */
     public UserService(boolean manual) {
         if (manual) {
-            // Manually create the dependency since @Inject won't work here.
             this.userDAO = new UserDAO();
         }
     }
@@ -53,7 +43,7 @@ public class UserService {
     public void createUser(User user, String plainPassword) {
         String hashedPassword = hashPassword(plainPassword);
         user.setPassword(hashedPassword);
-        userDAO.saveOrUpdate(user);
+        userDAO.save(user);
     }
 
     public User authenticate(String username, String plainPassword) {
@@ -66,26 +56,51 @@ public class UserService {
 
     public void softDelete(User user) {
         if (user != null && !"admin".equalsIgnoreCase(user.getUsername())) {
-            user.setActive(false);
-            userDAO.saveOrUpdate(user);
+            // Use the special method to update active status
+            userDAO.updateUserActiveStatus(user.getUserId(), false);
+        }
+    }
+
+    public void reactivateUser(User user) {
+        if (user != null) {
+            userDAO.updateUserActiveStatus(user.getUserId(), true);
         }
     }
 
     public User findByUsername(String username) {
         return userDAO.findByUsername(username);
     }
+
     public User findByUsernameIncludeInactive(String username) {
         return userDAO.findByUsernameIncludeInactive(username);
     }
+
     public User findByEmail(String email) {
         return userDAO.findByEmail(email);
     }
+
+    public User findByEmailIncludeInactive(String email) {
+        return userDAO.findByEmailIncludeInactive(email);
+    }
+
+    // Returns only active users by default
     public List<User> getAll() {
         return userDAO.findAll();
     }
+
+    // Method to get all users including inactive ones
+    public List<User> getAllIncludeInactive() {
+        return userDAO.findAllIncludeInactive();
+    }
+
     public void saveOrUpdate(User user) {
         userDAO.saveOrUpdate(user);
     }
+
+    public void update(User user) {
+        userDAO.update(user);
+    }
+
     public User findById(int id) {
         return userDAO.findById(id);
     }

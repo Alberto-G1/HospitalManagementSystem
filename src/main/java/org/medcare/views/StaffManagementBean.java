@@ -77,7 +77,7 @@ public class StaffManagementBean implements Serializable {
             PrimeFaces.current().executeScript("PF('manageDoctorDialog').hide()");
             PrimeFaces.current().ajax().update("form:messages", "form:doctor-tab:dt-doctors");
         } catch (Exception e) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not create doctor.");
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not create doctor: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -100,36 +100,55 @@ public class StaffManagementBean implements Serializable {
             PrimeFaces.current().executeScript("PF('manageReceptionistDialog').hide()");
             PrimeFaces.current().ajax().update("form:messages", "form:receptionist-tab:dt-receptionists");
         } catch (Exception e) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not create receptionist.");
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not create receptionist: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void deleteDoctor() {
         if (selectedDoctor != null) {
-            doctorService.softDelete(selectedDoctor);
-            doctors.remove(selectedDoctor);
-            selectedDoctor = null; // Deselect
-            addMessage(FacesMessage.SEVERITY_WARN, "Doctor Deactivated", "The doctor's account has been deactivated.");
+            try {
+                doctorService.softDelete(selectedDoctor);
+                // Refresh the list instead of manually removing
+                doctors = doctorService.getAll();
+                selectedDoctor = null; // Deselect
+                addMessage(FacesMessage.SEVERITY_WARN, "Doctor Deactivated", "The doctor's account has been deactivated.");
+                PrimeFaces.current().ajax().update("form:doctor-tab:dt-doctors");
+            } catch (Exception e) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not deactivate doctor: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No doctor selected for deletion.");
         }
     }
 
     public void deleteReceptionist() {
         if (selectedReceptionist != null) {
-            receptionistService.softDelete(selectedReceptionist);
-            receptionists.remove(selectedReceptionist);
-            selectedReceptionist = null; // Deselect
-            addMessage(FacesMessage.SEVERITY_WARN, "Receptionist Deactivated", "The receptionist's account has been deactivated.");
+            try {
+                receptionistService.softDelete(selectedReceptionist);
+                // Refresh the list instead of manually removing
+                receptionists = receptionistService.getAll();
+                selectedReceptionist = null; // Deselect
+                addMessage(FacesMessage.SEVERITY_WARN, "Receptionist Deactivated", "The receptionist's account has been deactivated.");
+                PrimeFaces.current().ajax().update("form:receptionist-tab:dt-receptionists");
+            } catch (Exception e) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not deactivate receptionist: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No receptionist selected for deletion.");
         }
     }
 
     private boolean isUsernameOrEmailTaken(String username, String email) {
         boolean taken = false;
+        // Check all users (including inactive) to prevent duplicate usernames/emails
         if (userService.findByUsernameIncludeInactive(username) != null) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", "Username is already taken.");
             taken = true;
         }
-        if (userService.findByEmail(email) != null) {
+        if (userService.findByEmailIncludeInactive(email) != null) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", "Email is already registered.");
             taken = true;
         }
@@ -145,7 +164,7 @@ public class StaffManagementBean implements Serializable {
     }
 
     // ===================================================================
-    // GETTERS AND SETTERS - THE MISSING PIECE
+    // GETTERS AND SETTERS
     // ===================================================================
 
     public List<Doctor> getDoctors() {

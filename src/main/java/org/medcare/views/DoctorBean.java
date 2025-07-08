@@ -17,7 +17,6 @@ import java.util.List;
 @ViewScoped
 public class DoctorBean implements Serializable {
 
-
     @Inject
     private DoctorService doctorService;
 
@@ -34,23 +33,36 @@ public class DoctorBean implements Serializable {
     }
 
     public void saveDoctor() {
-        if (this.selectedDoctor.getDoctorId() == 0) {
-            doctorService.save(this.selectedDoctor);
-            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Doctor Added");
-        } else {
-            doctorService.save(this.selectedDoctor);
-            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Doctor Updated");
+        try {
+            if (this.selectedDoctor.getDoctorId() == 0) {
+                doctorService.save(this.selectedDoctor);
+                addMessage(FacesMessage.SEVERITY_INFO, "Success", "Doctor Added");
+            } else {
+                doctorService.update(this.selectedDoctor);
+                addMessage(FacesMessage.SEVERITY_INFO, "Success", "Doctor Updated");
+            }
+            // Refresh the list to ensure consistency
+            doctors = doctorService.getAll();
+            PrimeFaces.current().ajax().update("form:dt-doctors");
+        } catch (Exception e) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save doctor: " + e.getMessage());
+            e.printStackTrace();
         }
-        doctors = doctorService.getAll();
-        PrimeFaces.current().ajax().update("form:dt-doctors");
     }
 
     public void deleteDoctor() {
         if (this.selectedDoctor != null) {
-            doctorService.softDelete(this.selectedDoctor);
-            doctors.remove(this.selectedDoctor);
-            this.selectedDoctor = null;
-            addMessage(FacesMessage.SEVERITY_WARN, "Removed", "Doctor has been deleted.");
+            try {
+                doctorService.softDelete(this.selectedDoctor);
+                // Refresh the list instead of manually removing
+                doctors = doctorService.getAll();
+                this.selectedDoctor = null;
+                addMessage(FacesMessage.SEVERITY_WARN, "Deactivated", "Doctor has been deactivated.");
+                PrimeFaces.current().ajax().update("form:dt-doctors");
+            } catch (Exception e) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not deactivate doctor: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No doctor selected for deletion.");
         }
