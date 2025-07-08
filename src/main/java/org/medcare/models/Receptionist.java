@@ -6,12 +6,12 @@ import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "receptionists")
-public class Receptionist {
+public class Receptionist extends BaseModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int receptionistId;
 
-    // Link to the User account for login credentials
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "userId", unique = true)
     private User user;
