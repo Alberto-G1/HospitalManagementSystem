@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
@@ -8,128 +7,1220 @@
     <ui:define name="pageTitle">Dashboard</ui:define>
 
     <ui:define name="content">
-        <!-- Welcome card -->
-        <div class="card">
-            <h2 style="font-size: 2rem; color: #1e3a8a; margin-top: 0;">Welcome, #{userBean.user.username}!</h2>
-            <p style="color: #666; font-size: 1.1rem; margin-top: -1rem;">Here's a quick overview of the hospital's status.</p>
+        <!-- Enhanced Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="welcome-section">
+                <h2 class="welcome-title">
+                    <i class="fas fa-chart-line welcome-icon"></i>
+                    Welcome back, #{userBean.user.username}!
+                </h2>
+                <p class="welcome-subtitle">Here's what's happening at MedCare HMS today</p>
+            </div>
+            <div class="date-time-widget">
+                <div class="current-date" id="currentDate"></div>
+                <div class="current-time" id="currentTime"></div>
+            </div>
         </div>
 
-        <!-- Admin Dashboard (Only admin sees all staff counts) -->
-        <ui:fragment rendered="#{userBean.user.role == 'ADMIN'}">
-            <div class="p-grid stats-grid">
-                <div class="p-col-12 p-md-6 p-lg-3">
-                    <div class="card stat-card patients">
-                        <i class="pi pi-users stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.patientCount}</span>
-                        <span class="stat-label">Total Patients</span>
+        <!-- Hospital Overview Section -->
+        <div class="dashboard-section">
+            <h3 class="section-title">
+                <i class="fas fa-hospital section-icon"></i>
+                Hospital Overview
+            </h3>
+
+            <!-- Admin Dashboard -->
+            <ui:fragment rendered="#{userBean.user.role == 'ADMIN'}">
+                <div class="stats-container">
+                    <div class="stats-grid">
+                        <div class="stat-card patients" data-aos="fade-up" data-aos-delay="100">
+                            <div class="stat-background">
+                                <i class="fas fa-user-injured stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper patients">
+                                    <i class="fas fa-user-injured stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.patientCount}">0</span>
+                                    <span class="stat-label">Total Patients</span>
+                                    <div class="stat-trend positive">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span>+12% this month</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card doctors" data-aos="fade-up" data-aos-delay="200">
+                            <div class="stat-background">
+                                <i class="fas fa-user-md stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper doctors">
+                                    <i class="fas fa-user-md stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.doctorCount}">0</span>
+                                    <span class="stat-label">Active Doctors</span>
+                                    <div class="stat-trend positive">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span>+3 new this week</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card receptionists" data-aos="fade-up" data-aos-delay="300">
+                            <div class="stat-background">
+                                <i class="fas fa-user-tie stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper receptionists">
+                                    <i class="fas fa-user-tie stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.receptionistCount}">0</span>
+                                    <span class="stat-label">Receptionists</span>
+                                    <div class="stat-trend neutral">
+                                        <i class="fas fa-minus"></i>
+                                        <span>No change</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card appointments" data-aos="fade-up" data-aos-delay="400">
+                            <div class="stat-background">
+                                <i class="fas fa-calendar-check stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper appointments">
+                                    <i class="fas fa-calendar-check stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.appointmentCount}">0</span>
+                                    <span class="stat-label">Appointments</span>
+                                    <div class="stat-trend positive">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span>+8% today</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Chart Container -->
+                    <div class="chart-container" data-aos="fade-left" data-aos-delay="500">
+                        <div class="chart-header">
+                            <h4 class="chart-title">
+                                <i class="fas fa-chart-pie"></i>
+                                Distribution Overview
+                            </h4>
+                            <div class="chart-controls">
+                                <button class="chart-btn active" data-chart="pie">
+                                    <i class="fas fa-chart-pie"></i>
+                                </button>
+                                <button class="chart-btn" data-chart="bar">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <p:pieChart model="#{dashboardBean.pieModel}"
+                                        style="width:100%; height:350px"
+                                        seriesColors="3b82f6,10b981,8b5cf6,f59e0b"/>
+                        </div>
+
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-color patients"></span>
+                                <span class="legend-text">Patients</span>
+                                <span class="legend-value">#{dashboardBean.patientCount}</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color doctors"></span>
+                                <span class="legend-text">Doctors</span>
+                                <span class="legend-value">#{dashboardBean.doctorCount}</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color receptionists"></span>
+                                <span class="legend-text">Receptionists</span>
+                                <span class="legend-value">#{dashboardBean.receptionistCount}</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color appointments"></span>
+                                <span class="legend-text">Appointments</span>
+                                <span class="legend-value">#{dashboardBean.appointmentCount}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="p-col-12 p-md-6 p-lg-3">
-                    <div class="card stat-card doctors">
-                        <i class="pi pi-user-md stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.doctorCount}</span>
-                        <span class="stat-label">Total Doctors</span>
+
+                <!-- Quick Actions for Admin -->
+                <div class="quick-actions-section" data-aos="fade-up" data-aos-delay="600">
+                    <h4 class="quick-actions-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h4>
+                    <div class="quick-actions-grid">
+                        <p:commandButton value="Add New Patient"
+                                         action ="/app/patients"
+                                         icon="fas fa-user-plus"
+                                         styleClass="quick-action-btn patients"/>
+                        <p:commandButton value="Schedule Appointment"
+                                         action="/app/appointments"
+                                         icon="fas fa-calendar-plus"
+                                         styleClass="quick-action-btn appointments"/>
+                        <p:commandButton value="View Reports"
+                                         action="/app/reports"
+                                         icon="fas fa-chart-line"
+                                         styleClass="quick-action-btn reports"/>
+                        <p:commandButton value="Manage Staff"
+                                         action="/app/staff"
+                                         icon="fas fa-users-cog"
+                                         styleClass="quick-action-btn staff"/>
                     </div>
                 </div>
-                <!-- ================= NEW CARD FOR RECEPTIONISTS ================= -->
-                <div class="p-col-12 p-md-6 p-lg-3">
-                    <div class="card stat-card receptionists">
-                        <i class="pi pi-briefcase stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.receptionistCount}</span>
-                        <span class="stat-label">Total Receptionists</span>
+            </ui:fragment>
+
+            <!-- Receptionist Dashboard -->
+            <ui:fragment rendered="#{userBean.user.role == 'RECEPTIONIST'}">
+                <div class="stats-container">
+                    <div class="stats-grid">
+                        <div class="stat-card patients" data-aos="fade-up" data-aos-delay="100">
+                            <div class="stat-background">
+                                <i class="fas fa-user-injured stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper patients">
+                                    <i class="fas fa-user-injured stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.patientCount}">0</span>
+                                    <span class="stat-label">Total Patients</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card doctors" data-aos="fade-up" data-aos-delay="200">
+                            <div class="stat-background">
+                                <i class="fas fa-user-md stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper doctors">
+                                    <i class="fas fa-user-md stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.doctorCount}">0</span>
+                                    <span class="stat-label">Available Doctors</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card appointments" data-aos="fade-up" data-aos-delay="300">
+                            <div class="stat-background">
+                                <i class="fas fa-calendar-check stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper appointments">
+                                    <i class="fas fa-calendar-check stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.appointmentCount}">0</span>
+                                    <span class="stat-label">Today's Appointments</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container" data-aos="fade-left" data-aos-delay="400">
+                        <div class="chart-header">
+                            <h4 class="chart-title">
+                                <i class="fas fa-chart-pie"></i>
+                                Patient Distribution
+                            </h4>
+                        </div>
+
+                        <div class="chart-wrapper">
+                            <p:pieChart model="#{dashboardBean.receptionistPieModel}"
+                                        style="width:100%; height:350px"
+                                        seriesColors="3b82f6,10b981,f59e0b"/>
+                        </div>
+
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-color patients"></span>
+                                <span class="legend-text">Patients</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color doctors"></span>
+                                <span class="legend-text">Doctors</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color appointments"></span>
+                                <span class="legend-text">Appointments</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- ========================================================== -->
-                <div class="p-col-12 p-md-6 p-lg-3">
-                    <div class="card stat-card appointments">
-                        <i class="pi pi-calendar stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.appointmentCount}</span>
-                        <span class="stat-label">Scheduled Appointments</span>
+
+                <!-- Quick Actions for Receptionist -->
+                <div class="quick-actions-section" data-aos="fade-up" data-aos-delay="500">
+                    <h4 class="quick-actions-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h4>
+                    <div class="quick-actions-grid">
+                        <p:commandButton value="Register Patient"
+                                         outcome="/app/patients"
+                                         icon="fas fa-user-plus"
+                                         styleClass="quick-action-btn patients"/>
+                        <p:commandButton value="Book Appointment"
+                                         outcome="/app/appointments"
+                                         icon="fas fa-calendar-plus"
+                                         styleClass="quick-action-btn appointments"/>
+                        <p:commandButton value="Process Billing"
+                                         outcome="/app/billing"
+                                         icon="fas fa-receipt"
+                                         styleClass="quick-action-btn billing"/>
+                    </div>
+                </div>
+            </ui:fragment>
+
+            <!-- Doctor Dashboard -->
+            <ui:fragment rendered="#{userBean.user.role == 'DOCTOR'}">
+                <div class="doctor-dashboard">
+                    <div class="doctor-welcome-card" data-aos="fade-right">
+                        <div class="doctor-avatar">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="doctor-info">
+                            <h3>Dr. #{userBean.user.username}</h3>
+                            <p>Ready to help patients today</p>
+                        </div>
+                    </div>
+
+                    <div class="doctor-stats-grid">
+                        <div class="stat-card appointments" data-aos="fade-up" data-aos-delay="200">
+                            <div class="stat-background">
+                                <i class="fas fa-calendar-check stat-bg-icon"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-icon-wrapper appointments">
+                                    <i class="fas fa-calendar-check stat-icon"></i>
+                                </div>
+                                <div class="stat-text">
+                                    <span class="stat-number" data-target="#{dashboardBean.doctorAppointmentCount}">0</span>
+                                    <span class="stat-label">Your Appointments</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container doctor-chart" data-aos="fade-left" data-aos-delay="300">
+                            <div class="chart-header">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-
+pie"></i>
+                                    Appointment Status
+                                </h4>
+                            </div>
+
+                            <div class="chart-wrapper">
+                                <p:pieChart model="#{dashboardBean.doctorPieModel}"
+                                            style="width:100%; height:300px"
+                                            seriesColors="489FB5,10b981,ef4444"/>
+                            </div>
+
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <span class="legend-color scheduled"></span>
+                                    <span class="legend-text">Scheduled</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color completed"></span>
+                                    <span class="legend-text">Completed</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color canceled"></span>
+                                    <span class="legend-text">Canceled</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions for Doctor -->
+                    <div class="quick-actions-section" data-aos="fade-up" data-aos-delay="400">
+                        <h4 class="quick-actions-title">
+                            <i class="fas fa-bolt"></i>
+                            Quick Actions
+                        </h4>
+                        <div class="quick-actions-grid">
+                            <p:commandButton value="View Appointments"
+                                             outcome="/app/appointments"
+                                             icon="fas fa-calendar"
+                                             styleClass="quick-action-btn appointments"/>
+                            <p:commandButton value="Medical Records"
+                                             outcome="/app/records"
+                                             icon="fas fa-file-medical"
+                                             styleClass="quick-action-btn records"/>
+                            <p:commandButton value="Update Profile"
+                                             outcome="/app/doctorProfile"
+                                             icon="fas fa-user-edit"
+                                             styleClass="quick-action-btn profile"/>
+                        </div>
+                    </div>
+                </div>
+            </ui:fragment>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="recent-activity-section" data-aos="fade-up" data-aos-delay="700">
+            <h3 class="section-title">
+                <i class="fas fa-clock section-icon"></i>
+                Recent Activity
+            </h3>
+            <div class="activity-feed">
+                <div class="activity-item">
+                    <div class="activity-icon patients">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-text">New patient registered: John Doe</p>
+                        <span class="activity-time">2 minutes ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon appointments">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-text">Appointment scheduled with Dr. Smith</p>
+                        <span class="activity-time">15 minutes ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon completed">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-text">Medical record updated for Patient ID: 1234</p>
+                        <span class="activity-time">1 hour ago</span>
                     </div>
                 </div>
             </div>
-        </ui:fragment>
+        </div>
 
-        <!-- Receptionist Dashboard (Sees patients and appointments) -->
-        <ui:fragment rendered="#{userBean.user.role == 'RECEPTIONIST'}">
-            <div class="p-grid stats-grid">
-                <div class="p-col-12 p-md-6 p-lg-4">
-                    <div class="card stat-card patients">
-                        <i class="pi pi-users stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.patientCount}</span>
-                        <span class="stat-label">Total Patients</span>
-                    </div>
-                </div>
-                <!-- DOCTOR COUNT FOR RECEPTIONIST -->
-                <div class="p-col-12 p-md-6 p-lg-4">
-                    <div class="card stat-card doctors">
-                        <i class="pi pi-user-md stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.doctorCount}</span>
-                        <span class="stat-label">Total Doctors</span>
-                    </div>
-                </div>
-                <div class="p-col-12 p-md-6 p-lg-4">
-                    <div class="card stat-card appointments">
-                        <i class="pi pi-calendar stat-icon"></i>
-                        <span class="stat-number">#{dashboardBean.appointmentCount}</span>
-                        <span class="stat-label">Scheduled Appointments</span>
-                    </div>
-                </div>
-            </div>
-        </ui:fragment>
-
-        <!-- Doctor Dashboard -->
-        <ui:fragment rendered="#{userBean.user.role == 'DOCTOR'}">
-            <!-- For now, the doctor dashboard is simple -->
-            <div class="card">
-                <h3>Your Quick Actions</h3>
-                <p:button value="View My Appointments" outcome="/app/appointments" icon="pi pi-calendar" styleClass="ui-button-info"/>
-                <p:button value="Update My Profile" outcome="/app/doctorProfile" icon="pi pi-user-edit" styleClass="ui-button-secondary" style="margin-left: 10px;"/>
-            </div>
-        </ui:fragment>
-
+        <!-- Enhanced Stylesheets -->
         <h:outputStylesheet>
+            /* Dashboard Header */
+            .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.05) 0%, rgba(130, 192, 204, 0.05) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(22, 105, 122, 0.1);
+            backdrop-filter: blur(10px);
+            }
+
+            .welcome-section {
+            flex: 1;
+            }
+
+            .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #16697A;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            }
+
+            .welcome-icon {
+            background: linear-gradient(135deg, #16697A, #489FB5);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 20px rgba(22, 105, 122, 0.3);
+            }
+
+            .welcome-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin: 0;
+            }
+
+            .date-time-widget {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            }
+
+            .current-date {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #16697A;
+            margin-bottom: 0.5rem;
+            }
+
+            .current-time {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #489FB5;
+            font-family: 'Courier New', monospace;
+            }
+
+            /* Dashboard Section */
+            .dashboard-section {
+            margin-bottom: 3rem;
+            }
+
+            .section-title {
+            font-family: 'Montserrat', sans-serif;
+            color: #16697A;
+            margin-bottom: 2rem;
+            font-size: 1.75rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            }
+
+            .section-icon {
+            background: linear-gradient(135deg, #16697A, #489FB5);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            box-shadow: 0 5px 15px rgba(22, 105, 122, 0.3);
+            }
+
+            .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #16697A, #82C0CC);
+            border-radius: 4px;
+            }
+
+            /* Stats Container */
+            .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            }
+
+            @media (min-width: 1200px) {
+            .stats-container {
+            flex-direction: row;
+            }
+            .stats-grid {
+            flex: 2;
+            }
+            .chart-container {
+            flex: 1;
+            }
+            }
+
+            /* Stats Grid */
             .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted for 4 columns */
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
             }
+
+            /* Enhanced Stat Cards */
             .stat-card {
-            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            border-left: 5px solid;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
             }
+
             .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             }
-            .stat-card.patients { border-color: #3b82f6; }
-            .stat-card.doctors { border-color: #10b981; }
-            .stat-card.receptionists { border-color: #8b5cf6; } /* New color */
-            .stat-card.appointments { border-color: #f59e0b; }
+
+            .stat-background {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            opacity: 0.05;
+            font-size: 8rem;
+            color: currentColor;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            }
+
+            .stat-card:hover .stat-background {
+            opacity: 0.1;
+            transform: rotate(15deg) scale(1.1);
+            }
+
+            .stat-content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            z-index: 2;
+            }
+
+            .stat-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .stat-icon-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+            }
+
+            .stat-card:hover .stat-icon-wrapper::before {
+            transform: rotate(45deg) translate(50%, 50%);
+            }
 
             .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 2rem;
+            color: white;
+            z-index: 1;
+            position: relative;
             }
-            .stat-card.patients .stat-icon { color: #3b82f6; }
-            .stat-card.doctors .stat-icon { color: #10b981; }
-            .stat-card.receptionists .stat-icon { color: #8b5cf6; } /* New color */
-            .stat-card.appointments .stat-icon { color: #f59e0b; }
+
+            .stat-icon-wrapper.patients {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            }
+
+            .stat-icon-wrapper.doctors {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            }
+
+            .stat-icon-wrapper.receptionists {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            }
+
+            .stat-icon-wrapper.appointments {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            }
+
+            .stat-text {
+            flex: 1;
+            }
 
             .stat-number {
             display: block;
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
             color: #111827;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1;
+            margin-bottom: 0.5rem;
             }
+
             .stat-label {
             font-size: 1.1rem;
             color: #6b7280;
-            margin-top: 0.5rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            }
+
+            .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            }
+
+            .stat-trend.positive {
+            color: #10b981;
+            }
+
+            .stat-trend.negative {
+            color: #ef4444;
+            }
+
+            .stat-trend.neutral {
+            color: #6b7280;
+            }
+
+            /* Enhanced Chart Container */
+            .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+            }
+
+            .chart-title {
+            color: #16697A;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            }
+
+            .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+            }
+
+            .chart-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            }
+
+            .chart-btn:hover,
+            .chart-btn.active {
+            border-color: #16697A;
+            background: #16697A;
+            color: white;
+            transform: scale(1.1);
+            }
+
+            .chart-wrapper {
+            margin-bottom: 2rem;
+            }
+
+            .chart-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            }
+
+            .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            }
+
+            .legend-item:hover {
+            background: rgba(22, 105, 122, 0.05);
+            transform: translateY(-2px);
+            }
+
+            .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .legend-color.patients { background: #3b82f6; }
+            .legend-color.doctors { background: #10b981; }
+            .legend-color.receptionists { background: #8b5cf6; }
+            .legend-color.appointments { background: #f59e0b; }
+            .legend-color.scheduled { background: #489FB5; }
+            .legend-color.completed {
+            background: #10b981; }
+            .legend-color.canceled { background: #ef4444; }
+
+            .legend-text {
+            font-weight: 500;
+            color: #374151;
+            flex: 1;
+            }
+
+            .legend-value {
+            font-weight: 700;
+            color: #16697A;
+            font-size: 0.9rem;
+            }
+
+            /* Quick Actions Section */
+            .quick-actions-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 3rem;
+            }
+
+            .quick-actions-title {
+            color: #16697A;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            }
+
+            .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            }
+
+            .quick-action-btn {
+            padding: 1.5rem !important;
+            border-radius: 15px !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border: none !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .quick-action-btn:hover {
+            transform: translateY(-5px) scale(1.02) !important;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .quick-action-btn.patients {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+            color: white !important;
+            }
+
+            .quick-action-btn.appointments {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            color: white !important;
+            }
+
+            .quick-action-btn.reports {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+            color: white !important;
+            }
+
+            .quick-action-btn.staff {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: white !important;
+            }
+
+            .quick-action-btn.billing {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+            }
+
+            .quick-action-btn.records {
+            background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+            color: white !important;
+            }
+
+            .quick-action-btn.profile {
+            background: linear-gradient(135deg, #64748b, #475569) !important;
+            color: white !important;
+            }
+
+            /* Doctor Dashboard Specific */
+            .doctor-dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            }
+
+            .doctor-welcome-card {
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.05) 0%, rgba(130, 192, 204, 0.05) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            border: 1px solid rgba(22, 105, 122, 0.1);
+            backdrop-filter: blur(10px);
+            }
+
+            .doctor-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #16697A, #489FB5);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 25px rgba(22, 105, 122, 0.3);
+            }
+
+            .doctor-info h3 {
+            color: #16697A;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            }
+
+            .doctor-info p {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin: 0;
+            }
+
+            .doctor-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            align-items: start;
+            }
+
+            .doctor-chart {
+            margin: 0;
+            }
+
+            /* Recent Activity Section */
+            .recent-activity-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            }
+
+            .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            }
+
+            .activity-item:hover {
+            background: rgba(22, 105, 122, 0.05);
+            transform: translateX(5px);
+            border-left-color: #16697A;
+            }
+
+            .activity-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .activity-icon.patients {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            }
+
+            .activity-icon.appointments {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            }
+
+            .activity-icon.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            }
+
+            .activity-content {
+            flex: 1;
+            }
+
+            .activity-text {
+            color: #374151;
+            font-weight: 500;
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            }
+
+            .activity-time {
+            color: #6b7280;
+            font-size: 0.9rem;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 1200px) {
+            .doctor-stats-grid {
+            grid-template-columns: 1fr;
+            }
+            }
+
+            @media (max-width: 768px) {
+            .dashboard-header {
+            flex-direction: column;
+            gap: 2rem;
+            text-align: center;
+            }
+
+            .welcome-title {
+            font-size: 1.5rem;
+            }
+
+            .stats-grid {
+            grid-template-columns: 1fr;
+            }
+
+            .quick-actions-grid {
+            grid-template-columns: 1fr;
+            }
+
+            .doctor-welcome-card {
+            flex-direction: column;
+            text-align: center;
+            }
+
+            .chart-header {
+            flex-direction: column;
+            gap: 1rem;
+            }
+
+            .legend-item {
+            justify-content: center;
+            }
+            }
+
+            /* Animation Classes */
+            @keyframes fadeInUp {
+            from {
+            opacity: 0;
+            transform: translateY(30px);
+            }
+            to {
+            opacity: 1;
+            transform: translateY(0);
+            }
+            }
+
+            @keyframes pulse {
+            0%, 100% {
+            transform: scale(1);
+            }
+            50% {
+            transform: scale(1.05);
+            }
+            }
+
+            .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+            }
+
+            .pulse-animation {
+            animation: pulse 2s infinite;
             }
         </h:outputStylesheet>
+
+        <!-- Enhanced JavaScript -->
+        <h:outputScript target="body">
+            // <![CDATA[
+            document.addEventListener('DOMContentLoaded', function() {
+            // Update date and time
+            function updateDateTime() {
+            const now = new Date();
+            const dateElement = document.getElementById('currentDate');
+            const timeElement = document.getElementById('currentTime');
+
+            if (dateElement) {
+            dateElement.textContent = now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+            });
+            }
+
+            if (timeElement) {
+            timeElement.textContent = now.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+            });
+            }
+            }
+
+            // Update time every second
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // Enhanced number animation
+            function animateNumber(element, target, duration = 2000) {
+            const start = 0;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Easing function for smooth animation
+            const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(start + (target - start) * easeOutCubic);
+
+            element.textContent = current.toLocaleString();
+
+            if (progress < 1) {
+            requestAnimationFrame(update);
+            } else {
+            element.textContent = target.toLocaleString();
+            }
+            }
+
+            requestAnimationFrame(update);
+            }
+
+            // Intersection Observer for animations
+            const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+            // Staggered animation
+            setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0) scale(1)';
+
+            // Animate numbers
+            const numberElement = entry.target.querySelector('.stat-number[data-target]');
+            if (numberElement) {
+            const target = parseInt(numberElement.getAttribute('data-target'));
+            animateNumber(numberElement, target);
+            }
+            }, index * 150);
+
+            observer.unobserve(entry.target);
+            }
+            });
+            }, observerOptions);
+
+            // Observe all animated elements
+            const animatedElements = document.querySelectorAll('[data-aos], .stat-card, .chart-container, .quick-actions-section, .recent-activity-section');
+            animatedElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px) scale(0.95)';
+            el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            observer.observe(el);
+            });
+
+            // Chart controls functionality
+            const chartButtons = document.querySelectorAll('.chart-btn');
+            chartButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+            chartButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Add visual feedback
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+            this.style.transform = 'scale(1.1)';
+            }, 100);
+            });
+            });
+
+            // Enhanced hover effects for activity items
+            const activityItems = document.querySelectorAll('.activity-item');
+            activityItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+            this.querySelector('.activity-icon').style.transform = 'scale(1.1) rotate(5deg)';
+            });
+
+            item.addEventListener('mouseleave', function() {
+            this.querySelector('.activity-icon').style.transform = 'scale(1) rotate(0deg)';
+            });
+            });
+
+            // Periodic data refresh simulation
+            setInterval(() => {
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+            setTimeout(() => {
+            card.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+            card.style.transform = 'scale(1)';
+            }, 200);
+            }, index * 100);
+            });
+            }, 30000); // Every 30 seconds
+
+            // Add loading states for buttons
+            const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+            quickActionBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+            const originalText = this.textContent;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            this.disabled = true;
+
+            // Re-enable after navigation (fallback)
+            setTimeout(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+            }, 3000);
+            });
+            });
+
+            console.log('🏥 Enhanced Dashboard Loaded Successfully');
+            });
+        // ]]>
+        </h:outputScript>
     </ui:define>
 </ui:composition>
