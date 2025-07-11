@@ -13,9 +13,14 @@ import org.medcare.service.AppointmentService;
 import org.medcare.service.DoctorService;
 import org.medcare.service.PatientService;
 import org.primefaces.PrimeFaces;
+import org.primefaces.model.DefaultScheduleEvent;
+import org.primefaces.model.DefaultScheduleModel;
+import org.primefaces.model.ScheduleEvent;
+import org.primefaces.model.ScheduleModel;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +41,10 @@ public class AppointmentBean implements Serializable {
 
     private Appointment selectedAppointment;
 
+    // NEW: For the calendar view
+    private ScheduleModel scheduleModel;
+    private ScheduleEvent<?> event = new DefaultScheduleEvent<>();
+
     @PostConstruct
     public void init() {
         User currentUser = userBean.getUser();
@@ -50,18 +59,63 @@ public class AppointmentBean implements Serializable {
             appointments = appointmentService.getAllActive();
         }
 
-        // Admin can also see archived appointments
         if (currentUser.getRole() == Role.ADMIN) {
             archivedAppointments = appointmentService.getAllArchived();
         }
 
-        availableDoctors = doctorService.getAll(); // Lists only active doctors
+        availableDoctors = doctorService.getAll();
         availablePatients = patientService.getAllActive();
+
+        // NEW: Initialize the schedule model
+        initializeSchedule();
+    }
+
+    private void initializeSchedule() {
+        scheduleModel = new DefaultScheduleModel();
+        if (appointments != null) {
+            for (Appointment appt : appointments) {
+                LocalDateTime start = LocalDateTime.of(appt.getDate(), appt.getTime());
+                LocalDateTime end = start.plusHours(1); // Assuming 1-hour appointments
+                String title = "Pt: " + appt.getPatient().getLastName() + " | Dr: " + appt.getDoctor().getLastName();
+
+                DefaultScheduleEvent<?> event = DefaultScheduleEvent.builder()
+                        .title(title)
+                        .startDate(start)
+                        .endDate(end)
+                        .data(appt.getAppointmentId()) // Store the ID
+                        .styleClass(getStyleClassForStatus(appt.getStatus()))
+                        .build();
+                scheduleModel.addEvent(event);
+            }
+        }
+    }
+
+    private String getStyleClassForStatus(AppointmentStatus status) {
+        switch (status) {
+            case COMPLETED:
+                return "event-completed";
+            case CANCELED:
+                return "event-canceled";
+            case SCHEDULED:
+            default:
+                return "event-scheduled";
+        }
+    }
+
+    public void onEventSelect(org.primefaces.event.SelectEvent<ScheduleEvent<?>> selectEvent) {
+        event = selectEvent.getObject();
+        int appointmentId = (int) event.getData();
+        this.selectedAppointment = appointmentService.getById(appointmentId);
+    }
+
+    public void onDateSelect(org.primefaces.event.SelectEvent<LocalDateTime> selectEvent) {
+        openNew();
+        selectedAppointment.setDate(selectEvent.getObject().toLocalDate());
+        selectedAppointment.setTime(selectEvent.getObject().toLocalTime());
     }
 
     public void openNew() {
         selectedAppointment = new Appointment();
-        // Set default date and time to avoid nulls
         selectedAppointment.setDate(LocalDate.now());
         selectedAppointment.setTime(LocalTime.of(9, 0));
     }
@@ -69,9 +123,10 @@ public class AppointmentBean implements Serializable {
     public void saveAppointment() {
         try {
             appointmentService.createAppointment(selectedAppointment, userBean.getUser());
-            init(); // Refresh all lists
+            init(); // Refresh all lists and the calendar
             addMessage(FacesMessage.SEVERITY_INFO, "Success", "Appointment booked successfully.");
             PrimeFaces.current().executeScript("PF('manageAppointmentDialog').hide()");
+            PrimeFaces.current().ajax().update("appointmentForm");
         } catch (Exception e) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not book appointment.");
         }
@@ -80,9 +135,10 @@ public class AppointmentBean implements Serializable {
     public void updateStatus() {
         try {
             appointmentService.updateAppointmentStatus(selectedAppointment, selectedAppointment.getStatus(), userBean.getUser());
-            init(); // Refresh lists
+            init(); // Refresh lists and calendar
             addMessage(FacesMessage.SEVERITY_INFO, "Success", "Appointment status updated.");
             PrimeFaces.current().executeScript("PF('statusDialog').hide()");
+            PrimeFaces.current().ajax().update("appointmentForm");
         } catch(Exception e) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not update status.");
         }
@@ -91,8 +147,9 @@ public class AppointmentBean implements Serializable {
     public void deleteAppointment() {
         try {
             appointmentService.archiveAppointment(selectedAppointment.getAppointmentId(), userBean.getUser());
-            init(); // Refresh lists
+            init(); // Refresh lists and calendar
             addMessage(FacesMessage.SEVERITY_WARN, "Success", "Appointment has been deleted and archived.");
+            PrimeFaces.current().ajax().update("appointmentForm");
         } catch (Exception e) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not delete appointment.");
         }
@@ -117,4 +174,5 @@ public class AppointmentBean implements Serializable {
     public void setAvailablePatients(List<Patient> availablePatients) { this.availablePatients = availablePatients; }
     public Appointment getSelectedAppointment() { return selectedAppointment; }
     public void setSelectedAppointment(Appointment selectedAppointment) { this.selectedAppointment = selectedAppointment; }
+    public ScheduleModel getScheduleModel() { return scheduleModel; } // Getter for the calendar
 }
