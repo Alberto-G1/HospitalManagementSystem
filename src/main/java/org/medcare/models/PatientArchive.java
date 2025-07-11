@@ -16,7 +16,7 @@ public class PatientArchive {
     private String phoneNumber;
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "archived_by_user_id")
     private User archivedBy;
 

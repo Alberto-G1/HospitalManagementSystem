@@ -1,0 +1,379 @@
+/* -------------------------Enhanced Custom Styles -------------------*/
+
+     /* Enhanced Staff Page Specific Styles */
+ .enhanced-toolbar {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 1.5rem;
+     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+     border-radius: 12px;
+     border: 1px solid rgba(22, 105, 122, 0.1);
+     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+ }
+
+.enhanced-datatable-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+}
+
+.staff-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.staff-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.staff-avatar.receptionist {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.staff-details {
+    flex: 1;
+}
+
+.staff-name {
+    font-weight: 600;
+    color: #16697A;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.staff-subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.specialty-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    color: #0369a1;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(3, 105, 161, 0.2);
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: #374151;
+}
+
+.username-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    background: rgba(22, 105, 122, 0.1);
+    color: #16697A;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(22, 105, 122, 0.2);
+}
+
+.action-button {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.enhanced-dialog .ui-dialog-content {
+    padding: 0 !important;
+}
+
+.dialog-content {
+    padding: 1.5rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #16697A;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-weight: 600 !important;
+    color: #374151 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.enhanced-input {
+    padding: 0.75rem 1rem !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+}
+
+.enhanced-input:focus {
+    border-color: #16697A !important;
+    box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1) !important;
+    outline: none !important;
+}
+
+.enhanced-input.readonly {
+    background: #f9fafb !important;
+    color: #6b7280 !important;
+    cursor: not-allowed !important;
+}
+
+.form-hint {
+    color: #6b7280;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(248, 250, 252, 0.5);
+    border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.enhanced-button {
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.enhanced-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.enhanced-confirm-dialog .ui-dialog-content {
+    padding: 2rem !important;
+}
+
+.confirm-dialog-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.warning-icon {
+    font-size: 3rem;
+    color: #f59e0b;
+    animation: pulse 2s infinite;
+}
+
+.warning-text {
+    max-width: 400px;
+}
+
+.warning-text ul {
+    text-align: left;
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.warning-text li {
+    margin: 0.5rem 0;
+    color: #6b7280;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .enhanced-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .staff-info {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .dialog-footer {
+        flex-direction: column;
+    }
+
+    .enhanced-button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* Tab View Enhancements */
+.ui-tabs .ui-tabs-nav li {
+    margin-right: 0.5rem;
+}
+
+.ui-tabs .ui-tabs-nav li a {
+    padding: 1rem 1.5rem !important;
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    background: rgba(248, 250, 252, 0.5) !important;
+    border: 1px solid rgba(226, 232, 240, 0.5) !important;
+    transition: all 0.3s ease !important;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-state-active a {
+    background: white !important;
+    color: #16697A !important;
+    border-bottom-color: white !important;
+}
+
+.ui-tabs .ui-tabs-nav li:hover a {
+    background: rgba(22, 105, 122, 0.05) !important;
+    color: #16697A !important;
+}
+
+/* DataTable Header Enhancements */
+.ui-datatable thead th {
+    background: linear-gradient(135deg, #16697A 0%, #1a5f6b 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 1rem !important;
+    border: none !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    font-size: 0.85rem !important;
+}
+
+.ui-datatable tbody td {
+    padding: 1rem !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+    vertical-align: middle !important;
+}
+
+.ui-datatable tbody tr:hover {
+    background: rgba(22, 105, 122, 0.03) !important;
+}
+
+/* Status Indicators */
+.status-active {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* Loading States */
+.ui-datatable-loading-overlay {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+/* Scrollbar Styling */
+.ui-scrollpanel .ui-scrollpanel-wrapper {
+    border: none !important;
+}
+
+.ui-scrollpanel .ui-scrollpanel-content {
+    padding-right: 1rem !important;
+}
+
+/* Message Styling */
+.ui-messages {
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ui-messages-info {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    border: 1px solid #3b82f6 !important;
+    color: #1e40af !important;
+}
+
+.ui-messages-warn {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border: 1px solid #f59e0b !important;
+    color: #92400e !important;
+}
+
+.ui-messages-error {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    border: 1px solid #ef4444 !important;
+    color: #dc2626 !important;
+}

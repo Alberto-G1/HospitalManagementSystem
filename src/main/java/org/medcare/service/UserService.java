@@ -46,6 +46,18 @@ public class UserService {
         userDAO.save(user);
     }
 
+    public void update(User user, String plainPassword) {
+        if (plainPassword != null && !plainPassword.isEmpty()) {
+            String hashedPassword = hashPassword(plainPassword);
+            user.setPassword(hashedPassword);
+        }
+        userDAO.update(user);
+    }
+
+    public void update(User user) {
+        userDAO.update(user);
+    }
+
     public User authenticate(String username, String plainPassword) {
         User found = userDAO.findByUsername(username);
         if (found != null && checkPassword(plainPassword, found.getPassword())) {
@@ -56,7 +68,6 @@ public class UserService {
 
     public void softDelete(User user) {
         if (user != null && !"admin".equalsIgnoreCase(user.getUsername())) {
-            // Use the special method to update active status
             userDAO.updateUserActiveStatus(user.getUserId(), false);
         }
     }
@@ -83,22 +94,16 @@ public class UserService {
         return userDAO.findByEmailIncludeInactive(email);
     }
 
-    // Returns only active users by default
     public List<User> getAll() {
         return userDAO.findAll();
     }
 
-    // Method to get all users including inactive ones
     public List<User> getAllIncludeInactive() {
         return userDAO.findAllIncludeInactive();
     }
 
     public void saveOrUpdate(User user) {
         userDAO.saveOrUpdate(user);
-    }
-
-    public void update(User user) {
-        userDAO.update(user);
     }
 
     public User findById(int id) {
