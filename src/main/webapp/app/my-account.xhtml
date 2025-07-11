@@ -1,0 +1,1272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:define name="pageTitle">My Account</ui:define>
+
+    <ui:define name="content">
+        <h:outputStylesheet>
+            /* Enhanced Global Styles */
+            .fade-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Enhanced Growl Styles */
+            .custom-growl {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            animation: slideInFromRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            @keyframes slideInFromRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+            }
+
+            /* Enhanced Card Styles */
+            .password-card, .account-info-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(72, 159, 181, 0.1);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            }
+
+            .password-card::before, .account-info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.08), transparent);
+            transition: left 0.8s ease;
+            z-index: 1;
+            }
+
+            .password-card:hover::before, .account-info-card:hover::before {
+            left: 100%;
+            }
+
+            .password-card:hover, .account-info-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(72, 159, 181, 0.2);
+            border-color: rgba(72, 159, 181, 0.4);
+            }
+
+            /* Enhanced Header Styles */
+            .ui-card-header {
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%) !important;
+            padding: 1.5rem 2rem !important;
+            border-bottom: none !important;
+            position: relative;
+            }
+
+            .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            }
+
+            .header-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            font-size: 1.8rem;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            }
+
+            .header-icon:hover {
+            transform: scale(1.15) rotate(15deg);
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.3);
+            }
+
+            .icon-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            animation: iconGlow 3s ease-in-out infinite;
+            }
+
+            @keyframes iconGlow {
+            0%, 100% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+            }
+
+            .password-icon { background: linear-gradient(135deg, #489FB5, #16697A); }
+            .account-icon { background: linear-gradient(135deg, #16697A, #489FB5); }
+
+            .header-text h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'Montserrat', sans-serif;
+            }
+
+            .header-text p {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            }
+
+            /* Enhanced Security Info */
+            .security-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.08), rgba(22, 105, 122, 0.08));
+            border-radius: 16px;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(72, 159, 181, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            }
+
+            .security-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(72, 159, 181, 0.05) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+            }
+
+            .security-info:hover::before {
+            transform: translateX(100%);
+            }
+
+            .security-info:hover {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.12), rgba(22, 105, 122, 0.12));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(72, 159, 181, 0.15);
+            }
+
+            .info-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #16697A, #489FB5);
+            color: white;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(72, 159, 181, 0.3);
+            }
+
+            .info-icon:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 12px 30px rgba(72, 159, 181, 0.4);
+            }
+
+            .security-text p {
+            margin: 0 0 1rem 0;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            font-weight: 500;
+            }
+
+            .security-tips {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            }
+
+            .tip-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #16697A;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            background: rgba(72, 159, 181, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            }
+
+            .tip-item:hover {
+            background: rgba(72, 159, 181, 0.2);
+            transform: translateY(-2px);
+            }
+
+            .tip-item i {
+            color: #10b981;
+            font-size: 0.8rem;
+            }
+
+            /* Enhanced Form Styles */
+            .password-form {
+            position: relative;
+            z-index: 2;
+            }
+
+            .enhanced-field {
+            position: relative;
+            margin-bottom: 2rem;
+            }
+
+            .enhanced-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            color: #16697A;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            }
+
+            .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            }
+
+            .enhanced-input {
+            width: 100% !important;
+            padding: 1.25rem 1.25rem 1.25rem 3.5rem !important;
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            font-size: 1rem !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            .enhanced-input:focus {
+            border-color: #489FB5 !important;
+            box-shadow: 0 0 0 4px rgba(72, 159, 181, 0.2), 0 8px 25px rgba(72, 159, 181, 0.15) !important;
+            background: white !important;
+            transform: translateY(-3px) !important;
+            }
+
+            .input-icon {
+            position: absolute;
+            left: 1.25rem;
+            color: #64748b;
+            font-size: 1.1rem;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            }
+
+            .enhanced-field:focus-within .input-icon {
+            color: #489FB5;
+            transform: scale(1.2);
+            }
+
+            .input-border-effect {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #489FB5, #16697A);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 1px;
+            }
+
+            .enhanced-field:focus-within .input-border-effect {
+            width: 100%;
+            }
+
+            /* Password Strength Indicator */
+            .password-strength-indicator {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            }
+
+            .enhanced-field:focus-within .password-strength-indicator {
+            opacity: 1;
+            transform: translateY(0);
+            }
+
+            .strength-bar {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+            }
+
+            .strength-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            }
+
+            .strength-text {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+            }
+
+            /* Match Indicator */
+            .match-indicator {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #ef4444;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            }
+
+            .match-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+            }
+
+            .match-indicator.success {
+            color: #10b981;
+            }
+
+            .match-indicator.success i::before {
+            content: '\f058';
+            }
+
+            /* Enhanced Button Styles */
+            .button-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            }
+
+            .enhanced-button {
+            position: relative;
+            overflow: hidden;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border-radius: 16px !important;
+            padding: 1.25rem 2.5rem !important;
+            background: linear-gradient(135deg, #489FB5 0%, #16697A 100%) !important;
+            border: none !important;
+            box-shadow: 0 8px 25px rgba(72, 159, 181, 0.4) !important;
+            z-index: 1;
+            }
+
+            .enhanced-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+            }
+
+            .enhanced-button:hover::before {
+            left: 100%;
+            }
+
+            .enhanced-button:hover {
+            transform: translateY(-4px) scale(1.05) !important;
+            box-shadow: 0 15px 40px rgba(72, 159, 181, 0.5) !important;
+            }
+
+            .enhanced-button:active {
+            transform: translateY(-2px) scale(1.02) !important;
+            }
+
+            .enhanced-button.loading {
+            pointer-events: none;
+            opacity: 0.8;
+            }
+
+            .enhanced-button.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid transparent;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+            }
+
+            .button-ripple {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            pointer-events: none;
+            overflow: hidden;
+            }
+
+            /* Account Info Grid */
+            .account-info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            }
+
+            .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.9), rgba(224, 242, 254, 0.9));
+            border-radius: 16px;
+            border: 1px solid rgba(72, 159, 181, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            }
+
+            .info-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.1), transparent);
+            transition: left 0.6s ease;
+            }
+
+            .info-item:hover::before {
+            left: 100%;
+            }
+
+            .info-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(72, 159, 181, 0.2);
+            border-color: rgba(72, 159, 181, 0.3);
+            }
+
+            .animated-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+            }
+
+            .animated-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+            }
+
+            .info-label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            color: #16697A;
+            }
+
+            .label-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #489FB5, #16697A);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            }
+
+            .label-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 15px rgba(72, 159, 181, 0.3);
+            }
+
+            .info-value {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            }
+
+            .value-text {
+            font-weight: 700;
+            color: #16697A;
+            font-size: 1.05rem;
+            }
+
+            .value-indicator {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            }
+
+            .value-indicator.verified {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            }
+
+            .value-indicator.active {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            }
+
+            .indicator-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: inherit;
+            animation: indicatorPulse 2s infinite;
+            opacity: 0.6;
+            }
+
+            @keyframes indicatorPulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.3); opacity: 0.3; }
+            100% { transform: scale(1.6); opacity: 0; }
+            }
+
+            .role-badge {
+            position: relative;
+            display: inline-block;
+            }
+
+            .enhanced-tag {
+            background: linear-gradient(135deg, #489FB5, #16697A) !important;
+            color: white !important;
+            padding: 0.75rem 1.5rem !important;
+            border-radius: 25px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            font-size: 0.8rem !important;
+            box-shadow: 0 4px 15px rgba(72, 159, 181, 0.3) !important;
+            transition: all 0.3s ease !important;
+            position: relative;
+            overflow: hidden;
+            }
+
+            .enhanced-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+            }
+
+            .enhanced-tag:hover::before {
+            left: 100%;
+            }
+
+            .enhanced-tag:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(72, 159, 181, 0.4);
+            }
+
+            /* Account Actions */
+            .account-actions {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.9), rgba(224, 242, 254, 0.9));
+            border-radius: 16px;
+            border: 1px solid rgba(72, 159, 181, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .account-actions:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(72, 159, 181, 0.2);
+            }
+
+            .actions-header {
+            margin-bottom: 1.5rem;
+            position: relative;
+            }
+
+            .actions-header h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #16697A;
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            }
+
+            .header-line {
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #16697A, #489FB5);
+            border-radius: 2px;
+            }
+
+            .action-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(72, 159, 181, 0.1);
+            transition: all 0.3s ease;
+            }
+
+            .action-item:last-child {
+            border-bottom: none;
+            }
+
+            .action-item:hover {
+            transform: translateX(5px);
+            }
+
+            .action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #489FB5, #16697A);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            }
+
+            .action-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(72, 159, 181, 0.3);
+            }
+
+            .action-content {
+            flex: 1;
+            }
+
+            .action-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+            }
+
+            .action-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #16697A;
+            }
+
+            .action-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            }
+
+            .action-status.online .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+            }
+
+            .action-status.verified {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            }
+
+            .action-status.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+            .grid {
+            gap: 1.5rem;
+            }
+
+            .password-card, .account-info-card {
+            padding: 1.5rem;
+            }
+
+            .header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+            }
+
+            .header-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            }
+
+            .header-text h3 {
+            font-size: 1.2rem;
+            }
+
+            .security-info {
+            flex-direction: column;
+            padding: 1.5rem;
+            }
+
+            .security-tips {
+            flex-direction: column;
+            gap: 1rem;
+            }
+
+            .info-item {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+            }
+
+            .enhanced-input {
+            padding: 1rem 1rem 1rem 3rem !important;
+            }
+
+            .enhanced-button {
+            padding: 1rem 2rem !important;
+            font-size: 0.9rem !important;
+            }
+            }
+
+            @media (max-width: 576px) {
+            .grid {
+            gap: 1rem;
+            }
+
+            .password-card, .account-info-card {
+            padding: 1rem;
+            }
+
+            .header-text h3 {
+            font-size: 1.1rem;
+            }
+
+            .header-text p {
+            font-size: 0.8rem;
+            }
+
+            .enhanced-input {
+            padding: 0.875rem 0.875rem 0.875rem 2.5rem !important;
+            font-size: 0.9rem !important;
+            }
+
+            .input-icon {
+            left: 1rem;
+            font-size: 1rem;
+            }
+
+            .enhanced-button {
+            padding: 0.875rem 1.5rem !important;
+            font-size: 0.8rem !important;
+            }
+            }
+
+            /* Accessibility Enhancements */
+            .enhanced-input:focus, .enhanced-button:focus {
+            outline: 3px solid rgba(72, 159, 181, 0.5);
+            outline-offset: 2px;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            }
+            }
+        </h:outputStylesheet>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+            // Password strength checker
+            function checkPasswordStrength(password) {
+            let strength = 0;
+            const checks = {
+            length: password.length >= 8,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            numbers: /\d/.test(password),
+            special: /[!@#$%^&amp;*(),.?":{}|&lt;>]/.test(password)
+            };
+
+            strength = Object.values(checks).filter(Boolean).length;
+            const strengthBar = document.querySelector('.strength-fill');
+            const strengthText = document.querySelector('.strength-text');
+
+            if (strengthBar &amp;&amp; strengthText) {
+            const percentage = (strength / 5) * 100;
+            strengthBar.style.width = percentage + '%';
+
+            if (!(strength > 2)) {
+            strengthText.textContent = 'Weak';
+            strengthBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+            } else if (strength === 3) {
+            strengthText.textContent = 'Fair';
+            strengthBar.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+            } else if (strength === 4) {
+            strengthText.textContent = 'Good';
+            strengthBar.style.background = 'linear-gradient(90deg, #3b82f6, #60a5fa)';
+            } else {
+            strengthText.textContent = 'Strong';
+            strengthBar.style.background = 'linear-gradient(90deg, #10b981, #34d399)';
+            }
+            }
+            }
+
+            // Password match checker
+            function checkPasswordMatch() {
+            const newPassword = document.getElementById('passwordForm:newPassword');
+            const confirmPassword = document.getElementById('passwordForm:confirmPassword');
+            const matchIndicator = document.querySelector('.match-indicator');
+
+            if (newPassword &amp;&amp; confirmPassword &amp;&amp; matchIndicator) {
+            const isMatch = newPassword.value === confirmPassword.value;
+            const hasValue = confirmPassword.value.length > 0;
+
+            if (hasValue) {
+            matchIndicator.classList.add('show');
+            if (isMatch) {
+            matchIndicator.classList.add('success');
+            matchIndicator.innerHTML = '<i class="fas fa-check-circle"></i><span>Passwords match</span>';
+            } else {
+            matchIndicator.classList.remove('success');
+            matchIndicator.innerHTML = '<i class="fas fa-times-circle"></i><span>Passwords do not match</span>';
+            }
+            } else {
+            matchIndicator.classList.remove('show');
+            }
+            }
+            }
+
+            // Button ripple effect
+            function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: rippleEffect 0.6s linear;
+            pointer-events: none;
+            `;
+
+            button.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+            }
+
+            // Form submission with loading state
+            function handlePasswordChange(button) {
+            window.showLoading();
+            button.classList.add('loading');
+            const buttonText = button.querySelector('span');
+            if (buttonText) buttonText.style.opacity = '0';
+            setTimeout(() => {
+            button.classList.remove('loading');
+            if (buttonText) buttonText.style.opacity = '1';
+            }, 2000);
+            }
+
+            // Initialize event listeners
+            const newPasswordInput = document.getElementById('passwordForm:newPassword');
+            if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            });
+            }
+
+            const confirmPasswordInput = document.getElementById('passwordForm:confirmPassword');
+            if (confirmPasswordInput &amp;&amp; newPasswordInput) {
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+            newPasswordInput.addEventListener('input', checkPasswordMatch);
+            }
+
+            const buttons = document.querySelectorAll('.enhanced-button');
+            buttons.forEach(button => {
+            button.addEventListener('click', createRipple);
+            });
+
+            const form = document.getElementById('passwordForm');
+            if (form) {
+            form.addEventListener('submit', function() {
+            window.showLoading();
+            });
+            }
+
+            // Animate elements on scroll
+            const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+            setTimeout(() => {
+            entry.target.classList.add('visible');
+            }, index * 100);
+            }
+            });
+            }, observerOptions);
+
+            const animatedElements = document.querySelectorAll('.animated-item');
+            animatedElements.forEach(el => observer.observe(el));
+
+            // Enhanced input focus effects
+            const inputs = document.querySelectorAll('.enhanced-input');
+            inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+            this.closest('.enhanced-field').classList.add('focused');
+            });
+            input.addEventListener('blur', function() {
+            this.closest('.enhanced-field').classList.remove('focused');
+            });
+            });
+
+            // Password toggle icon animation
+            const passwordIcons = document.querySelectorAll('.ui-password-icon');
+            passwordIcons.forEach(icon => {
+            icon.addEventListener('click', function() {
+            const isVisible = this.classList.contains('pi-eye');
+            this.style.transform = isVisible ? 'rotate(180deg)' : 'rotate(0deg)';
+            setTimeout(() => { this.style.transform = ''; }, 300);
+            });
+            });
+
+            // Keyboard navigation enhancement
+            document.addEventListener('keydown', function(event) {
+            if (event.key === 'Tab') {
+            document.body.classList.add('keyboard-navigation');
+            }
+            });
+
+            document.addEventListener('mousedown', function() {
+            document.body.classList.remove('keyboard-navigation');
+            });
+
+            // Add ripple animation CSS
+            const rippleStyle = document.createElement('style');
+            rippleStyle.textContent = `
+            @keyframes rippleEffect {
+            to { transform: scale(4); opacity: 0; }
+            }
+            .enhanced-field.focused .enhanced-label {
+            color: #10b981;
+            transform: translateY(-2px);
+            }
+            `;
+            document.head.appendChild(rippleStyle);
+
+            console.log('🏥 MedCare HMS - My Account UI Enhanced');
+            });
+        </script>
+
+        <div class="grid fade-in" style="gap: 2rem;">
+            <!-- Password Change Card -->
+            <div class="col-12 md:col-6">
+                <div class="ui-card password-card" style="height: 100%;">
+                    <div class="ui-card-header">
+                        <div class="header-content">
+                            <div class="header-icon password-icon">
+                                <i class="fas fa-key"></i>
+                                <div class="icon-glow"></div>
+                            </div>
+                            <div class="header-text">
+                                <h3>Change Your Password</h3>
+                                <p>Secure your account with a new password</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui-card-body">
+                        <div class="security-info">
+                            <div class="info-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="security-text">
+                                <p>To change your password, you must first enter your current password for security verification.</p>
+                                <div class="security-tips">
+                                    <span class="tip-item"><i class="fas fa-check-circle"></i> Use 8+ characters</span>
+                                    <span class="tip-item"><i class="fas fa-check-circle"></i> Include special characters</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h:form id="passwordForm">
+                            <p:growl id="messages" showDetail="true" life="6000" styleClass="custom-growl" />
+
+                            <div class="p-fluid password-form" style="max-width: 500px;">
+                                <div class="field enhanced-field">
+                                    <p:outputLabel for="currentPassword" value="Current Password" styleClass="enhanced-label"/>
+                                    <div class="input-wrapper">
+                                        <p:password id="currentPassword" value="#{myAccountBean.currentPassword}"
+                                                    required="true" feedback="false" toggleMask="true"
+                                                    placeholder="Enter your current password"
+                                                    styleClass="enhanced-input"
+                                                    inputStyle="width: 100%; padding: 1rem;"/>
+                                        <div class="input-icon"><i class="fas fa-lock"></i></div>
+                                        <div class="input-border-effect"></div>
+                                    </div>
+                                    <p:message for="currentPassword" display="icon"/>
+                                </div>
+
+                                <div class="field enhanced-field">
+                                    <p:outputLabel for="newPassword" value="New Password" styleClass="enhanced-label"/>
+                                    <div class="input-wrapper">
+                                        <p:password id="newPassword" value="#{myAccountBean.newPassword}"
+                                                    required="true" feedback="true" match="confirmPassword"
+                                                    validatorMessage="New passwords do not match."
+                                                    toggleMask="true"
+                                                    styleClass="enhanced-input"
+                                                    inputStyle="width: 100%; padding: 1rem;"/>
+                                        <div class="input-icon"><i class="fas fa-key"></i></div>
+                                        <div class="input-border-effect"></div>
+                                        <div class="password-strength-indicator">
+                                            <div class="strength-bar"><div class="strength-fill"></div></div>
+                                            <span class="strength-text">Password Strength</span>
+                                        </div>
+                                    </div>
+                                    <p:message for="newPassword" display="icon"/>
+                                </div>
+
+                                <div class="field enhanced-field">
+                                    <p:outputLabel for="confirmPassword" value="Confirm New Password" styleClass="enhanced-label"/>
+                                    <div class="input-wrapper">
+                                        <p:password id="confirmPassword" value="#{myAccountBean.confirmPassword}"
+                                                    required="true" feedback="false"
+                                                    toggleMask="true"
+                                                    styleClass="enhanced-input"
+                                                    inputStyle="width: 100%; padding: 1rem;"/>
+                                        <div class="input-icon"><i class="fas fa-check-circle"></i></div>
+                                        <div class="input-border-effect"></div>
+                                        <div class="match-indicator">
+                                            <i class="fas fa-times-circle"></i>
+                                            <span>Passwords don't match</span>
+                                        </div>
+                                    </div>
+                                    <p:message for="confirmPassword" display="icon"/>
+                                </div>
+
+                                <div class="button-wrapper">
+                                    <p:commandButton value="Change Password"
+                                                     action="#{myAccountBean.changePassword}"
+                                                     update="messages @form"
+                                                     icon="pi pi-key"
+                                                     styleClass="ui-button ui-button-info enhanced-button"
+                                                     style="width: 100%;"
+                                                     onclick="handlePasswordChange(this)"/>
+                                    <div class="button-ripple"></div>
+                                </div>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Information Card -->
+            <div class="col-12 md:col-6">
+                <div class="ui-card account-info-card" style="height: 100%;">
+                    <div class="ui-card-header">
+                        <div class="header-content">
+                            <div class="header-icon account-icon">
+                                <i class="fas fa-user-circle"></i>
+                                <div class="icon-glow"></div>
+                            </div>
+                            <div class="header-text">
+                                <h3>Account Information</h3>
+                                <p>Your profile details and account status</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui-card-body">
+                        <div class="account-info-grid">
+                            <div class="info-item animated-item">
+                                <div class="info-label">
+                                    <div class="label-icon"><i class="fas fa-user"></i></div>
+                                    <span>Username</span>
+                                </div>
+                                <div class="info-value">
+                                    <h:outputText value="#{userBean.user.username}" styleClass="value-text"/>
+                                    <div class="value-indicator verified">
+                                        <i class="fas fa-check-circle"></i>
+                                        <div class="indicator-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-item animated-item">
+                                <div class="info-label">
+                                    <div class="label-icon"><i class="fas fa-envelope"></i></div>
+                                    <span>Email Address</span>
+                                </div>
+                                <div class="info-value">
+                                    <h:outputText value="#{userBean.user.email}" styleClass="value-text"/>
+                                    <div class="value-indicator verified">
+                                        <i class="fas fa-check-circle"></i>
+                                        <div class="indicator-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-item animated-item">
+                                <div class="info-label">
+                                    <div class="label-icon"><i class="fas fa-shield-alt"></i></div>
+                                    <span>Account Role</span>
+                                </div>
+                                <div class="info-value">
+                                    <div class="role-badge">
+                                        <p:tag value="#{userBean.user.role}" severity="info" styleClass="enhanced-tag"/>
+                                        <div class="badge-glow"></div>
+                                    </div>
+                                    <div class="value-indicator active">
+                                        <i class="fas fa-circle"></i>
+                                        <div class="indicator-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-item security-status animated-item">
+                                <div class="info-label">
+                                    <div class="label-icon"><i class="fas fa-lock"></i></div>
+                                    <span>Security Status</span>
+                                </div>
+                                <div class="info-value">
+                                    <div class="security-indicator secure">
+                                        <i class="fas fa-shield-check"></i>
+                                        <span>Account Secured</span>
+                                        <div class="security-glow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="account-actions">
+                            <div class="actions-header">
+                                <h4>Account Activity</h4>
+                                <div class="header-line"></div>
+                            </div>
+                            <div class="action-item">
+                                <div class="action-icon"><i class="fas fa-history"></i></div>
+                                <div class="action-content">
+                                    <span class="action-label">Last Login</span>
+                                    <strong class="action-value">lastLogin</strong>
+                                </div>
+                                <div class="action-status online">
+                                    <div class="status-dot"></div>
+                                </div>
+                            </div>
+                            <div class="action-item">
+                                <div class="action-icon"><i class="fas fa-calendar"></i></div>
+                                <div class="action-content">
+                                    <span class="action-label">Account Created</span>
+                                    <strong class="action-value">accountCreated</strong>
+                                </div>
+                                <div class="action-status verified">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                            <div class="action-item">
+                                <div class="action-icon"><i class="fas fa-key"></i></div>
+                                <div class="action-content">
+                                    <span class="action-label">Password Last Changed</span>
+                                    <strong class="action-value">passwordLastChanged</strong>
+                                </div>
+                                <div class="action-status warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>
