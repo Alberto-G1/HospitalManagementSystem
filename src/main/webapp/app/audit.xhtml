@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:define name="pageTitle">System Audit Log</ui:define>
+
+    <ui:define name="content">
+        <style>
+            /* Enhanced Audit Page Styles */
+            .audit-container {
+                /*background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);*/
+                min-height: 100vh;
+                padding: 2rem 0;
+            }
+
+            .audit-main-card {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 24px;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                overflow: hidden;
+                animation: auditSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .audit-header {
+                background: linear-gradient(135deg, #226973 0%, #066dbc 100%);
+                color: white;
+                padding: 2rem;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .audit-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: auditHeaderGlow 4s ease-in-out infinite;
+            }
+
+            .audit-header h3 {
+                font-size: 2.5rem;
+                font-weight: 700;
+                margin: 0 0 0.5rem 0;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                position: relative;
+                z-index: 1;
+            }
+
+            .audit-header p {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                margin: 0;
+                position: relative;
+                z-index: 1;
+            }
+
+            .audit-header .audit-icon {
+                position: absolute;
+                top: 1rem;
+                right: 2rem;
+                font-size: 3rem;
+                opacity: 0.3;
+                z-index: 1;
+            }
+
+            .audit-filter-panel {
+                margin: 2rem;
+                border-radius: 16px;
+                border: none;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .audit-filter-panel .ui-panel-titlebar {
+                background: linear-gradient(135deg, #46d0e5 0%, #3a9fed 100%);
+                color: white;
+                border: none;
+                padding: 1rem 1.5rem;
+                font-weight: 600;
+            }
+
+            .audit-filter-panel .ui-panel-content {
+                background: #f8fafc;
+                border: none;
+                padding: 1.5rem;
+            }
+
+            .audit-field-group {
+                margin-bottom: 1.5rem;
+                animation: auditFieldSlide 0.6s ease-out;
+            }
+
+            .audit-field-group label {
+                display: block;
+                font-weight: 600;
+                color: #374151;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .audit-field-group .ui-inputfield,
+            .audit-field-group .ui-selectonemenu {
+                width: 100%;
+                border-radius: 12px;
+                border: 2px solid #e5e7eb;
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: white;
+            }
+
+            .audit-field-group .ui-inputfield:focus,
+            .audit-field-group .ui-selectonemenu:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .audit-action-buttons {
+                display: flex;
+                gap: 1rem;
+                justify-content: flex-end;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 2px solid #e5e7eb;
+            }
+
+            .audit-btn {
+                padding: 0.75rem 2rem;
+                border-radius: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: none;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .audit-btn-clear {
+                background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+                color: white;
+            }
+
+            .audit-btn-search {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+            }
+
+            .audit-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            }
+
+            .audit-data-table {
+                margin: 2rem;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                border: none;
+            }
+
+            .audit-data-table .ui-datatable-header {
+                background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+                color: white;
+                padding: 1rem;
+                border: none;
+                font-weight: 600;
+            }
+
+            .audit-data-table .ui-datatable-thead > tr > th {
+                background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+                color: white;
+                border: none;
+                padding: 1rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-size: 0.85rem;
+            }
+
+            .audit-data-table .ui-datatable-tbody > tr {
+                transition: all 0.3s ease;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .audit-data-table .ui-datatable-tbody > tr:hover {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                transform: translateX(5px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .audit-data-table .ui-datatable-tbody > tr > td {
+                padding: 1rem;
+                border: none;
+                vertical-align: middle;
+            }
+
+            .audit-timestamp {
+                font-family: 'Courier New', monospace;
+                background: #f3f4f6;
+                padding: 0.5rem;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                color: #374151;
+            }
+
+            .audit-user {
+                font-weight: 600;
+                color: #1f2937;
+                background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                display: inline-block;
+                font-size: 0.9rem;
+            }
+
+            .audit-action-tag {
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .audit-action-tag[data-action*="CREATE"] {
+                background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                color: #166534;
+            }
+
+            .audit-action-tag[data-action*="UPDATE"] {
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                color: #92400e;
+            }
+
+            .audit-action-tag[data-action*="DELETE"] {
+                background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+                color: #991b1b;
+            }
+
+            .audit-action-tag[data-action*="LOGIN"] {
+                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                color: #1e40af;
+            }
+
+            .audit-details {
+                color: #4b5563;
+                line-height: 1.5;
+                max-width: 400px;
+                word-wrap: break-word;
+            }
+
+            .audit-paginator {
+                background: #f8fafc;
+                border: none;
+                padding: 1rem;
+                border-top: 2px solid #e5e7eb;
+            }
+
+            .audit-empty-message {
+                text-align: center;
+                padding: 3rem;
+                color: #6b7280;
+                font-size: 1.1rem;
+            }
+
+            .audit-empty-message::before {
+                content: '🔍';
+                display: block;
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Animations */
+            @keyframes auditSlideIn {
+                0% {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes auditHeaderGlow {
+                0%, 100% {
+                    transform: rotate(0deg);
+                }
+                50% {
+                    transform: rotate(180deg);
+                }
+            }
+
+            @keyframes auditFieldSlide {
+                0% {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .audit-container {
+                    padding: 1rem;
+                }
+
+                .audit-main-card {
+                    margin: 0;
+                    border-radius: 16px;
+                }
+
+                .audit-header {
+                    padding: 1.5rem;
+                }
+
+                .audit-header h3 {
+                    font-size: 2rem;
+                }
+
+                .audit-filter-panel,
+                .audit-data-table {
+                    margin: 1rem;
+                }
+
+                .audit-action-buttons {
+                    flex-direction: column;
+                }
+
+                .audit-btn {
+                    width: 100%;
+                }
+            }
+        </style>
+
+        <div class="audit-container">
+            <div class="audit-main-card">
+                <div class="audit-header">
+                    <i class="pi pi-shield audit-icon"></i>
+                    <h3>System Audit Log</h3>
+                    <p>This log shows all significant actions performed in the system. Use the filters below to search for specific events.</p>
+                </div>
+
+                <h:form id="auditForm">
+                    <!-- ======================== -->
+                    <!-- === FILTER PANEL === -->
+                    <!-- ======================== -->
+                    <p:panel header="🔍 Filter Options" toggleable="true" collapsed="false"
+                             styleClass="audit-filter-panel">
+                        <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank"
+                                     columnClasses="ui-g-12 ui-md-3, ui-g-12 ui-md-3, ui-g-12 ui-md-3, ui-g-12 ui-md-3">
+                            <div class="audit-field-group">
+                                <p:outputLabel for="global" value="Search Any Word"/>
+                                <p:inputText id="global" value="#{auditBean.globalFilter}"
+                                             placeholder="e.g., password, patient name..."/>
+                            </div>
+                            <div class="audit-field-group">
+                                <p:outputLabel for="startDate" value="Start Date"/>
+                                <p:datePicker id="startDate" value="#{auditBean.startDate}"
+                                              showIcon="true" pattern="dd/MM/yyyy"/>
+                            </div>
+                            <div class="audit-field-group">
+                                <p:outputLabel for="endDate" value="End Date"/>
+                                <p:datePicker id="endDate" value="#{auditBean.endDate}"
+                                              showIcon="true" pattern="dd/MM/yyyy"/>
+                            </div>
+                            <div></div>
+                            <div class="audit-field-group">
+                                <p:outputLabel for="user" value="Filter by User"/>
+                                <p:selectOneMenu id="user" value="#{auditBean.selectedUser}"
+                                                 filter="true" filterMatchMode="contains">
+                                    <f:selectItem itemLabel="All Users" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{auditBean.distinctUsers}"/>
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="audit-field-group">
+                                <p:outputLabel for="action" value="Filter by Action"/>
+                                <p:selectOneMenu id="action" value="#{auditBean.selectedAction}"
+                                                 filter="true" filterMatchMode="contains">
+                                    <f:selectItem itemLabel="All Actions" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{auditBean.distinctActions}"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </p:panelGrid>
+                        <p:divider/>
+                        <div class="audit-action-buttons">
+                            <p:commandButton value="Clear Filters" icon="pi pi-refresh"
+                                             actionListener="#{auditBean.clearFilters}"
+                                             update="@form"
+                                             styleClass="audit-btn audit-btn-clear"/>
+                            <p:commandButton value="Search" icon="pi pi-search"
+                                             actionListener="#{auditBean.filterLogs}"
+                                             update="dt-logs"
+                                             styleClass="audit-btn audit-btn-search"/>
+                        </div>
+                    </p:panel>
+
+                    <!-- ======================== -->
+                    <!-- === DATA TABLE      === -->
+                    <!-- ======================== -->
+                    <p:dataTable id="dt-logs" var="log" value="#{auditBean.logs}"
+                                 paginator="true" rows="10"
+                                 paginatorPosition="bottom"
+                                 emptyMessage="No logs found matching your criteria."
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowsPerPageTemplate="5,10,15,20,30,50,100"
+                                 styleClass="audit-data-table">
+
+                        <p:column headerText="📅 Timestamp" sortBy="#{log.timestamp}" style="width:15rem;">
+                            <div class="audit-timestamp">
+                                <h:outputText value="#{log.timestamp}">
+                                    <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm:ss" />
+                                </h:outputText>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="👤 User" sortBy="#{log.user.username}" style="width:10rem;">
+                            <div class="audit-user">
+                                <h:outputText value="#{log.user.username}" />
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="⚡ Action" sortBy="#{log.action}" style="width:12rem;">
+                            <span class="audit-action-tag" data-action="#{log.action}">
+                                <h:outputText value="#{log.action}" />
+                            </span>
+                        </p:column>
+
+                        <p:column headerText="📝 Details">
+                            <div class="audit-details">
+                                <h:outputText value="#{log.details}" />
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+
+        <!-- Enhanced JavaScript for Audit Page -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Enhanced animations for audit entries
+                const auditRows = document.querySelectorAll('.audit-data-table .ui-datatable-tbody tr');
+                auditRows.forEach((row, index) => {
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+
+                    setTimeout(() => {
+                        row.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                        row.style.opacity = '1';
+                        row.style.transform = 'translateX(0)';
+                    }, index * 100);
+                });
+
+                // Enhanced filter field interactions
+                const filterFields = document.querySelectorAll('.audit-field-group input, .audit-field-group select');
+                filterFields.forEach(field => {
+                    field.addEventListener('focus', function() {
+                        this.parentElement.style.transform = 'translateY(-2px)';
+                        this.parentElement.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.15)';
+                    });
+
+                    field.addEventListener('blur', function() {
+                        this.parentElement.style.transform = 'translateY(0)';
+                        this.parentElement.style.boxShadow = 'none';
+                    });
+                });
+
+                // Enhanced button interactions
+                const auditButtons = document.querySelectorAll('.audit-btn');
+                auditButtons.forEach(button => {
+                    button.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px) scale(1.02)';
+                    });
+
+                    button.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+
+                    button.addEventListener('click', function(e) {
+                        // Create ripple effect
+                        const ripple = document.createElement('span');
+                        const rect = this.getBoundingClientRect();
+                        const size = Math.max(rect.width, rect.height);
+                        const x = e.clientX - rect.left - size / 2;
+                        const y = e.clientY - rect.top - size / 2;
+
+                        ripple.style.cssText = `
+                            position: absolute;
+                            width: ${size}px;
+                            height: ${size}px;
+                            left: ${x}px;
+                            top: ${y}px;
+                            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+                            border-radius: 50%;
+                            transform: scale(0);
+                            animation: auditRipple 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                            pointer-events: none;
+                            z-index: 1;
+                        `;
+
+                        this.appendChild(ripple);
+                        setTimeout(() => ripple.remove(), 800);
+                    });
+                });
+
+                // Dynamic action tag styling
+                const actionTags = document.querySelectorAll('.audit-action-tag');
+                actionTags.forEach(tag => {
+                    const action = tag.getAttribute('data-action');
+                    if (action) {
+                        if (action.includes('CREATE') || action.includes('ADD')) {
+                            tag.style.background = 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)';
+                            tag.style.color = '#166534';
+                        } else if (action.includes('UPDATE') || action.includes('EDIT')) {
+                            tag.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
+                            tag.style.color = '#92400e';
+                        } else if (action.includes('DELETE') || action.includes('REMOVE')) {
+                            tag.style.background = 'linear-gradient(135deg, #fecaca 0%, #fca5a5 100%)';
+                            tag.style.color = '#991b1b';
+                        } else if (action.includes('LOGIN') || action.includes('AUTH')) {
+                            tag.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
+                            tag.style.color = '#1e40af';
+                        } else {
+                            tag.style.background = 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+                            tag.style.color = '#374151';
+                        }
+                    }
+                });
+
+                // Add audit-specific animations
+                const auditStyle = document.createElement('style');
+                auditStyle.textContent = `
+                    @keyframes auditRipple {
+                        0% {
+                            transform: scale(0);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: scale(2);
+                            opacity: 0;
+                        }
+                    }
+
+                    .audit-data-table .ui-datatable-tbody tr:nth-child(even) {
+                        background: rgba(248, 250, 252, 0.5);
+                    }
+
+                    .audit-data-table .ui-datatable-tbody tr:hover .audit-timestamp {
+                        background: #667eea;
+                        color: white;
+                        transform: scale(1.05);
+                    }
+
+                    .audit-data-table .ui-datatable-tbody tr:hover .audit-user {
+                        transform: scale(1.05);
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                    }
+
+                    .audit-data-table .ui-datatable-tbody tr:hover .audit-action-tag {
+                        transform: scale(1.05);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    }
+                `;
+                document.head.appendChild(auditStyle);
+
+                // Auto-refresh functionality (optional)
+                let autoRefreshInterval;
+                const startAutoRefresh = () => {
+                    autoRefreshInterval = setInterval(() => {
+                        const searchBtn = document.querySelector('.audit-btn-search');
+                        if (searchBtn) {
+                            searchBtn.click();
+                        }
+                    }, 30000); // Refresh every 30 seconds
+                };
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    if (!(!e.ctrlKey || e.key !== 'f')) {
+                        e.preventDefault();
+                        const globalFilter = document.getElementById('auditForm:global');
+                        if (globalFilter) {
+                            globalFilter.focus();
+                        }
+                    }
+
+                    if (!(!e.ctrlKey || e.key !== 'r')) {
+                        e.preventDefault();
+                        const clearBtn = document.querySelector('.audit-btn-clear');
+                        if (clearBtn) {
+                            clearBtn.click();
+                        }
+                    }
+
+                    if (!(e.key !== 'Enter' || !e.target.closest('.audit-field-group'))) {
+                        const searchBtn = document.querySelector('.audit-btn-search');
+                        if (searchBtn) {
+                            searchBtn.click();
+                        }
+                    }
+                });
+
+                // Enhanced empty state
+                const checkEmptyState = () => {
+                    const emptyMessage = document.querySelector('.ui-datatable-empty-message');
+                    if (emptyMessage) {
+                        emptyMessage.className += ' audit-empty-message';
+                    }
+                };
+
+                // Initialize
+                checkEmptyState();
+
+                console.log('🔍 Audit Page - Enhanced UI Loaded Successfully');
+                console.log('💡 Keyboard shortcuts: Ctrl+F (focus search), Ctrl+R (clear filters), Enter (search)');
+            });
+        </script>
+    </ui:define>
+</ui:composition>
+</html>
