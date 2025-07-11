@@ -4,6 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.medcare.dao.ReceptionistDAO;
 import org.medcare.models.Receptionist;
+import org.medcare.models.User;
+
 import java.util.List;
 
 @ApplicationScoped
@@ -15,46 +17,45 @@ public class ReceptionistService {
     @Inject
     private UserService userService;
 
-    public void save(Receptionist receptionist) {
-        receptionistDAO.save(receptionist);
-    }
+    @Inject
+    private ActivityLogService activityLogService;
 
-    public void update(Receptionist receptionist) {
-        receptionistDAO.update(receptionist);
-    }
-
-    public void saveOrUpdate(Receptionist receptionist) {
+    public void saveOrUpdate(Receptionist receptionist, User adminUser) {
+        boolean isNew = receptionist.getReceptionistId() == 0;
         receptionistDAO.saveOrUpdate(receptionist);
+        if (isNew) {
+            activityLogService.log("RECEPTIONIST_CREATED", "Created new receptionist: " + receptionist.getFirstName(), adminUser);
+        } else {
+            activityLogService.log("RECEPTIONIST_UPDATED", "Updated receptionist: " + receptionist.getFirstName(), adminUser);
+        }
     }
 
-    public void softDelete(Receptionist receptionist) {
+    public void softDelete(Receptionist receptionist, User adminUser) {
         if (receptionist != null && receptionist.getUser() != null) {
             userService.softDelete(receptionist.getUser());
+            activityLogService.log("RECEPTIONIST_DEACTIVATED", "Deactivated receptionist: " + receptionist.getFirstName(), adminUser);
         }
     }
 
-    public void reactivate(Receptionist receptionist) {
+    public void reactivate(Receptionist receptionist, User adminUser) {
         if (receptionist != null && receptionist.getUser() != null) {
             userService.reactivateUser(receptionist.getUser());
+            activityLogService.log("RECEPTIONIST_REACTIVATED", "Reactivated receptionist: " + receptionist.getFirstName(), adminUser);
         }
     }
 
-    // Returns only active receptionists
     public List<Receptionist> getAll() {
         return receptionistDAO.findAll();
     }
 
-    // Method to get all receptionists including inactive ones
     public List<Receptionist> getAllIncludeInactive() {
         return receptionistDAO.findAllIncludeInactive();
     }
 
-    // Returns only active receptionist
     public Receptionist getById(int id) {
         return receptionistDAO.findById(id);
     }
 
-    // Method to get receptionist by ID including inactive ones
     public Receptionist getByIdIncludeInactive(int id) {
         return receptionistDAO.findByIdIncludeInactive(id);
     }

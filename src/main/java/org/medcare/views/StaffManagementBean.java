@@ -18,6 +18,7 @@ import org.primefaces.PrimeFaces;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Named
 @ViewScoped
@@ -26,169 +27,168 @@ public class StaffManagementBean implements Serializable {
     @Inject private UserService userService;
     @Inject private DoctorService doctorService;
     @Inject private ReceptionistService receptionistService;
+    @Inject private UserBean userBean;
 
-    private List<Doctor> doctors;
-    private List<Receptionist> receptionists;
+    private List<Doctor> activeDoctors;
+    private List<Receptionist> activeReceptionists;
+    private List<Doctor> inactiveDoctors;
+    private List<Receptionist> inactiveReceptionists;
+
     private Doctor selectedDoctor;
     private Receptionist selectedReceptionist;
-    private User newUser;
+
+    // This will now be the single source of truth for all operations
+    private User userForOperation;
+
     private String initialPassword;
+    private String newPasswordForReset;
 
     @PostConstruct
     public void init() {
-        System.out.println("StaffManagementBean initialized");
-        doctors = doctorService.getAll();
-        receptionists = receptionistService.getAll();
-        selectedDoctor = new Doctor();
-        selectedReceptionist = new Receptionist();
-        newUser = new User();
+        loadStaffLists();
+        userForOperation = new User();
+    }
+
+    private void loadStaffLists() {
+        List<Doctor> allDoctors = doctorService.getAllIncludeInactive();
+        activeDoctors = allDoctors.stream().filter(d -> d.getUser().isActive()).collect(Collectors.toList());
+        inactiveDoctors = allDoctors.stream().filter(d -> !d.getUser().isActive()).collect(Collectors.toList());
+
+        List<Receptionist> allReceptionists = receptionistService.getAllIncludeInactive();
+        activeReceptionists = allReceptionists.stream().filter(r -> r.getUser().isActive()).collect(Collectors.toList());
+        inactiveReceptionists = allReceptionists.stream().filter(r -> !r.getUser().isActive()).collect(Collectors.toList());
     }
 
     public void openNewDoctor() {
-        System.out.println("Opening new doctor dialog");
         selectedDoctor = new Doctor();
-        newUser = new User();
-        newUser.setRole(Role.DOCTOR);
+        userForOperation = new User();
+        userForOperation.setRole(Role.DOCTOR);
         initialPassword = generateRandomPassword();
     }
 
     public void openNewReceptionist() {
-        System.out.println("Opening new receptionist dialog");
         selectedReceptionist = new Receptionist();
-        newUser = new User();
-        newUser.setRole(Role.RECEPTIONIST);
+        userForOperation = new User();
+        userForOperation.setRole(Role.RECEPTIONIST);
         initialPassword = generateRandomPassword();
     }
 
-    public void editDoctor(Doctor doctor) {
-        System.out.println("Editing doctor: " + (doctor != null ? doctor.getFirstName() : "null"));
-        selectedDoctor = (doctor != null) ? doctor : new Doctor();
-        newUser = (doctor != null && doctor.getUser() != null) ? doctor.getUser() : new User();
-        newUser.setRole(Role.DOCTOR);
-        initialPassword = null;
-    }
-
-    public void editReceptionist(Receptionist receptionist) {
-        System.out.println("Editing receptionist: " + (receptionist != null ? receptionist.getFirstName() : "null"));
-        selectedReceptionist = (receptionist != null) ? receptionist : new Receptionist();
-        newUser = (receptionist != null && receptionist.getUser() != null) ? receptionist.getUser() : new User();
-        newUser.setRole(Role.RECEPTIONIST);
-        initialPassword = null;
-    }
-
     public void saveDoctor() {
-        System.out.println("Saving doctor: " + (selectedDoctor != null ? selectedDoctor.getFirstName() : "null"));
-        if (isUsernameOrEmailTaken(newUser.getUsername(), newUser.getEmail())) {
+        // ... (this logic is fine, but let's make it safer)
+        if (isUsernameOrEmailTaken(userForOperation, userForOperation.getUsername(), userForOperation.getEmail())) {
             return;
         }
-
         try {
-            if (selectedDoctor.getDoctorId() == 0) { // New doctor
-                newUser.setActive(true);
-                userService.createUser(newUser, initialPassword);
-                User createdUser = userService.findByUsernameIncludeInactive(newUser.getUsername());
+            boolean isNew = selectedDoctor.getDoctorId() == 0;
+            if (isNew) {
+                userForOperation.setActive(true);
+                userService.createUser(userForOperation, initialPassword);
+                User createdUser = userService.findByUsernameIncludeInactive(userForOperation.getUsername());
                 selectedDoctor.setUser(createdUser);
-            } else { // Existing doctor
-                userService.update(newUser);
-                selectedDoctor.setUser(newUser);
+            } else {
+                // When editing, userForOperation is already the correct user object
+                userService.updateUser(userForOperation);
+                selectedDoctor.setUser(userForOperation);
             }
-            doctorService.save(selectedDoctor);
-            doctors = doctorService.getAll();
-            selectedDoctor = new Doctor();
-            newUser = new User();
-            initialPassword = null;
-            addMessage(FacesMessage.SEVERITY_INFO,
-                    "Doctor Saved",
-                    "Doctor saved successfully. Username: " + newUser.getUsername());
+            doctorService.saveOrUpdate(selectedDoctor, userBean.getUser());
+            loadStaffLists();
+            addMessage(FacesMessage.SEVERITY_INFO, "Doctor Saved", selectedDoctor.getFirstName() + " " + selectedDoctor.getLastName() + " was saved.");
             PrimeFaces.current().executeScript("PF('manageDoctorDialog').hide()");
-            PrimeFaces.current().ajax().update("staffForm:messages", "staffForm:staffTabView:dt-doctors");
+            PrimeFaces.current().ajax().update("staffForm:messages", "staffForm:staffTabView");
         } catch (Exception e) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save doctor: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
     public void saveReceptionist() {
-        System.out.println("Saving receptionist: " + (selectedReceptionist != null ? selectedReceptionist.getFirstName() : "null"));
-        if (isUsernameOrEmailTaken(newUser.getUsername(), newUser.getEmail())) {
+        // ... (this logic is fine, but let's make it safer)
+        if (isUsernameOrEmailTaken(userForOperation, userForOperation.getUsername(), userForOperation.getEmail())) {
             return;
         }
-
         try {
-            if (selectedReceptionist.getReceptionistId() == 0) { // New receptionist
-                newUser.setActive(true);
-                userService.createUser(newUser, initialPassword);
-                User createdUser = userService.findByUsernameIncludeInactive(newUser.getUsername());
+            boolean isNew = selectedReceptionist.getReceptionistId() == 0;
+            if (isNew) {
+                userForOperation.setActive(true);
+                userService.createUser(userForOperation, initialPassword);
+                User createdUser = userService.findByUsernameIncludeInactive(userForOperation.getUsername());
                 selectedReceptionist.setUser(createdUser);
-            } else { // Existing receptionist
-                userService.update(newUser);
-                selectedReceptionist.setUser(newUser);
+            } else {
+                userService.updateUser(userForOperation);
+                selectedReceptionist.setUser(userForOperation);
             }
-            receptionistService.save(selectedReceptionist);
-            receptionists = receptionistService.getAll();
-            selectedReceptionist = new Receptionist();
-            newUser = new User();
-            initialPassword = null;
-            addMessage(FacesMessage.SEVERITY_INFO,
-                    "Receptionist Saved",
-                    "Receptionist saved successfully. Username: " + newUser.getUsername());
+            receptionistService.saveOrUpdate(selectedReceptionist, userBean.getUser());
+            loadStaffLists();
+            addMessage(FacesMessage.SEVERITY_INFO, "Receptionist Saved", "Receptionist saved successfully.");
             PrimeFaces.current().executeScript("PF('manageReceptionistDialog').hide()");
-            PrimeFaces.current().ajax().update("staffForm:messages", "staffForm:staffTabView:dt-receptionists");
+            PrimeFaces.current().ajax().update("staffForm:messages", "staffForm:staffTabView");
         } catch (Exception e) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save receptionist: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
-    public void deleteDoctor() {
-        if (selectedDoctor != null && selectedDoctor.getDoctorId() != 0) {
-            try {
-                System.out.println("Deactivating doctor: " + selectedDoctor.getFirstName());
-                doctorService.softDelete(selectedDoctor);
-                doctors = doctorService.getAll();
-                selectedDoctor = new Doctor();
-                newUser = new User();
-                addMessage(FacesMessage.SEVERITY_WARN, "Doctor Deactivated", "The doctor's account has been deactivated.");
-                PrimeFaces.current().ajax().update("staffForm:staffTabView:dt-doctors", "staffForm:messages");
-            } catch (Exception e) {
-                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not deactivate doctor: " + e.getMessage());
-                e.printStackTrace();
-            }
+    public void deactivateDoctor() {
+        if (selectedDoctor != null) {
+            doctorService.softDelete(selectedDoctor, userBean.getUser());
+            loadStaffLists();
+            addMessage(FacesMessage.SEVERITY_WARN, "Doctor Deactivated", "The doctor's account has been deactivated.");
+        }
+    }
+
+    public void deactivateReceptionist() {
+        if (selectedReceptionist != null) {
+            receptionistService.softDelete(selectedReceptionist, userBean.getUser());
+            loadStaffLists();
+            addMessage(FacesMessage.SEVERITY_WARN, "Receptionist Deactivated", "Account deactivated.");
+        }
+    }
+
+    public void reactivateDoctor(Doctor doctor) {
+        doctorService.reactivate(doctor, userBean.getUser());
+        loadStaffLists();
+        addMessage(FacesMessage.SEVERITY_INFO, "Doctor Reactivated", doctor.getFirstName() + " has been reactivated.");
+    }
+
+    public void reactivateReceptionist(Receptionist receptionist) {
+        receptionistService.reactivate(receptionist, userBean.getUser());
+        loadStaffLists();
+        addMessage(FacesMessage.SEVERITY_INFO, "Receptionist Reactivated", receptionist.getFirstName() + " has been reactivated.");
+    }
+
+    /**
+     * Prepares the password reset dialog by setting the user object and generating a new password.
+     * This method is now safe and doesn't rely on selectedDoctor/Receptionist.
+     */
+    public void preparePasswordReset(User user) {
+        this.userForOperation = user;
+        this.newPasswordForReset = generateRandomPassword();
+    }
+
+    /**
+     * Executes the password reset using the 'userForOperation' object.
+     * This method is now safe and free from NullPointerExceptions.
+     */
+    public void executePasswordReset() {
+        if (userForOperation != null) {
+            userService.adminResetPassword(userForOperation, newPasswordForReset, userBean.getUser());
+            addMessage(FacesMessage.SEVERITY_INFO, "Password Reset", "Password for " + userForOperation.getUsername() + " has been reset.");
+            PrimeFaces.current().executeScript("PF('resetPasswordDialog').hide()");
         } else {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No doctor selected for deletion.");
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No user was selected for password reset.");
         }
     }
 
-    public void deleteReceptionist() {
-        if (selectedReceptionist != null && selectedReceptionist.getReceptionistId() != 0) {
-            try {
-                System.out.println("Deactivating receptionist: " + selectedReceptionist.getFirstName());
-                receptionistService.softDelete(selectedReceptionist);
-                receptionists = receptionistService.getAll();
-                selectedReceptionist = new Receptionist();
-                newUser = new User();
-                addMessage(FacesMessage.SEVERITY_WARN, "Receptionist Deactivated", "The receptionist's account has been deactivated.");
-                PrimeFaces.current().ajax().update("staffForm:staffTabView:dt-receptionists", "staffForm:messages");
-            } catch (Exception e) {
-                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not deactivate receptionist: " + e.getMessage());
-                e.printStackTrace();
-            }
-        } else {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No receptionist selected for deletion.");
-        }
-    }
-
-    private boolean isUsernameOrEmailTaken(String username, String email) {
-        boolean taken = false;
-        if (userService.findByUsernameIncludeInactive(username) != null) {
+    private boolean isUsernameOrEmailTaken(User editingUser, String username, String email) {
+        User userByUsername = userService.findByUsernameIncludeInactive(username);
+        if (userByUsername != null && (editingUser.getUserId() == 0 || editingUser.getUserId() != userByUsername.getUserId())) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", "Username is already taken.");
-            taken = true;
+            return true;
         }
-        if (userService.findByEmailIncludeInactive(email) != null) {
+        User userByEmail = userService.findByEmailIncludeInactive(email);
+        if (userByEmail != null && (editingUser.getUserId() == 0 || editingUser.getUserId() != userByEmail.getUserId())) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", "Email is already registered.");
-            taken = true;
+            return true;
         }
-        return taken;
+        return false;
     }
 
     private String generateRandomPassword() {
@@ -199,78 +199,31 @@ public class StaffManagementBean implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 
-    // Getters and Setters
-    public List<Doctor> getDoctors() {
-        return doctors;
-    }
-
-    public void setDoctors(List<Doctor> doctors) {
-        this.doctors = doctors;
-    }
-
-    public List<Receptionist> getReceptionists() {
-        return receptionists;
-    }
-
-    public void setReceptionists(List<Receptionist> receptionists) {
-        this.receptionists = receptionists;
-    }
-
-    public Doctor getSelectedDoctor() {
-        if (selectedDoctor == null) {
-            System.out.println("getSelectedDoctor: Initializing new Doctor due to null");
-            selectedDoctor = new Doctor();
-        }
-        System.out.println("Getting selectedDoctor: " + (selectedDoctor.getFirstName() != null ? selectedDoctor.getFirstName() : "empty"));
-        return selectedDoctor;
-    }
-
+    // --- Getters and Setters ---
+    // Updated setters to also set the 'userForOperation'
+    public Doctor getSelectedDoctor() { return selectedDoctor; }
     public void setSelectedDoctor(Doctor selectedDoctor) {
-        if (selectedDoctor == null) {
-            System.out.println("Warning: Attempted to set selectedDoctor to null");
-            this.selectedDoctor = new Doctor();
-        } else {
-            this.selectedDoctor = selectedDoctor;
-            System.out.println("setSelectedDoctor: Set to " + (selectedDoctor.getFirstName() != null ? selectedDoctor.getFirstName() : "empty"));
-        }
+        this.selectedDoctor = selectedDoctor;
+        this.userForOperation = (selectedDoctor != null && selectedDoctor.getUser() != null) ? selectedDoctor.getUser() : new User();
+        this.initialPassword = null;
     }
-
-    public Receptionist getSelectedReceptionist() {
-        if (selectedReceptionist == null) {
-            System.out.println("getSelectedReceptionist: Initializing new Receptionist due to null");
-            selectedReceptionist = new Receptionist();
-        }
-        System.out.println("Getting selectedReceptionist: " + (selectedReceptionist.getFirstName() != null ? selectedReceptionist.getFirstName() : "empty"));
-        return selectedReceptionist;
-    }
-
+    public Receptionist getSelectedReceptionist() { return selectedReceptionist; }
     public void setSelectedReceptionist(Receptionist selectedReceptionist) {
-        if (selectedReceptionist == null) {
-            System.out.println("Warning: Attempted to set selectedReceptionist to null");
-            this.selectedReceptionist = new Receptionist();
-        } else {
-            this.selectedReceptionist = selectedReceptionist;
-            System.out.println("setSelectedReceptionist: Set to " + (selectedReceptionist.getFirstName() != null ? selectedReceptionist.getFirstName() : "empty"));
-        }
+        this.selectedReceptionist = selectedReceptionist;
+        this.userForOperation = (selectedReceptionist != null && selectedReceptionist.getUser() != null) ? selectedReceptionist.getUser() : new User();
+        this.initialPassword = null;
     }
 
-    public User getNewUser() {
-        if (newUser == null) {
-            System.out.println("getNewUser: Initializing new User due to null");
-            newUser = new User();
-        }
-        return newUser;
-    }
+    // Changed 'getNewUser' to 'getUserForOperation' for clarity
+    public User getUserForOperation() { return userForOperation; }
+    public void setUserForOperation(User userForOperation) { this.userForOperation = userForOperation; }
 
-    public void setNewUser(User newUser) {
-        this.newUser = (newUser != null) ? newUser : new User();
-    }
+    public String getInitialPassword() { return initialPassword; }
+    public String getNewPasswordForReset() { return newPasswordForReset; }
 
-    public String getInitialPassword() {
-        return initialPassword;
-    }
-
-    public void setInitialPassword(String initialPassword) {
-        this.initialPassword = initialPassword;
-    }
+    // Other getters...
+    public List<Doctor> getActiveDoctors() { return activeDoctors; }
+    public List<Receptionist> getActiveReceptionists() { return activeReceptionists; }
+    public List<Doctor> getInactiveDoctors() { return inactiveDoctors; }
+    public List<Receptionist> getInactiveReceptionists() { return inactiveReceptionists; }
 }
