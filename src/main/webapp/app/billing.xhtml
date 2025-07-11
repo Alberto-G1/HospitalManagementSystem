@@ -1,13 +1,106 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="/WEB-INF/template.xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:define name="pageTitle">Billing</ui:define>
+<ui:composition template="/WEB-INF/template.xhtml">
+
+    <ui:define name="pageTitle">Billing and Invoicing</ui:define>
 
     <ui:define name="content">
-        <div class="card">
-            <h2>Billing &amp; Invoicing</h2>
-            <p>This feature is under construction.</p>
-        </div>
+        <h:form id="billForm">
+            <p:growl id="messages" showDetail="true"/>
+
+            <div class="card">
+                <p:toolbar>
+                    <p:toolbarGroup>
+                        <p:commandButton value="New Bill" icon="pi pi-plus"
+                                         actionListener="#{billBean.openNew}"
+                                         update=":billForm:manageBillContent"
+                                         oncomplete="PF('manageBillDialog').show()"
+                                         styleClass="ui-button-success"/>
+                    </p:toolbarGroup>
+                </p:toolbar>
+
+                <p:dataTable id="dt-bills" var="bill" value="#{billBean.bills}" paginator="true" rows="10"
+                             rowKey="#{bill.billId}" selection="#{billBean.selectedBill}" selectionMode="single"
+                             style="margin-top:20px;">
+                    <f:facet name="header">All Bills</f:facet>
+                    <p:column headerText="Bill ID" sortBy="#{bill.billId}" style="width: 6rem;">B-#{bill.billId}</p:column>
+                    <p:column headerText="Patient" sortBy="#{bill.patient.lastName}">#{bill.patient.firstName} #{bill.patient.lastName}</p:column>
+                    <p:column headerText="Date" sortBy="#{bill.billDate}" style="width: 10rem;">
+                        <h:outputText value="#{bill.billDate}"><f:convertDateTime type="localDate" pattern="dd MMM yyyy"/></h:outputText>
+                    </p:column>
+                    <p:column headerText="Amount" sortBy="#{bill.amount}" style="text-align:right; width: 10rem;">
+                        <h:outputText value="#{bill.amount}"><f:convertNumber type="currency" currencySymbol="$ "/></h:outputText>
+                    </p:column>
+                    <p:column headerText="Status" sortBy="#{bill.status}" style="width: 10rem;">
+                        <p:tag value="#{bill.status}" severity="#{bill.status == 'PAID' ? 'success' : (bill.status == 'PENDING' ? 'warning' : 'info')}"/>
+                    </p:column>
+                    <p:column style="width:7rem;text-align:center;">
+                        <p:commandButton icon="pi pi-pencil" update=":billForm:manageBillContent" oncomplete="PF('manageBillDialog').show()" process="@this">
+                            <f:setPropertyActionListener value="#{bill}" target="#{billBean.selectedBill}"/>
+                        </p:commandButton>
+                        <p:commandButton icon="pi pi-trash" process="@this" oncomplete="PF('deleteBillDialog').show()" styleClass="ui-button-danger" style="margin-left:.5rem;">
+                            <f:setPropertyActionListener value="#{bill}" target="#{billBean.selectedBill}"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <!-- ============================================= -->
+            <!-- === Dialog for Creating/Editing Bills (FIXED) === -->
+            <!-- ============================================= -->
+            <p:dialog header="Bill Details" widgetVar="manageBillDialog" modal="true" width="700" responsive="true">
+                <p:outputPanel id="manageBillContent" class="ui-fluid">
+                    <!-- FIX: Added a scrollable container div around the form grid -->
+                    <div style="max-height: 65vh; overflow-y: auto; padding-right: 15px;">
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty billBean.selectedBill}">
+
+                            <p:outputLabel for="appointment" value="Link to Appointment (Optional)"/>
+                            <p:selectOneMenu id="appointment" value="#{billBean.selectedBill.appointment}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+                                <f:selectItem itemLabel="Select Appointment" noSelectionOption="true"/>
+                                <f:selectItems value="#{billBean.appointmentsWithoutBills}" var="appt" itemValue="#{appt}" itemLabel="ID #{appt.appointmentId} - #{appt.patient.firstName} - #{appt.date}"/>
+                                <p:ajax event="change" listener="#{billBean.onAppointmentChange}" update="patient"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="patient" value="Patient"/>
+                            <p:selectOneMenu id="patient" value="#{billBean.selectedBill.patient}" converter="omnifaces.SelectItemsConverter" required="true" filter="true" filterMatchMode="contains">
+                                <f:selectItems value="#{billBean.activePatients}" var="p" itemValue="#{p}" itemLabel="#{p.firstName} #{p.lastName}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="billDate" value="Bill Date"/>
+                            <p:calendar id="billDate" value="#{billBean.selectedBill.billDate}" navigator = "true" required="true" showIcon="true"/>
+
+                            <p:outputLabel for="amount" value="Amount"/>
+                            <p:inputNumber id="amount" value="#{billBean.selectedBill.amount}" required="true" symbol="$ "/>
+
+                            <p:outputLabel for="status" value="Payment Status"/>
+                            <p:selectOneRadio id="status" value="#{billBean.selectedBill.status}" required="true">
+                                <f:selectItems value="#{billBean.paymentStatuses}" var="s" itemLabel="#{s}" itemValue="#{s}"/>
+                            </p:selectOneRadio>
+
+                            <p:outputLabel for="desc" value="Description"/>
+                            <p:inputTextarea id="desc" value="#{billBean.selectedBill.description}" rows="4" autoResize="false"/>
+
+                        </p:panelGrid>
+                    </div>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{billBean.saveBill}"
+                                     process="manageBillContent @this"
+                                     update=":billForm:messages :billForm:dt-bills"/>
+                    <p:commandButton value="Cancel" icon="pi pi-times" styleClass="ui-button-secondary" onclick="PF('manageBillDialog').hide()"/>
+                </f:facet>
+            </p:dialog>
+
+            <p:confirmDialog widgetVar="deleteBillDialog" message="Are you sure you want to delete this bill? This action cannot be undone." header="Confirm Deletion" severity="alert">
+                <p:commandButton value="Yes, Delete" icon="pi pi-trash" actionListener="#{billBean.deleteBill}" process="@this" update="billForm"/>
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteBillDialog').hide()"/>
+            </p:confirmDialog>
+        </h:form>
     </ui:define>
 </ui:composition>
+</html>
