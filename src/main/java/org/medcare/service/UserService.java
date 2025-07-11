@@ -12,8 +12,8 @@ import java.util.List;
 @ApplicationScoped
 public class UserService {
 
-    @Inject
-    private UserDAO userDAO;
+    @Inject private UserDAO userDAO;
+    @Inject private ActivityLogService activityLogService;
 
     public UserService() {
         // CDI constructor
@@ -25,7 +25,7 @@ public class UserService {
         }
     }
 
-    private String hashPassword(String password) {
+    public String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hashedBytes = md.digest(password.getBytes());
@@ -35,7 +35,7 @@ public class UserService {
         }
     }
 
-    private boolean checkPassword(String plainPassword, String hashedPassword) {
+    public boolean checkPassword(String plainPassword, String hashedPassword) {
         if (plainPassword == null || hashedPassword == null) return false;
         return hashPassword(plainPassword).equals(hashedPassword);
     }
@@ -44,24 +44,38 @@ public class UserService {
         String hashedPassword = hashPassword(plainPassword);
         user.setPassword(hashedPassword);
         userDAO.save(user);
+        // Note: Logging is done in Doctor/Receptionist services to be more specific
     }
 
-    public void update(User user, String plainPassword) {
-        if (plainPassword != null && !plainPassword.isEmpty()) {
-            String hashedPassword = hashPassword(plainPassword);
-            user.setPassword(hashedPassword);
+    public boolean changePassword(User user, String oldPassword, String newPassword) {
+        if (checkPassword(oldPassword, user.getPassword())) {
+            user.setPassword(hashPassword(newPassword));
+            userDAO.update(user);
+            activityLogService.log("PASSWORD_CHANGE", "User changed their own password.", user);
+            return true;
         }
-        userDAO.update(user);
+        return false;
     }
 
-    public void update(User user) {
+    public void adminResetPassword(User user, String newPassword, User admin) {
+        user.setPassword(hashPassword(newPassword));
+        userDAO.update(user);
+        activityLogService.log("PASSWORD_RESET", "Admin reset password for user: " + user.getUsername(), admin);
+    }
+
+
+    public void updateUser(User user) {
         userDAO.update(user);
     }
 
     public User authenticate(String username, String plainPassword) {
         User found = userDAO.findByUsername(username);
         if (found != null && checkPassword(plainPassword, found.getPassword())) {
+            activityLogService.log("LOGIN_SUCCESS", "User logged in successfully.", found);
             return found;
+        }
+        if (found != null) {
+            activityLogService.log("LOGIN_FAILED", "User login failed (invalid password).", found);
         }
         return null;
     }
