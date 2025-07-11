@@ -1,35 +1,492 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:p="http://primefaces.org/ui"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="/WEB-INF/template.xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
+<ui:composition template="/WEB-INF/template.xhtml">
     <ui:define name="pageTitle">My Profile</ui:define>
 
     <ui:define name="content">
-        <div class="card">
-            <h:form id="profileForm">
-                <p:growl id="messages" showDetail="true"/>
+        <div class="fade-in">
+            <!-- Profile Header Card -->
+            <div class="ui-card shadow-lg rounded-xl" style="margin-bottom: 2rem;">
+                <div class="ui-card-header">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="stat-icon" style="width: 60px; height: 60px; background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);">
+                            <i class="fas fa-user-circle" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h2 style="margin: 0; font-size: 1.5rem; color: white;">Receptionist Profile</h2>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.95rem;">Manage your personal information</p>
+                        </div>
+                    </div>
+                </div>
 
-                <p:panel header="Edit Your Details" rendered="#{not empty receptionistProfileBean.currentProfile}">
-                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
-                        <p:outputLabel value="Account Username"/>
-                        <h:outputText value="#{receptionistProfileBean.currentProfile.user.username}" styleClass="font-bold"/>
+                <div class="ui-card-body">
+                    <h:form id="profileForm">
+                        <p:growl id="messages" showDetail="true" life="6000"
+                                 styleClass="fade-in"/>
 
-                        <p:outputLabel for="firstName" value="First Name"/>
-                        <p:inputText id="firstName" value="#{receptionistProfileBean.currentProfile.firstName}" required="true"/>
+                        <!-- Profile Details Panel -->
+                        <p:panel id="profilePanel"
+                                 styleClass="ui-card shadow-md rounded-lg"
+                                 style="border: none; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);">
 
-                        <p:outputLabel for="lastName" value="Last Name"/>
-                        <p:inputText id="lastName" value="#{receptionistProfileBean.currentProfile.lastName}" required="true"/>
+                            <div rendered="#{not empty receptionistProfileBean.currentProfile}">
+                                <!-- Profile Information Grid -->
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
 
-                        <p:outputLabel for="phone" value="Phone Number"/>
-                        <p:inputText id="phone" value="#{receptionistProfileBean.currentProfile.phoneNumber}" required="true"/>
-                    </p:panelGrid>
+                                    <!-- Account Username Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-user text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label class="profile-field-label">Account Username</label>
+                                        </div>
+                                        <div class="profile-field-content readonly">
+                                            <h:outputText value="#{receptionistProfileBean.currentProfile.user.username}"
+                                                          styleClass="profile-field-value"/>
+                                        </div>
+                                    </div>
 
-                    <p:commandButton value="Save Changes" actionListener="#{receptionistProfileBean.updateProfile}"
-                                     update="messages" icon="pi pi-save" style="margin-top: 20px;"/>
-                </p:panel>
-            </h:form>
+                                    <!-- First Name Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-id-card text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="firstName" class="profile-field-label">First Name</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <!-- Read-only view -->
+                                            <h:outputText value="#{receptionistProfileBean.currentProfile.firstName}"
+                                                          rendered="#{not receptionistProfileBean.editMode}"
+                                                          styleClass="profile-field-value"/>
+                                            <!-- Edit mode -->
+                                            <p:inputText id="firstName"
+                                                         value="#{receptionistProfileBean.currentProfile.firstName}"
+                                                         required="true"
+                                                         rendered="#{receptionistProfileBean.editMode}"
+                                                         styleClass="profile-input-field"
+                                                         placeholder="Enter your first name"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Last Name Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-id-badge text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="lastName" class="profile-field-label">Last Name</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <!-- Read-only view -->
+                                            <h:outputText value="#{receptionistProfileBean.currentProfile.lastName}"
+                                                          rendered="#{not receptionistProfileBean.editMode}"
+                                                          styleClass="profile-field-value"/>
+                                            <!-- Edit mode -->
+                                            <p:inputText id="lastName"
+                                                         value="#{receptionistProfileBean.currentProfile.lastName}"
+                                                         required="true"
+                                                         rendered="#{receptionistProfileBean.editMode}"
+                                                         styleClass="profile-input-field"
+                                                         placeholder="Enter your last name"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Phone Number Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-phone text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="phone" class="profile-field-label">Phone Number</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <!-- Read-only view -->
+                                            <h:outputText value="#{receptionistProfileBean.currentProfile.phoneNumber}"
+                                                          rendered="#{not receptionistProfileBean.editMode}"
+                                                          styleClass="profile-field-value"/>
+                                            <!-- Edit mode -->
+                                            <p:inputText id="phone"
+                                                         value="#{receptionistProfileBean.currentProfile.phoneNumber}"
+                                                         required="true"
+                                                         rendered="#{receptionistProfileBean.editMode}"
+                                                         styleClass="profile-input-field"
+                                                         placeholder="Enter your phone number"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Divider -->
+                                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(22, 105, 122, 0.2), transparent); margin: 2rem 0;"></div>
+
+                                <!-- Action Buttons -->
+                                <div class="profile-actions">
+                                    <!-- Edit Button (View Mode) -->
+                                    <p:commandButton value="Edit Profile"
+                                                     icon="fas fa-edit"
+                                                     actionListener="#{receptionistProfileBean.enableEditMode}"
+                                                     update="profilePanel"
+                                                     rendered="#{not receptionistProfileBean.editMode}"
+                                                     styleClass="ui-button-info profile-action-btn"/>
+
+                                    <!-- Save Button (Edit Mode) -->
+                                    <p:commandButton value="Save Changes"
+                                                     icon="fas fa-save"
+                                                     actionListener="#{receptionistProfileBean.updateProfile}"
+                                                     update="profilePanel messages"
+                                                     rendered="#{receptionistProfileBean.editMode}"
+                                                     styleClass="ui-button-success profile-action-btn"/>
+
+                                    <!-- Cancel Button (Edit Mode) -->
+                                    <p:commandButton value="Cancel"
+                                                     icon="fas fa-times"
+                                                     actionListener="#{receptionistProfileBean.cancelEdit}"
+                                                     update="profilePanel"
+                                                     rendered="#{receptionistProfileBean.editMode}"
+                                                     styleClass="ui-button-secondary profile-action-btn"
+                                                     immediate="true"/>
+                                </div>
+                            </div>
+                        </p:panel>
+                    </h:form>
+                </div>
+            </div>
         </div>
+
+        <!-- Custom Styles for Profile Page -->
+        <style>
+            /* Profile Field Groups */
+            .profile-field-group {
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 12px;
+                padding: 1.5rem;
+                border: 1px solid rgba(22, 105, 122, 0.1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(10px);
+            }
+
+            .profile-field-group:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(22, 105, 122, 0.1);
+                border-color: rgba(22, 105, 122, 0.2);
+            }
+
+            .profile-field-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+            }
+
+            .profile-field-label {
+                font-weight: 600;
+                color: #16697A;
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin: 0;
+            }
+
+            .profile-field-content {
+                position: relative;
+            }
+
+            .profile-field-content.readonly {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                border-radius: 8px;
+                padding: 1rem;
+                border-left: 4px solid #16697A;
+            }
+
+            .profile-field-value {
+                font-size: 1.1rem;
+                color: #2c3e50;
+                font-weight: 500;
+                display: block;
+                min-height: 1.5rem;
+            }
+
+            .profile-input-field {
+                width: 100% !important;
+                padding: 1rem 1.25rem !important;
+                border-radius: 10px !important;
+                border: 2px solid #e2e8f0 !important;
+                font-size: 1rem !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            .profile-input-field:focus {
+                border-color: #489FB5 !important;
+                box-shadow: 0 0 0 4px rgba(72, 159, 181, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+                background: white !important;
+                transform: translateY(-2px) !important;
+            }
+
+            /* Action Buttons */
+            .profile-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1rem;
+                flex-wrap: wrap;
+                margin-top: 1rem;
+            }
+
+            .profile-action-btn {
+                min-width: 140px !important;
+                padding: 0.875rem 1.75rem !important;
+                font-weight: 600 !important;
+                border-radius: 12px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+
+            .profile-action-btn:hover {
+                transform: translateY(-3px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .profile-action-btn:active {
+                transform: translateY(-1px) scale(0.98) !important;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .profile-field-group {
+                    padding: 1rem;
+                }
+
+                .profile-field-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                }
+
+                .profile-actions {
+                    justify-content: center;
+                    flex-direction: column;
+                }
+
+                .profile-action-btn {
+                    width: 100% !important;
+                    min-width: unset !important;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .ui-card-header > div {
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 1rem;
+                }
+
+                .profile-field-label {
+                    font-size: 0.9rem;
+                }
+
+                .profile-field-value {
+                    font-size: 1rem;
+                }
+            }
+
+            /* Animation Enhancements */
+            .profile-field-group {
+                animation: slideInUp 0.6s ease forwards;
+            }
+
+            .profile-field-group:nth-child(1) { animation-delay: 0.1s; }
+            .profile-field-group:nth-child(2) { animation-delay: 0.2s; }
+            .profile-field-group:nth-child(3) { animation-delay: 0.3s; }
+            .profile-field-group:nth-child(4) { animation-delay: 0.4s; }
+
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Loading State for Inputs */
+            .profile-input-field:disabled {
+                background: #f8fafc !important;
+                cursor: not-allowed !important;
+                opacity: 0.7 !important;
+            }
+
+            /* Success/Error States */
+            .ui-growl {
+                position: fixed !important;
+                top: 100px !important;
+                right: 20px !important;
+                z-index: 9999 !important;
+            }
+
+            .ui-growl .ui-growl-item {
+                border-radius: 12px !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+                backdrop-filter: blur(10px) !important;
+            }
+        </style>
+
+        <!-- Enhanced JavaScript for Profile Page -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Enhanced field animations
+                const fieldGroups = document.querySelectorAll('.profile-field-group');
+                fieldGroups.forEach((group, index) => {
+                    group.style.opacity = '0';
+                    group.style.transform = 'translateY(20px)';
+
+                    setTimeout(() => {
+                        group.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                        group.style.opacity = '1';
+                        group.style.transform = 'translateY(0)';
+                    }, index * 150);
+                });
+
+                // Enhanced input field interactions
+                const inputFields = document.querySelectorAll('.profile-input-field');
+                inputFields.forEach(input => {
+                    // Add floating label effect
+                    input.addEventListener('focus', function() {
+                        this.parentElement.classList.add('focused');
+                        this.style.transform = 'translateY(-2px)';
+                    });
+
+                    input.addEventListener('blur', function() {
+                        this.parentElement.classList.remove('focused');
+                        this.style.transform = 'translateY(0)';
+                    });
+
+                    // Add typing animation
+                    input.addEventListener('input', function() {
+                        this.style.borderColor = '#10b981';
+                        clearTimeout(this.typingTimer);
+                        this.typingTimer = setTimeout(() => {
+                            this.style.borderColor = '#489FB5';
+                        }, 500);
+                    });
+                });
+
+                // Enhanced button interactions
+                const actionButtons = document.querySelectorAll('.profile-action-btn');
+                actionButtons.forEach(button => {
+                    button.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px) scale(1.02)';
+                    });
+
+                    button.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+
+                    button.addEventListener('click', function(e) {
+                        // Create enhanced ripple effect
+                        const ripple = document.createElement('span');
+                        const rect = this.getBoundingClientRect();
+                        const size = Math.max(rect.width, rect.height);
+                        const x = e.clientX - rect.left - size / 2;
+                        const y = e.clientY - rect.top - size / 2;
+
+                        ripple.style.cssText = `
+                            position: absolute;
+                            width: ${size}px;
+                            height: ${size}px;
+                            left: ${x}px;
+                            top: ${y}px;
+                            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+                            border-radius: 50%;
+                            transform: scale(0);
+                            animation: profileRipple 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                            pointer-events: none;
+                            z-index: 1;
+                        `;
+
+                        this.appendChild(ripple);
+                        setTimeout(() => ripple.remove(), 800);
+                    });
+                });
+
+                // Add profile-specific animations
+                const profileStyle = document.createElement('style');
+                profileStyle.textContent = `
+                    @keyframes profileRipple {
+                        0% {
+                            transform: scale(0);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: scale(2);
+                            opacity: 0;
+                        }
+                    }
+
+                    .profile-field-content.focused {
+                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                    }
+
+                    .profile-field-group:hover .profile-field-header i {
+                        transform: scale(1.1);
+                        color: #489FB5;
+                    }
+                `;
+                document.head.appendChild(profileStyle);
+
+                // Auto-save indication (visual feedback)
+                const form = document.getElementById('profileForm');
+                if (form) {
+                    const originalSubmit = form.onsubmit;
+                    form.addEventListener('submit', function() {
+                        const submitBtn = this.querySelector('.ui-button-success');
+                        if (submitBtn) {
+                            const originalText = submitBtn.querySelector('.ui-button-text').textContent;
+                            submitBtn.querySelector('.ui-button-text').textContent = 'Saving...';
+                            submitBtn.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+
+                            setTimeout(() => {
+                                submitBtn.querySelector('.ui-button-text').textContent = originalText;
+                                submitBtn.style.background = '';
+                            }, 2000);
+                        }
+                    });
+                }
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    if (!(!e.ctrlKey || e.key !== 'e')) {
+                        e.preventDefault();
+                        const editBtn = document.querySelector('.ui-button-info');
+                        if (!(!editBtn || editBtn.style.display === 'none')) {
+                            editBtn.click();
+                        }
+                    }
+
+                    if (!(!e.ctrlKey || e.key !== 's')) {
+                        e.preventDefault();
+                        const saveBtn = document.querySelector('.ui-button-success');
+                        if (!(!saveBtn || saveBtn.style.display === 'none')) {
+                            saveBtn.click();
+                        }
+                    }
+
+                    if (e.key === 'Escape') {
+                        const cancelBtn = document.querySelector('.ui-button-secondary');
+                        if (!(!cancelBtn || cancelBtn.style.display === 'none')) {
+                            cancelBtn.click();
+                        }
+                    }
+                });
+
+                console.log('👤 Profile Page - Enhanced UI Loaded Successfully');
+            });
+        </script>
     </ui:define>
 </ui:composition>
+</html>
