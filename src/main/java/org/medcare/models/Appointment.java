@@ -18,7 +18,7 @@ public class Appointment extends BaseModel {
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @JoinColumn(name = "doctor_doctorId", nullable = false)
     private Doctor doctor;
 
     @Column(nullable = false)
@@ -59,6 +59,8 @@ public class Appointment extends BaseModel {
     @PrePersist
     protected void initializeDefaults() {
         super.onCreate();  // Auditable fields
-        this.status = AppointmentStatus.SCHEDULED;
+        if (this.status == null) { // Only set default if it's not already set
+            this.status = AppointmentStatus.SCHEDULED;
+        }
     }
 }

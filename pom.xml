@@ -11,6 +11,12 @@
 
   <name>MedCare Hospital Management System</name>
 
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <dependencies>
     <!-- JSF (Mojarra) -->
     <dependency>
@@ -47,6 +53,25 @@
       <artifactId>mysql-connector-j</artifactId>
       <version>8.0.33</version>
     </dependency>
+
+    <!-- PDF Generation (iText) -->
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>itext7-core</artifactId>
+      <version>8.0.4</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>kernel</artifactId>
+      <version>8.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>layout</artifactId>
+      <version>8.0.4</version>
+    </dependency>
+
 
     <!-- Servlet API (provided by Tomcat) -->
     <dependency>
