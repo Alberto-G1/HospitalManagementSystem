@@ -5,20 +5,18 @@ import jakarta.inject.Inject;
 import org.medcare.dao.DoctorDAO;
 import org.medcare.models.Doctor;
 import org.medcare.models.User;
+import org.medcare.service.interfaces.DoctorServiceInterface;
 
 import java.util.List;
 
 @ApplicationScoped
-public class DoctorService {
-    @Inject
-    private DoctorDAO doctorDAO;
+public class DoctorService implements DoctorServiceInterface {
 
-    @Inject
-    private UserService userService;
+    @Inject private DoctorDAO doctorDAO;
+    @Inject private UserService userService;
+    @Inject private ActivityLogService activityLogService;
 
-    @Inject
-    private ActivityLogService activityLogService;
-
+    @Override
     public void saveOrUpdate(Doctor doctor, User adminUser) {
         boolean isNew = doctor.getDoctorId() == 0;
         doctorDAO.saveOrUpdate(doctor);
@@ -29,6 +27,7 @@ public class DoctorService {
         }
     }
 
+    @Override
     public void softDelete(Doctor doctor, User adminUser) {
         if (doctor != null && doctor.getUser() != null) {
             userService.softDelete(doctor.getUser());
@@ -36,6 +35,7 @@ public class DoctorService {
         }
     }
 
+    @Override
     public void reactivate(Doctor doctor, User adminUser) {
         if (doctor != null && doctor.getUser() != null) {
             userService.reactivateUser(doctor.getUser());
@@ -43,26 +43,32 @@ public class DoctorService {
         }
     }
 
+    @Override
     public List<Doctor> getAll() {
         return doctorDAO.findAll();
     }
 
+    @Override
     public List<Doctor> getAllIncludeInactive() {
         return doctorDAO.findAllIncludeInactive();
     }
 
+    @Override
     public Doctor getById(int id) {
         return doctorDAO.findById(id);
     }
 
+    @Override
     public Doctor getByIdIncludeInactive(int id) {
         return doctorDAO.findByIdIncludeInactive(id);
     }
 
+    @Override
     public Doctor findByUserId(int userId) {
         return doctorDAO.findByUserId(userId);
     }
 
+    @Override
     public Doctor findByUserIdIncludeInactive(int userId) {
         return doctorDAO.findByUserIdIncludeInactive(userId);
     }
