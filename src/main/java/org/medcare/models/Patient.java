@@ -16,10 +16,14 @@ public class Patient extends BaseModel {
     private int patientId;
 
     @NotBlank(message = "First name is required.")
+    @Size(max = 50, message = "First name must be less than 50 characters.")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "First name must contain only letters.")
     @Column(nullable = false, length = 50)
     private String firstName;
 
     @NotBlank(message = "Last name is required.")
+    @Size(max = 50, message = "Last name must be less than 50 characters.")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Last name must contain only letters.")
     @Column(nullable = false, length = 50)
     private String lastName;
 
@@ -39,15 +43,21 @@ public class Patient extends BaseModel {
     private String phoneNumber;
 
     @Email(message = "Invalid email format.")
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Email must end with a valid domain (e.g., .com, .org)")
+    @Size(max = 50, message = "Email must be less than 50 characters.")
     @Column(length = 50)
     private String email;
 
+    @Size(max = 100, message = "Address must be less than 100 characters.")
     @Column(length = 100)
     private String address;
 
+    @Size(max = 50, message = "Emergency contact must be less than 50 characters.")
+    @Pattern(regexp = "^(\\+256|0)7[0-9]{8}$", message = "Invalid Ugandan phone number.")
     @Column(length = 50)
     private String emergencyContact;
 
+    @Size(max = 500, message = "Medical history must be less than 500 characters.")
     @Column(columnDefinition = "TEXT")
     private String medicalHistory;
 
