@@ -2,7 +2,9 @@ package org.medcare.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 
@@ -14,17 +16,23 @@ public class Doctor extends BaseModel implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int doctorId;
 
+    @NotNull(message = "User is required.")
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "userId", unique = true)
     private User user;
 
     @NotBlank(message = "First name is required.")
+    @Size(max = 50, message = "First name must be less than 50 characters.")
+    @Pattern(regexp = "^[A-Za-z\\s'-]+$", message = "Name must contain only letters, spaces, hyphens, or apostrophes.")
     @Column(nullable = false)
     private String firstName;
 
     @NotBlank(message = "Last name is required.")
+    @Size(max = 50, message = "Last name must be less than 50 characters.")
+    @Pattern(regexp = "^[A-Za-z\\s'-]+$", message = "Name must contain only letters, spaces, hyphens, or apostrophes.")
     @Column(nullable = false)
     private String lastName;
+
 
     @NotBlank(message = "Phone number is required.")
     @Pattern(regexp = "^(\\+256|0)7[0-9]{8}$", message = "Invalid Ugandan phone number.")
@@ -32,6 +40,7 @@ public class Doctor extends BaseModel implements Serializable {
     private String phoneNumber;
 
     @NotBlank(message = "Speciality is required.")
+    @Size(max = 100, message = "Speciality must be less than 100 characters.")
     @Column(nullable = false)
     private String speciality;
 

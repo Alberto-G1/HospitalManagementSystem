@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
 
@@ -8,6 +9,8 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>#{pageTitle} - MedCare HMS</title>
+    <h:outputStylesheet name="css/staff.css" library="css"/>
+    <h:outputScript name="js/staff.js" library="js"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=Montserrat:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 
@@ -822,48 +825,21 @@
 
             <h:form>
                 <p:menu>
-                    <p:menuitem value="Dashboard"
-                                outcome="/app/dashboard"
-                                icon="fas fa-home"/>
-                    <p:menuitem value="Patients"
-                                outcome="/app/patients"
-                                icon="fas fa-user-injured"/>
-                    <p:menuitem value="Staff Management"
-                                outcome="/app/staff"
-                                icon="fas fa-user-md"
-                                rendered="#{userBean.user.role == 'ADMIN'}"/>
-                    <p:menuitem value="Appointments"
-                                outcome="/app/appointments"
-                                icon="fas fa-calendar-check"/>
-                    <p:menuitem value="Medical Records"
-                                outcome="/app/records"
-                                icon="fas fa-file-medical"/>
-                    <p:menuitem value="Billing"
-                                outcome="/app/billing"
-                                icon="fas fa-receipt"
-                                rendered="#{userBean.user.role == 'ADMIN' or userBean.user.role == 'RECEPTIONIST'}"/>
-                    <p:menuitem value="Reports"
-                                outcome="/app/reports"
-                                icon="fas fa-chart-line"
-                                rendered="#{userBean.user.role == 'ADMIN'}"/>
-                    <p:menuitem value="Settings"
-                                outcome="/app/settings"
-                                icon="fas fa-cog"
-                                rendered="#{userBean.user.role == 'ADMIN'}"/>
-
-                    <!-- Profile Links -->
-                    <p:menuitem value="My Profile"
-                                outcome="/app/doctorProfile"
-                                icon="fas fa-user-circle"
-                                rendered="#{userBean.user.role == 'DOCTOR'}"/>
-                    <p:menuitem value="My Profile"
-                                outcome="/app/receptionistProfile"
-                                icon="fas fa-user-circle"
-                                rendered="#{userBean.user.role == 'RECEPTIONIST'}"/>
-                    <p:menuitem value="Admin Profile"
-                                outcome="/app/adminProfile"
-                                icon="fas fa-user-shield"
-                                rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:menuitem value="Dashboard" outcome="/app/dashboard" icon="fas fa-home"/>
+                    <p:menuitem value="Patients" outcome="/app/patients" icon="fas fa-user-injured"/>
+                    <p:menuitem value="Staff Management" outcome="/app/staff" icon="fas fa-user-md" rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:menuitem value="Appointments" outcome="/app/appointments" icon="fas fa-calendar-check"/>
+                    <p:menuitem value="Medical Records" outcome="/app/records" icon="fas fa-file-medical"/>
+                    <p:menuitem value="Billing" outcome="/app/billing" icon="fas fa-receipt" rendered="#{userBean.user.role != 'DOCTOR'}"/>
+                    <p:menuitem value="Reports" outcome="/app/reports" icon="fas fa-chart-line" rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:menuitem value="Audit Log" outcome="/app/audit" icon="fas fa-history" rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:menuitem value="Settings" outcome="/app/settings" icon="fas fa-cog" rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    <p:submenu label="My Profile" icon="fas fa-user-circle">
+                        <p:menuitem value="Account Settings" outcome="/app/my-account" icon="pi pi-key"/>
+                        <p:menuitem value="View Profile" outcome="/app/doctorProfile" rendered="#{userBean.user.role == 'DOCTOR'}"/>
+                        <p:menuitem value="View Profile" outcome="/app/receptionistProfile" rendered="#{userBean.user.role == 'RECEPTIONIST'}"/>
+                        <p:menuitem value="View Profile" outcome="/app/adminProfile" rendered="#{userBean.user.role == 'ADMIN'}"/>
+                    </p:submenu>
                 </p:menu>
             </h:form>
         </div>
@@ -1056,7 +1032,7 @@
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.createElement('button');
 
-            sidebarToggle.innerHTML = '&lt;i class="fas fa-bars">&lt;/i>';
+            sidebarToggle.innerHTML = '<i class="fas fa-bars"></i>';
             sidebarToggle.style.cssText = `
                 position: fixed;
                 top: 20px;

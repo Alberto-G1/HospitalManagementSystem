@@ -2,6 +2,7 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
                 template="/WEB-INF/template.xhtml">
 
     <ui:define name="pageTitle">Dashboard</ui:define>
@@ -375,40 +376,30 @@ pie"></i>
             </ui:fragment>
         </div>
 
-        <!-- Recent Activity Section -->
+        <!-- Recent Activity Section (Updated) -->
         <div class="recent-activity-section" data-aos="fade-up" data-aos-delay="700">
             <h3 class="section-title">
-                <i class="fas fa-clock section-icon"></i>
-                Recent Activity
+                <i class="fas fa-history section-icon"></i>
+                Recent System Activity
             </h3>
             <div class="activity-feed">
-                <div class="activity-item">
-                    <div class="activity-icon patients">
-                        <i class="fas fa-user-plus"></i>
+                <ui:repeat value="#{dashboardBean.recentActivities}" var="activity" varStatus="loop">
+                    <div class="activity-item" style="animation-delay: #{loop.index * 100}ms;">
+                        <div class="activity-icon #{dashboardBean.getIconForActivity(activity.action)}">
+                            <i class="fas fa-#{dashboardBean.getIconForActivity(activity.action)}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">
+                                <strong>#{activity.user.username}</strong>: #{activity.details}
+                            </p>
+                            <span class="activity-time">
+                                <h:outputText value="#{activity.timestamp}">
+                                    <f:convertDateTime type="localDateTime" pattern="h:mm a, dd MMM"/>
+                                </h:outputText>
+                            </span>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <p class="activity-text">New patient registered: John Doe</p>
-                        <span class="activity-time">2 minutes ago</span>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon appointments">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="activity-content">
-                        <p class="activity-text">Appointment scheduled with Dr. Smith</p>
-                        <span class="activity-time">15 minutes ago</span>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon completed">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <p class="activity-text">Medical record updated for Patient ID: 1234</p>
-                        <span class="activity-time">1 hour ago</span>
-                    </div>
-                </div>
+                </ui:repeat>
             </div>
         </div>
 

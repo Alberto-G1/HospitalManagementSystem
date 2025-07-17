@@ -1,98 +1,455 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:p="http://primefaces.org/ui"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="/WEB-INF/template.xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
+<ui:composition template="/WEB-INF/template.xhtml">
     <ui:define name="pageTitle">My Profile</ui:define>
 
     <ui:define name="content">
-        <h:form id="profileForm">
-            <p:growl id="messages" showDetail="true" life="4000"/>
+        <div class="fade-in">
+            <!-- Profile Header Card -->
+            <div class="ui-card shadow-lg rounded-xl" style="margin-bottom: 2rem;">
+                <div class="ui-card-header">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="stat-icon" style="width: 60px; height: 60px; background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);">
+                            <!-- Changed icon to user-doctor -->
+                            <i class="fas fa-user-doctor" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <!-- Changed title to Doctor Profile -->
+                            <h2 style="margin: 0; font-size: 1.5rem; color: white;">Doctor Profile</h2>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.95rem;">Manage your personal and professional information</p>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="card" rendered="#{not empty doctorProfileBean.currentDoctorProfile}">
-                <p:toolbar id="profileToolbar">
-                    <p:toolbarGroup>
-                        <p:commandButton value="Edit Profile" icon="pi pi-pencil"
-                                         actionListener="#{doctorProfileBean.toggleEditMode}"
-                                         update="profilePanel profileToolbar"
-                                         rendered="#{not doctorProfileBean.editMode}"
-                                         styleClass="ui-button-info"
-                                         process="@this"/>
+                <div class="ui-card-body">
+                    <h:form id="profileForm">
+                        <p:growl id="messages" showDetail="true" life="6000" styleClass="fade-in"/>
 
-                        <p:commandButton value="Save Changes" icon="pi pi-save"
-                                         actionListener="#{doctorProfileBean.updateProfile}"
-                                         process="profilePanel @this"
-                                         update="profilePanel profileToolbar messages"
-                                         rendered="#{doctorProfileBean.editMode}"
-                                         styleClass="ui-button-success"/>
+                        <!-- Profile Details Panel -->
+                        <p:panel id="profilePanel" styleClass="ui-card shadow-md rounded-lg" style="border: none; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);">
 
-                        <p:commandButton value="Cancel" icon="pi pi-times"
-                                         actionListener="#{doctorProfileBean.toggleEditMode}"
-                                         update="profilePanel profileToolbar"
-                                         rendered="#{doctorProfileBean.editMode}"
-                                         styleClass="ui-button-secondary"
-                                         process="@this" immediate="true"/>
-                    </p:toolbarGroup>
-                </p:toolbar>
+                            <!-- Changed bean reference to doctorProfileBean -->
+                            <div rendered="#{not empty doctorProfileBean.currentProfile}">
+                                <!-- Profile Information Grid -->
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
 
-                <p:panel id="profilePanel" style="margin-top: 20px; border: none;">
+                                    <!-- Account Username Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-user text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label class="profile-field-label">Account Username</label>
+                                        </div>
+                                        <div class="profile-field-content readonly">
+                                            <h:outputText value="#{doctorProfileBean.currentProfile.user.username}" styleClass="profile-field-value"/>
+                                        </div>
+                                    </div>
 
-                    <!-- VIEW MODE -->
-                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank profile-view"
-                                 rendered="#{not doctorProfileBean.editMode}">
-                        <h:outputText value="First Name:" styleClass="profile-label"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.firstName}" styleClass="profile-value"/>
+                                    <!-- First Name Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-id-card text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="firstName" class="profile-field-label">First Name</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <h:outputText value="#{doctorProfileBean.currentProfile.firstName}" rendered="#{not doctorProfileBean.editMode}" styleClass="profile-field-value"/>
+                                            <p:inputText id="firstName" value="#{doctorProfileBean.currentProfile.firstName}" required="true" rendered="#{doctorProfileBean.editMode}" styleClass="profile-input-field" placeholder="Enter your first name"/>
+                                        </div>
+                                    </div>
 
-                        <h:outputText value="Last Name:" styleClass="profile-label"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.lastName}" styleClass="profile-value"/>
+                                    <!-- Last Name Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-id-badge text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="lastName" class="profile-field-label">Last Name</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <h:outputText value="#{doctorProfileBean.currentProfile.lastName}" rendered="#{not doctorProfileBean.editMode}" styleClass="profile-field-value"/>
+                                            <p:inputText id="lastName" value="#{doctorProfileBean.currentProfile.lastName}" required="true" rendered="#{doctorProfileBean.editMode}" styleClass="profile-input-field" placeholder="Enter your last name"/>
+                                        </div>
+                                    </div>
 
-                        <h:outputText value="Speciality:" styleClass="profile-label"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.speciality}" styleClass="profile-value"/>
+                                    <!-- NEW: Specialty Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-stethoscope text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="specialty" class="profile-field-label">Specialty</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <h:outputText value="#{doctorProfileBean.currentProfile.speciality}" rendered="#{not doctorProfileBean.editMode}" styleClass="profile-field-value"/>
+                                            <p:inputText id="specialty" value="#{doctorProfileBean.currentProfile.speciality}" required="true" rendered="#{doctorProfileBean.editMode}" styleClass="profile-input-field" placeholder="e.g., Cardiologist, Pediatrician"/>
+                                        </div>
+                                    </div>
 
-                        <h:outputText value="Phone Number:" styleClass="profile-label"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.phoneNumber}" styleClass="profile-value"/>
+                                    <!-- Phone Number Section -->
+                                    <div class="profile-field-group">
+                                        <div class="profile-field-header">
+                                            <i class="fas fa-phone text-primary" style="margin-right: 0.5rem;"></i>
+                                            <label for="phone" class="profile-field-label">Phone Number</label>
+                                        </div>
+                                        <div class="profile-field-content">
+                                            <h:outputText value="#{doctorProfileBean.currentProfile.phoneNumber}" rendered="#{not doctorProfileBean.editMode}" styleClass="profile-field-value"/>
+                                            <p:inputText id="phone" value="#{doctorProfileBean.currentProfile.phoneNumber}" required="true" rendered="#{doctorProfileBean.editMode}" styleClass="profile-input-field" placeholder="Enter your phone number"/>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <h:outputText value="Account Username:" styleClass="profile-label"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.user.username}" styleClass="profile-value"/>
+                                <!-- Divider -->
+                                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(22, 105, 122, 0.2), transparent); margin: 2rem 0;"></div>
 
-                        <h:outputText value="Account Email:" styleClass="profile-label"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.user.email}" styleClass="profile-value"/>
-                    </p:panelGrid>
-
-                    <!-- EDIT MODE -->
-                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank"
-                                 rendered="#{doctorProfileBean.editMode}">
-                        <p:outputLabel for="firstName" value="First Name"/>
-                        <p:inputText id="firstName" value="#{doctorProfileBean.currentDoctorProfile.firstName}" required="true"/>
-
-                        <p:outputLabel for="lastName" value="Last Name"/>
-                        <p:inputText id="lastName" value="#{doctorProfileBean.currentDoctorProfile.lastName}" required="true"/>
-
-                        <p:outputLabel for="speciality" value="Speciality"/>
-                        <p:inputText id="speciality" value="#{doctorProfileBean.currentDoctorProfile.speciality}" required="true"/>
-
-                        <p:outputLabel for="phone" value="Phone Number"/>
-                        <p:inputText id="phone" value="#{doctorProfileBean.currentDoctorProfile.phoneNumber}" required="true"/>
-
-                        <p:outputLabel value="Account Username" />
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.user.username}" style="font-weight: bold; padding-top: .5rem;"/>
-
-                        <p:outputLabel value="Account Email"/>
-                        <h:outputText value="#{doctorProfileBean.currentDoctorProfile.user.email}" style="font-weight: bold; padding-top: .5rem;"/>
-                    </p:panelGrid>
-                </p:panel>
+                                <!-- Action Buttons (all pointing to doctorProfileBean) -->
+                                <div class="profile-actions">
+                                    <p:commandButton value="Edit Profile" icon="fas fa-edit" actionListener="#{doctorProfileBean.enableEditMode}" update="profilePanel" rendered="#{not doctorProfileBean.editMode}" styleClass="ui-button-info profile-action-btn"/>
+                                    <p:commandButton value="Save Changes" icon="fas fa-save" actionListener="#{doctorProfileBean.updateProfile}" update="profilePanel messages" rendered="#{doctorProfileBean.editMode}" styleClass="ui-button-success profile-action-btn"/>
+                                    <p:commandButton value="Cancel" icon="fas fa-times" actionListener="#{doctorProfileBean.cancelEdit}" update="profilePanel" rendered="#{doctorProfileBean.editMode}" styleClass="ui-button-secondary profile-action-btn" immediate="true"/>
+                                </div>
+                            </div>
+                        </p:panel>
+                    </h:form>
+                </div>
             </div>
+        </div>
 
-            <p:panel header="Profile Not Found" rendered="#{empty doctorProfileBean.currentDoctorProfile}">
-                <h:outputText value="Could not load your doctor profile. This might be because your account is not of the 'DOCTOR' role. Please contact an administrator." />
-            </p:panel>
-        </h:form>
+        <!-- Custom Styles for Profile Page -->
+        <style>
+            /* Profile Field Groups */
+            .profile-field-group {
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 12px;
+                padding: 1.5rem;
+                border: 1px solid rgba(22, 105, 122, 0.1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(10px);
+            }
 
-        <h:outputStylesheet>
-            .profile-label { font-weight: 600; color: #4b5563; text-align: right; padding-right: 1rem; }
-            .profile-value { font-size: 1.1rem; color: #111827; font-weight: 500; }
-            .profile-view .ui-grid-col-6 { padding: 1rem; border-bottom: 1px solid #f3f4f6; }
-        </h:outputStylesheet>
+            .profile-field-group:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(22, 105, 122, 0.1);
+                border-color: rgba(22, 105, 122, 0.2);
+            }
+
+            .profile-field-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+            }
+
+            .profile-field-label {
+                font-weight: 600;
+                color: #16697A;
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin: 0;
+            }
+
+            .profile-field-content {
+                position: relative;
+            }
+
+            .profile-field-content.readonly {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                border-radius: 8px;
+                padding: 1rem;
+                border-left: 4px solid #16697A;
+            }
+
+            .profile-field-value {
+                font-size: 1.1rem;
+                color: #2c3e50;
+                font-weight: 500;
+                display: block;
+                min-height: 1.5rem;
+            }
+
+            .profile-input-field {
+                width: 100% !important;
+                padding: 1rem 1.25rem !important;
+                border-radius: 10px !important;
+                border: 2px solid #e2e8f0 !important;
+                font-size: 1rem !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            .profile-input-field:focus {
+                border-color: #489FB5 !important;
+                box-shadow: 0 0 0 4px rgba(72, 159, 181, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+                background: white !important;
+                transform: translateY(-2px) !important;
+            }
+
+            /* Action Buttons */
+            .profile-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1rem;
+                flex-wrap: wrap;
+                margin-top: 1rem;
+            }
+
+            .profile-action-btn {
+                min-width: 140px !important;
+                padding: 0.875rem 1.75rem !important;
+                font-weight: 600 !important;
+                border-radius: 12px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+
+            .profile-action-btn:hover {
+                transform: translateY(-3px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .profile-action-btn:active {
+                transform: translateY(-1px) scale(0.98) !important;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .profile-field-group {
+                    padding: 1rem;
+                }
+
+                .profile-field-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                }
+
+                .profile-actions {
+                    justify-content: center;
+                    flex-direction: column;
+                }
+
+                .profile-action-btn {
+                    width: 100% !important;
+                    min-width: unset !important;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .ui-card-header > div {
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 1rem;
+                }
+
+                .profile-field-label {
+                    font-size: 0.9rem;
+                }
+
+                .profile-field-value {
+                    font-size: 1rem;
+                }
+            }
+
+            /* Animation Enhancements */
+            .profile-field-group {
+                animation: slideInUp 0.6s ease forwards;
+            }
+
+            .profile-field-group:nth-child(1) { animation-delay: 0.1s; }
+            .profile-field-group:nth-child(2) { animation-delay: 0.2s; }
+            .profile-field-group:nth-child(3) { animation-delay: 0.3s; }
+            .profile-field-group:nth-child(4) { animation-delay: 0.4s; }
+
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Loading State for Inputs */
+            .profile-input-field:disabled {
+                background: #f8fafc !important;
+                cursor: not-allowed !important;
+                opacity: 0.7 !important;
+            }
+
+            /* Success/Error States */
+            .ui-growl {
+                position: fixed !important;
+                top: 100px !important;
+                right: 20px !important;
+                z-index: 9999 !important;
+            }
+
+            .ui-growl .ui-growl-item {
+                border-radius: 12px !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+                backdrop-filter: blur(10px) !important;
+            }
+        </style>
+
+        <!-- Enhanced JavaScript for Profile Page -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Enhanced field animations
+                const fieldGroups = document.querySelectorAll('.profile-field-group');
+                fieldGroups.forEach((group, index) => {
+                    group.style.opacity = '0';
+                    group.style.transform = 'translateY(20px)';
+
+                    setTimeout(() => {
+                        group.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                        group.style.opacity = '1';
+                        group.style.transform = 'translateY(0)';
+                    }, index * 150);
+                });
+
+                // Enhanced input field interactions
+                const inputFields = document.querySelectorAll('.profile-input-field');
+                inputFields.forEach(input => {
+                    // Add floating label effect
+                    input.addEventListener('focus', function() {
+                        this.parentElement.classList.add('focused');
+                        this.style.transform = 'translateY(-2px)';
+                    });
+
+                    input.addEventListener('blur', function() {
+                        this.parentElement.classList.remove('focused');
+                        this.style.transform = 'translateY(0)';
+                    });
+
+                    // Add typing animation
+                    input.addEventListener('input', function() {
+                        this.style.borderColor = '#10b981';
+                        clearTimeout(this.typingTimer);
+                        this.typingTimer = setTimeout(() => {
+                            this.style.borderColor = '#489FB5';
+                        }, 500);
+                    });
+                });
+
+                // Enhanced button interactions
+                const actionButtons = document.querySelectorAll('.profile-action-btn');
+                actionButtons.forEach(button => {
+                    button.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px) scale(1.02)';
+                    });
+
+                    button.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+
+                    button.addEventListener('click', function(e) {
+                        // Create enhanced ripple effect
+                        const ripple = document.createElement('span');
+                        const rect = this.getBoundingClientRect();
+                        const size = Math.max(rect.width, rect.height);
+                        const x = e.clientX - rect.left - size / 2;
+                        const y = e.clientY - rect.top - size / 2;
+
+                        ripple.style.cssText = `
+                            position: absolute;
+                            width: ${size}px;
+                            height: ${size}px;
+                            left: ${x}px;
+                            top: ${y}px;
+                            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+                            border-radius: 50%;
+                            transform: scale(0);
+                            animation: profileRipple 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                            pointer-events: none;
+                            z-index: 1;
+                        `;
+
+                        this.appendChild(ripple);
+                        setTimeout(() => ripple.remove(), 800);
+                    });
+                });
+
+                // Add profile-specific animations
+                const profileStyle = document.createElement('style');
+                profileStyle.textContent = `
+                    @keyframes profileRipple {
+                        0% {
+                            transform: scale(0);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: scale(2);
+                            opacity: 0;
+                        }
+                    }
+
+                    .profile-field-content.focused {
+                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                    }
+
+                    .profile-field-group:hover .profile-field-header i {
+                        transform: scale(1.1);
+                        color: #489FB5;
+                    }
+                `;
+                document.head.appendChild(profileStyle);
+
+                // Auto-save indication (visual feedback)
+                const form = document.getElementById('profileForm');
+                if (form) {
+                    const originalSubmit = form.onsubmit;
+                    form.addEventListener('submit', function() {
+                        const submitBtn = this.querySelector('.ui-button-success');
+                        if (submitBtn) {
+                            const originalText = submitBtn.querySelector('.ui-button-text').textContent;
+                            submitBtn.querySelector('.ui-button-text').textContent = 'Saving...';
+                            submitBtn.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+
+                            setTimeout(() => {
+                                submitBtn.querySelector('.ui-button-text').textContent = originalText;
+                                submitBtn.style.background = '';
+                            }, 2000);
+                        }
+                    });
+                }
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    if (!(!e.ctrlKey || e.key !== 'e')) {
+                        e.preventDefault();
+                        const editBtn = document.querySelector('.ui-button-info');
+                        if (!(!editBtn || editBtn.style.display === 'none')) {
+                            editBtn.click();
+                        }
+                    }
+
+                    if (!(!e.ctrlKey || e.key !== 's')) {
+                        e.preventDefault();
+                        const saveBtn = document.querySelector('.ui-button-success');
+                        if (!(!saveBtn || saveBtn.style.display === 'none')) {
+                            saveBtn.click();
+                        }
+                    }
+
+                    if (e.key === 'Escape') {
+                        const cancelBtn = document.querySelector('.ui-button-secondary');
+                        if (!(!cancelBtn || cancelBtn.style.display === 'none')) {
+                            cancelBtn.click();
+                        }
+                    }
+                });
+
+                console.log('👤 Profile Page - Enhanced UI Loaded Successfully');
+            });
+        </script>
     </ui:define>
 </ui:composition>
+</html>
