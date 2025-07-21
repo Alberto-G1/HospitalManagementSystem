@@ -9,30 +9,37 @@ import org.medcare.models.Patient;
 import org.medcare.models.User;
 import org.medcare.service.interfaces.MedicalRecordServiceInterface;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
 public class MedicalRecordService implements MedicalRecordServiceInterface {
 
-    @Inject private MedicalRecordDAO recordDAO;
+    @Inject private MedicalRecordDAO medicalRecordDAO;
     @Inject private ActivityLogService activityLogService;
 
     @Override
-    public void addMedicalRecord(Patient patient, Doctor doctor, String notes, String prescription, User creator) {
+    public void addMedicalRecord(Patient patient, Doctor doctor, String notes, String prescription, User user) {
         MedicalRecord record = new MedicalRecord();
         record.setPatient(patient);
         record.setDoctor(doctor);
         record.setNotes(notes);
         record.setPrescription(prescription);
-        record.setVisitDate(LocalDateTime.now());
-        record.setCreatedBy(creator);
-        recordDAO.save(record);
-        activityLogService.log("MEDICAL_RECORD_ADDED", "Added medical record for patient " + patient.getFirstName() + " by Dr. " + doctor.getLastName(), creator);
+        record.setCreatedBy(user);
+
+        medicalRecordDAO.save(record);
+
+        activityLogService.log("MEDICAL_RECORD_ADDED", "Added new record for patient: " + patient.getFirstName() + " " + patient.getLastName(), user);
     }
 
     @Override
     public List<MedicalRecord> getRecordsForPatient(int patientId) {
-        return null; // Placeholder (use recordDAO.findByPatientId(patientId) if available)
+        Patient patient = new Patient();
+        patient.setPatientId(patientId);
+        return medicalRecordDAO.findByPatient(patient);
+    }
+
+    @Override
+    public List<MedicalRecord> getRecordsByPatient(Patient patient) {
+        return medicalRecordDAO.findByPatient(patient);
     }
 }

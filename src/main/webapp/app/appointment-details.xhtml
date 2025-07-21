@@ -1,0 +1,61 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+   <f:metadata>
+      <f:viewParam name="id" value="#{appointmentActionBean.appointmentId}" required="true" converter="jakarta.faces.Integer"/>
+      <f:viewAction action="#{appointmentActionBean.load}"/>
+   </f:metadata>
+
+   <ui:define name="pageTitle">Appointment Details</ui:define>
+
+   <ui:define name="content">
+      <div class="card" rendered="#{not empty appointmentActionBean.appointment}">
+         <p:toolbar>
+            <p:toolbarGroup>
+               <p:button value="Back to List" icon="pi pi-arrow-left" outcome="appointments" styleClass="ui-button-secondary"/>
+            </p:toolbarGroup>
+            <p:toolbarGroup align="right">
+               <p:button value="Edit This Appointment" icon="pi pi-pencil" outcome="appointment-edit"
+                         styleClass="ui-button-info" rendered="#{userBean.isAdminOrReceptionist()}">
+                  <f:param name="id" value="#{appointmentActionBean.appointmentId}"/>
+               </p:button>
+            </p:toolbarGroup>
+         </p:toolbar>
+
+         <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="margin-top:20px; line-height: 1.8;">
+            <h:outputText value="Appointment ID:" styleClass="font-bold"/>
+            <h:outputText value="APP-#{appointmentActionBean.appointment.appointmentId}"/>
+
+            <h:outputText value="Patient:" styleClass="font-bold"/>
+            <h:outputText value="#{appointmentActionBean.appointment.patient.firstName} #{appointmentActionBean.appointment.patient.lastName}"/>
+
+            <h:outputText value="Doctor:" styleClass="font-bold"/>
+            <h:outputText value="Dr. #{appointmentActionBean.appointment.doctor.firstName} #{appointmentActionBean.appointment.doctor.lastName} (#{appointmentActionBean.appointment.doctor.speciality})"/>
+
+            <h:outputText value="Date &amp; Time:" styleClass="font-bold"/>
+            <h:outputText value="#{appointmentActionBean.appointment.date} at #{appointmentActionBean.appointment.time}"/>
+
+            <h:outputText value="Reason for Visit:" styleClass="font-bold"/>
+            <h:outputText value="#{not empty appointmentActionBean.appointment.reason ? appointmentActionBean.appointment.reason : 'Not specified'}" style="white-space: pre-wrap;"/>
+
+            <h:outputText value="Status:" styleClass="font-bold"/>
+            <p:tag value="#{appointmentActionBean.appointment.status}" severity="#{appointmentActionBean.appointment.status == 'COMPLETED' ? 'success' : (appointmentActionBean.appointment.status == 'SCHEDULED' ? 'info' : 'danger')}"/>
+
+            <p:separator/> <p:separator/>
+
+            <h:outputText value="Created By:" styleClass="font-bold"/>
+            <h:outputText value="#{appointmentActionBean.appointment.createdBy.username}"/>
+
+            <h:outputText value="Created At:" styleClass="font-bold"/>
+            <h:outputText value="#{appointmentActionBean.appointment.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm"/></h:outputText>
+
+            <h:outputText value="Last Updated By:" styleClass="font-bold"/>
+            <h:outputText value="#{appointmentActionBean.appointment.lastUpdatedBy.username}"/>
+         </p:panelGrid>
+      </div>
+   </ui:define>
+</ui:composition>

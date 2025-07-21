@@ -10,4 +10,6 @@ import java.util.List;
 public interface MedicalRecordServiceInterface {
     void addMedicalRecord(Patient patient, Doctor doctor, String notes, String prescription, User creator);
     List<MedicalRecord> getRecordsForPatient(int patientId);
+
+    List<MedicalRecord> getRecordsByPatient(Patient patient);
 }

@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+   <f:metadata>
+      <!-- For editing, the id is required -->
+      <f:viewParam name="id" value="#{appointmentActionBean.appointmentId}" required="true" converter="jakarta.faces.Integer"/>
+      <f:viewAction action="#{appointmentActionBean.load}"/>
+   </f:metadata>
+
+   <ui:define name="pageTitle">Edit Appointment</ui:define>
+
+   <ui:define name="content">
+      <h:form id="form">
+         <p:growl id="messages" showDetail="true" life="6000"/>
+
+         <div class="card" rendered="#{not empty appointmentActionBean.appointment}">
+            <p:toolbar>
+               <p:toolbarGroup>
+                  <p:button value="Cancel" icon="pi pi-times" outcome="appointments" immediate="true" styleClass="ui-button-danger"/>
+               </p:toolbarGroup>
+               <p:toolbarGroup align="right">
+                  <p:commandButton value="Save Changes" icon="pi pi-save"
+                                   action="#{appointmentActionBean.save}"
+                                   update="@form"
+                                   styleClass="ui-button-success"/>
+               </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="margin-top:20px;">
+               <p:outputLabel for="patient" value="Patient"/>
+               <p:selectOneMenu id="patient" value="#{appointmentActionBean.appointment.patient}" converter="omnifaces.SelectItemsConverter" filter="true" required="true" requiredMessage="Patient is required.">
+                  <f:selectItem itemLabel="Select a Patient" noSelectionOption="true"/>
+                  <f:selectItems value="#{appointmentActionBean.availablePatients}" var="p" itemValue="#{p}" itemLabel="#{p.firstName} #{p.lastName}"/>
+               </p:selectOneMenu>
+
+               <p:outputLabel for="doctor" value="Doctor"/>
+               <p:selectOneMenu id="doctor" value="#{appointmentActionBean.appointment.doctor}" converter="omnifaces.SelectItemsConverter" filter="true" required="true" requiredMessage="Doctor is required.">
+                  <f:selectItem itemLabel="Select a Doctor" noSelectionOption="true"/>
+                  <f:selectItems value="#{appointmentActionBean.availableDoctors}" var="d" itemValue="#{d}" itemLabel="Dr. #{d.firstName} #{d.lastName} (#{d.speciality})"/>
+               </p:selectOneMenu>
+
+               <p:outputLabel for="date" value="Date"/>
+               <p:calendar id="date" value="#{appointmentActionBean.appointment.date}" navigator="true" required="true" mindate="#{java.time.LocalDate.now()}"/>
+
+               <p:outputLabel for="time" value="Time"/>
+               <p:datePicker id="time" value="#{appointmentActionBean.appointment.time}" required="true" pattern="HH:mm" timeOnly="true"/>
+
+               <p:outputLabel for="reason" value="Reason for Visit"/>
+               <p:inputTextarea id="reason" value="#{appointmentActionBean.appointment.reason}" rows="4" autoResize="false"/>
+            </p:panelGrid>
+         </div>
+      </h:form>
+   </ui:define>
+</ui:composition>

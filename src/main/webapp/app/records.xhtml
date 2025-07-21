@@ -1,13 +1,65 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="/WEB-INF/template.xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:define name="pageTitle">Medical Records</ui:define>
+<h:head>
+    <title>Medical Records</title>
+</h:head>
+<h:body>
+    <ui:composition template="/WEB-INF/template.xhtml">
+        <ui:define name="pageTitle">Medical Records</ui:define>
 
-    <ui:define name="content">
-        <div class="card">
-            <h2>Medical Records</h2>
-            <p>This feature is under construction.</p>
-        </div>
-    </ui:define>
-</ui:composition>
+        <ui:define name="content">
+            <h:form id="recordForm">
+                <p:growl id="messages" showDetail="true" life="6000"/>
+
+                <div class="card">
+                    <h2>Medical Records for #{patientBean.selectedPatient.firstName} #{patientBean.selectedPatient.lastName}</h2>
+
+                    <p:dataTable id="recordsTable" var="record" value="#{patientBean.selectedPatientRecords}"
+                                 paginator="true" rows="5" filteredValue="#{patientBean.filteredPatientRecords}"
+                                 widgetVar="recordTable" emptyMessage="No medical records found."
+                                 rowKey="#{record.recordId}" styleClass="records-table">
+
+                        <p:column headerText="Visit Date" sortBy="#{record.visitDate}" filterBy="#{record.visitDate}" >
+                            <h:outputText value="#{record.visitDate}"/>
+                        </p:column>
+
+                        <p:column headerText="Doctor">
+                            <h:outputText value="#{record.doctor.firstName} #{record.doctor.lastName}"/>
+                        </p:column>
+
+                        <p:column headerText="Notes">
+                            <h:outputText value="#{record.notes}"/>
+                        </p:column>
+
+                        <p:column headerText="Prescription">
+                            <h:outputText value="#{record.prescription}"/>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+
+                <p:separator/>
+
+                <p:panel header="Add Medical Record">
+                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
+
+                        <p:outputLabel for="notes" value="Visit Notes:"/>
+                        <p:inputTextarea id="notes" value="#{patientBean.newRecord.notes}" required="true"
+                                         autoResize="true" rows="4" cols="50"/>
+
+                        <p:outputLabel for="prescription" value="Prescription:"/>
+                        <p:textEditor id="prescription" value="#{patientBean.newRecord.prescription}" height="150px" style="width:100%"/>
+                    </p:panelGrid>
+
+                    <p:commandButton value="Add Record" icon="pi pi-plus" actionListener="#{patientBean.addMedicalRecord}"
+                                     update=":recordForm:messages :recordForm:recordsTable"/>
+                </p:panel>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

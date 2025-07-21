@@ -55,22 +55,21 @@
                             <p:column headerText="Phone Number" sortBy="#{patient.phoneNumber}"><h:outputText value="#{patient.phoneNumber}"/></p:column>
 
                             <p:column headerText="Actions" style="width:11rem;text-align:center;">
-                                <!-- FIX: "Edit" button is now visible to ALL roles (Admin, Receptionist, Doctor). -->
-                                <p:commandButton icon="pi pi-pencil" title="Edit Patient Details"
-                                                 update=":patientForm:managePatientContent"
-                                                 oncomplete="PF('managePatientDialog').show()" process="@this"
-                                                 styleClass="rounded-button ui-button-info">
-                                    <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
-                                </p:commandButton>
+                                <!-- VIEW/EDIT BUTTON - Navigates to the new details page -->
+                                <p:button icon="pi pi-eye" title="View/Edit Patient Details"
+                                          outcome="patient-details"
+                                          styleClass="rounded-button ui-button-info">
+                                    <f:param name="id" value="#{patient.patientId}"/>
+                                </p:button>
 
-                                <!-- "View Medical Records" button is visible to ALL roles. -->
+                                <!-- VIEW MEDICAL RECORDS BUTTON (Functionality remains here for quick access) -->
                                 <p:commandButton icon="pi pi-file-medical" title="View Medical Records"
                                                  oncomplete="PF('medicalRecordsDialog').show()" process="@this"
                                                  styleClass="rounded-button ui-button-secondary" style="margin-left:.5rem"
                                                  actionListener="#{patientBean.viewMedicalRecords(patient)}"
                                                  update=":patientForm:medicalRecordsPanel"/>
 
-                                <!-- "Deactivate" button is ONLY for Admins and Receptionists. -->
+                                <!-- DEACTIVATE BUTTON -->
                                 <p:commandButton icon="pi pi-trash" title="Deactivate Patient" process="@this"
                                                  styleClass="rounded-button ui-button-danger" style="margin-left:.5rem"
                                                  oncomplete="PF('deactivatePatientDialog').show()"

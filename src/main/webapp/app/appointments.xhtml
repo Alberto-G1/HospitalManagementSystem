@@ -1,90 +1,85 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
-
-<ui:composition template="/WEB-INF/template.xhtml">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
 
     <ui:define name="pageTitle">Appointments</ui:define>
 
     <ui:define name="content">
-
         <h:form id="appointmentForm">
             <p:growl id="messages" showDetail="true" life="5000" />
 
             <div class="card">
                 <p:toolbar>
                     <p:toolbarGroup>
-                        <p:commandButton value="New Appointment" icon="pi pi-plus"
-                                         actionListener="#{appointmentBean.openNew}"
-                                         update=":appointmentForm:manageAppointmentContent"
-                                         oncomplete="PF('manageAppointmentDialog').show()"
-                                         styleClass="ui-button-success"
-                                         rendered="#{userBean.isReceptionist() or userBean.isAdmin()}"/>
+                        <p:button value="New Appointment" icon="pi pi-plus"
+                                  outcome="appointment-add"
+                                  styleClass="ui-button-success"
+                                  rendered="#{userBean.isAdminOrReceptionist()}">
+                            <f:param name="id" value="0"/>
+                        </p:button>
                     </p:toolbarGroup>
                 </p:toolbar>
 
                 <p:tabView id="tabView" style="margin-top: 20px;">
-                    <p:tab title="List View">
-                        <p:dataTable id="dt-appointments" var="appt" value="#{appointmentBean.appointments}"
+                    <p:tab title="Active Appointments">
+                        <p:dataTable id="dt-appointments" widgetVar="dtAppointments" var="appt" value="#{appointmentBean.appointments}"
                                      paginator="true" rows="10" emptyMessage="No active appointments found."
-                                     style="margin-top: 20px;">
-                            <p:column headerText="Patient">#{appt.patient.firstName} #{appt.patient.lastName}</p:column>
-                            <p:column headerText="Doctor">Dr. #{appt.doctor.firstName} #{appt.doctor.lastName}</p:column>
-                            <p:column headerText="Date and Time">
-                                <h:outputText value="#{appt.date}"><f:convertDateTime type="localDate" pattern="EEE, dd MMM yyyy"/></h:outputText> at
-                                <h:outputText value="#{appt.time}"><f:convertDateTime type="localTime" pattern="h:mm a"/></h:outputText>
+                                     filteredValue="#{appointmentBean.filteredAppointments}"
+                                     globalFilterFunction="#{appointmentBean.globalFilterFunction}">
+
+                            <f:facet name="header">
+                                <div class="flex justify-content-between align-items-center">
+                                    <span class="font-bold">Appointment List</span>
+                                    <span class="p-input-icon-left">
+                                        <i class="pi pi-search"></i>
+                                        <p:inputText id="globalFilter" onkeyup="PF('dtAppointments').filter()" placeholder="Search..." style="width: 250px;"/>
+                                    </span>
+                                </div>
+                            </f:facet>
+
+                            <p:column headerText="Patient" sortBy="#{appt.patient.lastName}">#{appt.patient.firstName} #{appt.patient.lastName}</p:column>
+                            <p:column headerText="Doctor" sortBy="#{appt.doctor.lastName}">Dr. #{appt.doctor.firstName} #{appt.doctor.lastName}</p:column>
+                            <p:column headerText="Date and Time" sortBy="#{appt.date}">
+                                <h:outputText value="#{appt.date}"/><h:outputText value=" at "/><h:outputText value="#{appt.time}"/>
                             </p:column>
-                            <p:column headerText="Status">
-                                <p:tag severity="#{appt.status == 'SCHEDULED' ? 'info' : (appt.status == 'COMPLETED' ? 'success' : 'danger')}" value="#{appt.status}"/>
-                            </p:column>
+                            <p:column headerText="Status" sortBy="#{appt.status}"><p:tag value="#{appt.status}"/></p:column>
 
-                            <!-- ======================================================= -->
-                            <!-- === FIX: ALL ACTION LISTENERS MOVED INSIDE BUTTONS  === -->
-                            <!-- ======================================================= -->
-                            <p:column style="width:120px;text-align:center;">
-                                <!-- Button for Doctors to update status -->
-                                <p:commandButton icon="pi pi-check-square" title="Update Status"
-                                                 update=":appointmentForm:statusUpdatePanel"
-                                                 oncomplete="PF('statusDialog').show()"
-                                                 process="@this"
-                                                 styleClass="ui-button-info"
-                                                 rendered="#{userBean.isDoctor()}">
-                                    <f:setPropertyActionListener value="#{appt}" target="#{appointmentBean.selectedAppointment}"/>
-                                </p:commandButton>
+                            <p:column style="width:12rem;text-align:center;">
+                                <p:button icon="pi pi-eye" title="View Details"
+                                          outcome="appointment-details"
+                                          styleClass="ui-button-secondary rounded-button">
+                                    <f:param name="id" value="#{appt.appointmentId}"/>
+                                </p:button>
 
-                                <!-- Button for Admins/Receptionists to edit appointment -->
-                                <p:commandButton icon="pi pi-pencil" title="Edit"
-                                                 update=":appointmentForm:manageAppointmentContent"
-                                                 oncomplete="PF('manageAppointmentDialog').show()"
-                                                 process="@this"
-                                                 styleClass="ui-button-info"
-                                                 rendered="#{userBean.isAdminOrReceptionist()}">
-                                    <f:setPropertyActionListener value="#{appt}" target="#{appointmentBean.selectedAppointment}"/>
-                                </p:commandButton>
+                                <p:button icon="pi pi-pencil" title="Edit"
+                                          outcome="appointment-edit"
+                                          styleClass="ui-button-info rounded-button" style="margin-left:.5rem;"
+                                          rendered="#{userBean.isAdminOrReceptionist()}">
+                                    <f:param name="id" value="#{appt.appointmentId}"/>
+                                </p:button>
 
-                                <!-- Button for Admins/Receptionists to delete -->
-                                <p:commandButton icon="pi pi-trash" title="Delete"
+                                <p:commandButton icon="pi pi-trash" title="Archive"
                                                  oncomplete="PF('deleteDialog').show()"
                                                  process="@this"
-                                                 styleClass="ui-button-danger"
+                                                 styleClass="ui-button-danger rounded-button" style="margin-left:.5rem;"
                                                  rendered="#{userBean.isAdminOrReceptionist()}">
-                                    <f:setPropertyActionListener value="#{appt}" target="#{appointmentBean.selectedAppointment}"/>
+                                    <f:setPropertyActionListener value="#{appt}" target="#{appointmentBean.selectedAppointmentForActions}"/>
                                 </p:commandButton>
                             </p:column>
                         </p:dataTable>
                     </p:tab>
 
                     <p:tab title="Calendar View">
-                        <p:schedule id="schedule" value="#{appointmentBean.scheduleModel}" widgetVar="scheduleWidget" locale="en" timeZone="UTC" clientTimeZone="local" view="timeGridWeek" rightHeaderTemplate="dayGridMonth,timeGridWeek,timeGridDay" style="height: 600px;">
-                            <p:ajax event="dateSelect" listener="#{appointmentBean.onDateSelect}" update=":appointmentForm:manageAppointmentContent" oncomplete="PF('manageAppointmentDialog').show()"/>
-                            <p:ajax event="eventSelect" listener="#{appointmentBean.onEventSelect}" update=":appointmentForm:manageAppointmentContent" oncomplete="PF('manageAppointmentDialog').show()"/>
+                        <p:schedule id="schedule" value="#{appointmentBean.scheduleModel}" widgetVar="scheduleWidget">
+                            <p:ajax event="eventSelect" listener="#{appointmentBean.onEventSelect}" />
                         </p:schedule>
                     </p:tab>
 
-                    <p:tab title="Archived" rendered="#{userBean.isAdmin()}">
+                    <!-- FIX: Added tab for archived appointments, visible only to admins -->
+                    <p:tab title="Archived Appointments" rendered="#{userBean.isAdmin()}">
                         <p:dataTable id="dt-archives" var="archive" value="#{appointmentBean.archivedAppointments}" paginator="true" rows="10" emptyMessage="No archived appointments found.">
                             <p:column headerText="Patient">#{archive.patientName}</p:column>
                             <p:column headerText="Doctor">Dr. #{archive.doctorName}</p:column>
@@ -96,47 +91,11 @@
                 </p:tabView>
             </div>
 
-            <!-- Add/Edit Appointment Dialog -->
-            <p:dialog header="Appointment Details" widgetVar="manageAppointmentDialog" modal="true" width="600" responsive="true" showEffect="fade" hideEffect="fade">
-                <p:outputPanel id="manageAppointmentContent" class="ui-fluid">
-                    <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty appointmentBean.selectedAppointment}">
-                        <p:outputLabel for="patient" value="Patient"/><p:selectOneMenu id="patient" value="#{appointmentBean.selectedAppointment.patient}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="Patient is required."><f:selectItem itemLabel="Select Patient" noSelectionOption="true" itemValue="#{null}"/><f:selectItems value="#{appointmentBean.availablePatients}" var="p" itemValue="#{p}" itemLabel="#{p.firstName} #{p.lastName}"/></p:selectOneMenu>
-                        <p:outputLabel for="doctor" value="Doctor"/><p:selectOneMenu id="doctor" value="#{appointmentBean.selectedAppointment.doctor}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="Doctor is required."><f:selectItem itemLabel="Select Doctor" noSelectionOption="true" itemValue="#{null}"/><f:selectItems value="#{appointmentBean.availableDoctors}" var="d" itemValue="#{d}" itemLabel="Dr. #{d.firstName} #{d.lastName} (#{d.speciality})"/></p:selectOneMenu>
-                        <p:outputLabel for="date" value="Date"/><p:calendar id="date" value="#{appointmentBean.selectedAppointment.date}" navigator = "true" required="true" mindate="#{java.time.LocalDate.now()}"/>
-                        <p:outputLabel for="time" value="Time"/><p:datePicker id="time" value="#{appointmentBean.selectedAppointment.time}" required="true" pattern="HH:mm" timeOnly="true"/>
-                        <p:outputLabel for="reason" value="Reason for Visit"/><p:inputTextarea id="reason" value="#{appointmentBean.selectedAppointment.reason}" rows="3"/>
-                    </p:panelGrid>
-                </p:outputPanel>
-                <f:facet name="footer">
-                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{appointmentBean.saveAppointment}" process="manageAppointmentContent @this" update=":appointmentForm:messages :appointmentForm:tabView"/>
-                    <p:commandButton value="Cancel" icon="pi pi-times" styleClass="ui-button-secondary" type="button" onclick="PF('manageAppointmentDialog').hide()"/>
-                </f:facet>
-            </p:dialog>
-
-            <!-- Update Status Dialog -->
-            <p:dialog header="Update Status" widgetVar="statusDialog" modal="true" width="400">
-                <p:panelGrid id="statusUpdatePanel" columns="1" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty appointmentBean.selectedAppointment}">
-                    <p:outputLabel for="status" value="New Status"/>
-                    <p:selectOneMenu id="status" value="#{appointmentBean.selectedAppointment.status}" required="true" requiredMessage="Status cannot be empty.">
-                        <f:selectItem itemLabel="Select Status" noSelectionOption="true"/>
-                        <f:selectItems value="#{appointmentBean.appointmentStatuses}" var="s" itemLabel="#{s}" itemValue="#{s}"/>
-                    </p:selectOneMenu>
-                </p:panelGrid>
-                <f:facet name="footer">
-                    <p:commandButton value="Update" icon="pi pi-save" action="#{appointmentBean.updateStatus}"
-                                     process="@this statusUpdatePanel"
-                                     update=":appointmentForm:messages :appointmentForm:tabView"
-                                     oncomplete="if (!args.validationFailed) { PF('statusDialog').hide(); }"/>
-                </f:facet>
-            </p:dialog>
-
-            <!-- Confirm Delete Dialog -->
-            <p:confirmDialog widgetVar="deleteDialog" header="Confirm Deletion" severity="alert" message="Are you sure you want to delete and archive this appointment?">
-                <p:commandButton value="Yes, Delete" action="#{appointmentBean.deleteAppointment}" process="@this" update=":appointmentForm:messages :appointmentForm:tabView"/>
+            <p:confirmDialog widgetVar="deleteDialog" header="Confirm Archive" severity="alert" message="Are you sure you want to archive this appointment?">
+                <p:commandButton value="Yes, Archive" action="#{appointmentBean.deleteAppointment}" process="@this" update=":appointmentForm"/>
                 <p:commandButton value="No" type="button" styleClass="ui-button-secondary" onclick="PF('deleteDialog').hide()"/>
             </p:confirmDialog>
         </h:form>
     </ui:define>
 
 </ui:composition>
-</html>
