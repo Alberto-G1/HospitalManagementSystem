@@ -1,0 +1,65 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+   <f:metadata>
+      <f:viewParam name="id" value="#{receptionistDetailBean.receptionistId}" required="true" converter="jakarta.faces.Integer"/>
+      <f:viewAction action="#{receptionistDetailBean.loadReceptionist}"/>
+   </f:metadata>
+
+   <ui:define name="pageTitle">Receptionist Details</ui:define>
+
+   <ui:define name="content">
+      <h:form id="form">
+
+         <div class="card">
+            <p:outputPanel id="detailPanel">
+
+               <!-- RENDERED WHEN RECEPTIONIST IS FOUND -->
+               <p:outputPanel rendered="#{not empty receptionistDetailBean.receptionist}">
+                  <p:toolbar>
+                     <p:toolbarGroup>
+                        <p:button value="Back to Staff List" icon="pi pi-arrow-left" outcome="staff" styleClass="ui-button-secondary"/>
+                     </p:toolbarGroup>
+                  </p:toolbar>
+
+                  <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="margin-top:20px; line-height: 1.8;">
+                     <h:outputText value="First Name:" styleClass="font-bold"/>
+                     <h:outputText value="#{receptionistDetailBean.receptionist.firstName}"/>
+
+                     <h:outputText value="Last Name:" styleClass="font-bold"/>
+                     <h:outputText value="#{receptionistDetailBean.receptionist.lastName}"/>
+
+                     <h:outputText value="Phone Number:" styleClass="font-bold"/>
+                     <h:outputText value="#{receptionistDetailBean.receptionist.phoneNumber}"/>
+
+                     <p:separator/> <p:separator/>
+
+                     <h:outputText value="Username:" styleClass="font-bold"/>
+                     <h:outputText value="#{receptionistDetailBean.receptionist.user.username}"/>
+
+                     <h:outputText value="Email:" styleClass="font-bold"/>
+                     <h:outputText value="#{receptionistDetailBean.receptionist.user.email}"/>
+
+                     <h:outputText value="Account Status:" styleClass="font-bold"/>
+                     <p:tag value="#{receptionistDetailBean.receptionist.user.active ? 'ACTIVE' : 'INACTIVE'}"
+                            severity="#{receptionistDetailBean.receptionist.user.active ? 'success' : 'danger'}"/>
+                  </p:panelGrid>
+               </p:outputPanel>
+
+               <!-- RENDERED WHEN RECEPTIONIST IS NOT FOUND -->
+               <p:outputPanel rendered="#{empty receptionistDetailBean.receptionist}">
+                  <h3>Receptionist Not Found</h3>
+                  <p>The receptionist with the specified ID could not be found. They may have been deleted.</p>
+                  <p:button value="Back to Staff List" icon="pi pi-arrow-left" outcome="staff" styleClass="ui-button-secondary" style="margin-top: 20px;"/>
+               </p:outputPanel>
+
+            </p:outputPanel>
+         </div>
+      </h:form>
+   </ui:define>
+
+</ui:composition>

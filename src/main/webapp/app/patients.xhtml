@@ -55,12 +55,21 @@
                             <p:column headerText="Phone Number" sortBy="#{patient.phoneNumber}"><h:outputText value="#{patient.phoneNumber}"/></p:column>
 
                             <p:column headerText="Actions" style="width:11rem;text-align:center;">
-                                <!-- VIEW/EDIT BUTTON - Navigates to the new details page -->
-                                <p:button icon="pi pi-eye" title="View/Edit Patient Details"
+                                <!-- VIEW BUTTON - Navigates to the new details page -->
+                                <p:button icon="pi pi-eye" title="View Full Details"
                                           outcome="patient-details"
-                                          styleClass="rounded-button ui-button-info">
+                                          styleClass="rounded-button ui-button-secondary">
                                     <f:param name="id" value="#{patient.patientId}"/>
                                 </p:button>
+
+                                <!-- EDIT BUTTON - Opens the corrected dialog -->
+                                <p:commandButton icon="pi pi-pencil" title="Edit Patient Info"
+                                                 update=":patientForm:managePatientContent"
+                                                 oncomplete="PF('managePatientDialog').show()" process="@this"
+                                                 styleClass="rounded-button ui-button-info" style="margin-left:.5rem;"
+                                                 rendered="#{userBean.isAdminOrReceptionist()}">
+                                    <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
+                                </p:commandButton>
 
                                 <!-- VIEW MEDICAL RECORDS BUTTON (Functionality remains here for quick access) -->
                                 <p:commandButton icon="pi pi-file-medical" title="View Medical Records"

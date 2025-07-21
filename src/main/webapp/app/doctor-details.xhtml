@@ -14,79 +14,37 @@
 
     <ui:define name="content">
         <h:form id="form">
-            <p:growl id="messages" showDetail="true" life="6000"/>
-
             <div class="card" rendered="#{not empty doctorDetailBean.doctor}">
                 <p:toolbar>
                     <p:toolbarGroup>
                         <p:button value="Back to Staff List" icon="pi pi-arrow-left" outcome="staff" styleClass="ui-button-secondary"/>
                     </p:toolbarGroup>
-                    <p:toolbarGroup align="right">
-                        <p:commandButton value="Edit Profile" icon="pi pi-pencil"
-                                         actionListener="#{doctorDetailBean.enableEditMode}"
-                                         update="@form" process="@this"
-                                         rendered="#{not doctorDetailBean.editMode and userBean.isAdmin()}"/>
-
-                        <!-- FIX: Added process="@form" to ensure all inputs are submitted -->
-                        <p:commandButton value="Save Changes" icon="pi pi-save"
-                                         action="#{doctorDetailBean.saveDoctor}"
-                                         process="@form" update="@form"
-                                         styleClass="ui-button-success"
-                                         rendered="#{doctorDetailBean.editMode}"/>
-
-                        <!-- FIX: Added immediate="true" to bypass validation -->
-                        <p:commandButton value="Cancel Edit" icon="pi pi-times"
-                                         actionListener="#{doctorDetailBean.cancelEdit}"
-                                         update="@form" process="@this" immediate="true"
-                                         styleClass="ui-button-danger"
-                                         rendered="#{doctorDetailBean.editMode}"/>
-                    </p:toolbarGroup>
                 </p:toolbar>
 
-                <p:tabView style="margin-top:20px;">
-                    <p:tab title="Doctor Profile">
-                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
-                            <h:outputText value="First Name:" styleClass="font-bold"/>
-                            <h:outputText value="#{doctorDetailBean.doctor.firstName}" rendered="#{not doctorDetailBean.editMode}"/>
-                            <p:inputText value="#{doctorDetailBean.doctor.firstName}" required="true" rendered="#{doctorDetailBean.editMode}"/>
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="margin-top:20px;">
+                    <h:outputText value="Name:" styleClass="font-bold"/>
+                    <h:outputText value="Dr. #{doctorDetailBean.doctor.firstName} #{doctorDetailBean.doctor.lastName}"/>
+                    <h:outputText value="Specialty:" styleClass="font-bold"/>
+                    <h:outputText value="#{doctorDetailBean.doctor.speciality}"/>
+                    <h:outputText value="Phone:" styleClass="font-bold"/>
+                    <h:outputText value="#{doctorDetailBean.doctor.phoneNumber}"/>
+                    <p:separator/><p:separator/>
+                    <h:outputText value="Username:" styleClass="font-bold"/>
+                    <h:outputText value="#{doctorDetailBean.doctor.user.username}"/>
+                    <h:outputText value="Email:" styleClass="font-bold"/>
+                    <h:outputText value="#{doctorDetailBean.doctor.user.email}"/>
+                    <h:outputText value="Account Status:" styleClass="font-bold"/>
+                    <p:tag value="#{doctorDetailBean.doctor.user.active ? 'ACTIVE' : 'INACTIVE'}" severity="#{doctorDetailBean.doctor.user.active ? 'success' : 'danger'}"/>
+                </p:panelGrid>
 
-                            <h:outputText value="Last Name:" styleClass="font-bold"/>
-                            <h:outputText value="#{doctorDetailBean.doctor.lastName}" rendered="#{not doctorDetailBean.editMode}"/>
-                            <p:inputText value="#{doctorDetailBean.doctor.lastName}" required="true" rendered="#{doctorDetailBean.editMode}"/>
-
-                            <h:outputText value="Specialty:" styleClass="font-bold"/>
-                            <h:outputText value="#{doctorDetailBean.doctor.speciality}" rendered="#{not doctorDetailBean.editMode}"/>
-                            <p:inputText value="#{doctorDetailBean.doctor.speciality}" required="true" rendered="#{doctorDetailBean.editMode}"/>
-
-                            <h:outputText value="Phone Number:" styleClass="font-bold"/>
-                            <h:outputText value="#{doctorDetailBean.doctor.phoneNumber}" rendered="#{not doctorDetailBean.editMode}"/>
-                            <p:inputText value="#{doctorDetailBean.doctor.phoneNumber}" required="true" rendered="#{doctorDetailBean.editMode}"/>
-
-                            <p:separator/> <p:separator/>
-
-                            <h:outputText value="Username:" styleClass="font-bold"/>
-                            <h:outputText value="#{doctorDetailBean.doctor.user.username}" rendered="#{not doctorDetailBean.editMode}"/>
-                            <p:inputText value="#{doctorDetailBean.doctor.user.username}" required="true" rendered="#{doctorDetailBean.editMode}"/>
-
-                            <h:outputText value="Email:" styleClass="font-bold"/>
-                            <h:outputText value="#{doctorDetailBean.doctor.user.email}" rendered="#{not doctorDetailBean.editMode}"/>
-                            <p:inputText value="#{doctorDetailBean.doctor.user.email}" required="true" rendered="#{doctorDetailBean.editMode}"/>
-                        </p:panelGrid>
-                    </p:tab>
-
-                    <p:tab title="Appointment Schedule (#{doctorDetailBean.appointments.size()})">
-                        <p:dataTable var="appt" value="#{doctorDetailBean.appointments}" rows="10" paginator="true" emptyMessage="No appointments found for this doctor.">
-                            <p:column headerText="Date"><h:outputText value="#{appt.date}"><f:convertDateTime type="localDate" pattern="dd MMM yyyy"/></h:outputText></p:column>
-                            <p:column headerText="Time"><h:outputText value="#{appt.time}"><f:convertDateTime type="localTime" pattern="h:mm a"/></h:outputText></p:column>
-                            <p:column headerText="Patient">#{appt.patient.firstName} #{appt.patient.lastName}</p:column>
-                            <p:column headerText="Status">
-                                <p:tag value="#{appt.status}" severity="#{appt.status == 'COMPLETED' ? 'success' : (appt.status == 'SCHEDULED' ? 'info' : 'danger')}"/>
-                            </p:column>
-                        </p:dataTable>
-                    </p:tab>
-                </p:tabView>
+                <p:panel header="Upcoming Appointments (#{doctorDetailBean.appointments.size()})" style="margin-top:20px;">
+                    <p:dataTable var="appt" value="#{doctorDetailBean.appointments}" emptyMessage="No appointments found.">
+                        <p:column headerText="Date"><h:outputText value="#{appt.date}"/></p:column>
+                        <p:column headerText="Patient">#{appt.patient.firstName} #{appt.patient.lastName}</p:column>
+                        <p:column headerText="Status"><p:tag value="#{appt.status}"/></p:column>
+                    </p:dataTable>
+                </p:panel>
             </div>
         </h:form>
     </ui:define>
-
 </ui:composition>
