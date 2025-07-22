@@ -33,18 +33,29 @@
                             <p:column headerText="Specialty">#{doc.speciality}</p:column>
                             <p:column headerText="Phone">#{doc.phoneNumber}</p:column>
                             <p:column headerText="Username">#{doc.user.username}</p:column>
-                            <p:column headerText="Actions" style="width:12rem;text-align:center;">
-                                <p:commandButton icon="pi pi-pencil" title="Edit"
-                                                 oncomplete="PF('manageDoctorDialog').show()"
-                                                 update=":staffForm:manage-doctor-content" process="@this">
+                            <p:column headerText=" ⚡ Actions" style="width:16rem;text-align:center;">
+                                <!-- VIEW BUTTON -->
+                                <p:button icon="pi pi-eye" title="View Full Details"
+                                          outcome="doctor-details"
+                                          styleClass="rounded-button ui-button-secondary">
+                                    <f:param name="id" value="#{doc.doctorId}"/>
+                                </p:button>
+                                <!-- EDIT BUTTON -->
+                                <p:commandButton icon="pi pi-pencil" title="Edit Doctor"
+                                                 update=":staffForm:manage-doctor-content"
+                                                 oncomplete="PF('manageDoctorDialog').show()" process="@this"
+                                                 styleClass="rounded-button ui-button-info" style="margin-left:.5rem;">
                                     <f:setPropertyActionListener value="#{doc}" target="#{staffManagementBean.selectedDoctor}"/>
                                 </p:commandButton>
+
+                                <!-- PASSWORD RESET BUTTON -->
                                 <p:commandButton icon="pi pi-key" title="Reset Password"
                                                  oncomplete="PF('resetPasswordDialog').show()" process="@this"
                                                  style="margin-left: .5rem;"
                                                  actionListener="#{staffManagementBean.preparePasswordReset(doc.user)}"
-                                                 update=":staffForm:resetPasswordContent">
-                                </p:commandButton>
+                                                 update=":staffForm:resetPasswordContent"/>
+
+                                <!-- DEACTIVATE BUTTON -->
                                 <p:commandButton icon="pi pi-trash" title="Deactivate"
                                                  oncomplete="PF('deleteDoctorDialog').show()" process="@this"
                                                  style="margin-left: .5rem;" styleClass="ui-button-danger">
@@ -53,10 +64,6 @@
                             </p:column>
                         </p:dataTable>
                     </p:tab>
-
-                    <!-- ======================= -->
-                    <!-- === RECEPTIONISTS TAB === -->
-                    <!-- ======================= -->
                     <p:tab title="Receptionists (#{staffManagementBean.activeReceptionists.size()})">
                         <p:toolbar>
                             <p:toolbarGroup>
@@ -72,10 +79,18 @@
                             <p:column headerText="Name">#{rec.firstName} #{rec.lastName}</p:column>
                             <p:column headerText="Phone">#{rec.phoneNumber}</p:column>
                             <p:column headerText="Username">#{rec.user.username}</p:column>
-                            <p:column headerText="Actions" style="width:12rem;text-align:center;">
-                                <p:commandButton icon="pi pi-pencil" title="Edit"
+                            <p:column headerText="⚡ Actions" style="width:16rem;text-align:center;">
+                                <!-- FIX: VIEW BUTTON for Receptionists -->
+                                <p:button icon="pi pi-eye" title="View Full Details"
+                                          outcome="receptionist-details"
+                                          styleClass="rounded-button ui-button-secondary">
+                                    <f:param name="id" value="#{rec.receptionistId}"/>
+                                </p:button>
+                                <!-- FIX: EDIT BUTTON for Receptionists -->
+                                <p:commandButton icon="pi pi-pencil" title="Edit Receptionist"
                                                  oncomplete="PF('manageReceptionistDialog').show()"
-                                                 update=":staffForm:manage-receptionist-content" process="@this">
+                                                 update=":staffForm:manage-receptionist-content" process="@this"
+                                                 styleClass="rounded-button ui-button-info" style="margin-left:.5rem;">
                                     <f:setPropertyActionListener value="#{rec}" target="#{staffManagementBean.selectedReceptionist}"/>
                                 </p:commandButton>
                                 <p:commandButton icon="pi pi-key" title="Reset Password"

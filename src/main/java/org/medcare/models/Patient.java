@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.medcare.enums.Gender;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -53,6 +54,7 @@ public class Patient extends BaseModel {
     private String address;
 
     @Size(max = 50, message = "Emergency contact must be less than 50 characters.")
+    @NotBlank(message = "Emergency Contact is required.")
     @Pattern(regexp = "^(\\+256|0)7[0-9]{8}$", message = "Invalid Ugandan phone number.")
     @Column(length = 50)
     private String emergencyContact;
@@ -64,8 +66,8 @@ public class Patient extends BaseModel {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicalRecord> medicalRecords;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Collection<Appointment> appointments;
+    @OneToMany(mappedBy = "patient", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Collection<Appointment> appointments = new ArrayList<>();
 
     // Getters and Setters
     public int getPatientId() { return patientId; }

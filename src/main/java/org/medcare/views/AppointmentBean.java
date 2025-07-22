@@ -6,22 +6,20 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.medcare.enums.AppointmentStatus;
 import org.medcare.enums.Role;
-import org.medcare.models.*;
-import org.medcare.service.AppointmentService;
-import org.medcare.service.DoctorService;
-import org.medcare.service.PatientService;
-import org.primefaces.PrimeFaces;
+import org.medcare.models.Appointment;
+import org.medcare.models.AppointmentArchive;
+import org.medcare.models.Doctor;
+import org.medcare.service.interfaces.AppointmentServiceInterface;
+import org.medcare.service.interfaces.DoctorServiceInterface;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
+import java.io.IOException;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,45 +27,35 @@ import java.util.List;
 @ViewScoped
 public class AppointmentBean implements Serializable {
 
-    @Inject private AppointmentService appointmentService;
-    @Inject private DoctorService doctorService;
-    @Inject private PatientService patientService;
+    @Inject private AppointmentServiceInterface appointmentService;
+    @Inject private DoctorServiceInterface doctorService;
     @Inject private UserBean userBean;
 
     private List<Appointment> appointments;
-    private List<AppointmentArchive> archivedAppointments;
-    private List<Doctor> availableDoctors;
-    private List<Patient> availablePatients;
-
-    private Appointment selectedAppointment;
-
-    // NEW: For the calendar view
+    private List<AppointmentArchive> archivedAppointments; // Property for archived list
+    private List<Appointment> filteredAppointments; // Property for search filter
     private ScheduleModel scheduleModel;
-    private ScheduleEvent<?> event = new DefaultScheduleEvent<>();
+
+    private Appointment selectedAppointmentForActions;
 
     @PostConstruct
     public void init() {
-        User currentUser = userBean.getUser();
-        if (currentUser.getRole() == Role.DOCTOR) {
-            Doctor doctorProfile = doctorService.findByUserId(currentUser.getUserId());
-            if (doctorProfile != null) {
-                appointments = appointmentService.getAppointmentsForDoctor(doctorProfile.getDoctorId());
-            } else {
-                appointments = new ArrayList<>(); // Doctor has no profile, show empty list
-            }
-        } else { // Admin or Receptionist
+        loadAppointments();
+        initializeSchedule();
+    }
+
+    private void loadAppointments() {
+        if (userBean.getUser().getRole() == Role.DOCTOR) {
+            Doctor doctorProfile = doctorService.findByUserId(userBean.getUser().getUserId());
+            appointments = (doctorProfile != null) ? appointmentService.getAppointmentsForDoctor(doctorProfile.getDoctorId()) : new ArrayList<>();
+        } else {
             appointments = appointmentService.getAllActive();
         }
 
-        if (currentUser.getRole() == Role.ADMIN) {
+        // FIX: Load archived appointments if the user is an admin
+        if (userBean.isAdmin()) {
             archivedAppointments = appointmentService.getAllArchived();
         }
-
-        availableDoctors = doctorService.getAll();
-        availablePatients = patientService.getAllActive();
-
-        // NEW: Initialize the schedule model
-        initializeSchedule();
     }
 
     private void initializeSchedule() {
@@ -75,104 +63,66 @@ public class AppointmentBean implements Serializable {
         if (appointments != null) {
             for (Appointment appt : appointments) {
                 LocalDateTime start = LocalDateTime.of(appt.getDate(), appt.getTime());
-                LocalDateTime end = start.plusHours(1); // Assuming 1-hour appointments
+                LocalDateTime end = start.plusHours(1);
                 String title = "Pt: " + appt.getPatient().getLastName() + " | Dr: " + appt.getDoctor().getLastName();
-
                 DefaultScheduleEvent<?> event = DefaultScheduleEvent.builder()
                         .title(title)
                         .startDate(start)
                         .endDate(end)
-                        .data(appt.getAppointmentId()) // Store the ID
-                        .styleClass(getStyleClassForStatus(appt.getStatus()))
+                        .data(appt.getAppointmentId())
                         .build();
                 scheduleModel.addEvent(event);
             }
         }
     }
 
-    private String getStyleClassForStatus(AppointmentStatus status) {
-        switch (status) {
-            case COMPLETED:
-                return "event-completed";
-            case CANCELED:
-                return "event-canceled";
-            case SCHEDULED:
-            default:
-                return "event-scheduled";
-        }
-    }
-
     public void onEventSelect(org.primefaces.event.SelectEvent<ScheduleEvent<?>> selectEvent) {
-        event = selectEvent.getObject();
-        int appointmentId = (int) event.getData();
-        this.selectedAppointment = appointmentService.getById(appointmentId);
-    }
-
-    public void onDateSelect(org.primefaces.event.SelectEvent<LocalDateTime> selectEvent) {
-        openNew();
-        selectedAppointment.setDate(selectEvent.getObject().toLocalDate());
-        selectedAppointment.setTime(selectEvent.getObject().toLocalTime());
-    }
-
-    public void openNew() {
-        selectedAppointment = new Appointment();
-        selectedAppointment.setDate(LocalDate.now());
-        selectedAppointment.setTime(LocalTime.of(9, 0));
-    }
-
-    public void saveAppointment() {
+        int appointmentId = (int) selectEvent.getObject().getData();
         try {
-            appointmentService.createAppointment(selectedAppointment, userBean.getUser());
-            init(); // Refresh all lists and the calendar
-            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Appointment booked successfully.");
-            PrimeFaces.current().executeScript("PF('manageAppointmentDialog').hide()");
-            PrimeFaces.current().ajax().update("appointmentForm");
-        } catch (Exception e) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not book appointment.");
-        }
-    }
-
-    public void updateStatus() {
-        try {
-            appointmentService.updateAppointmentStatus(selectedAppointment, selectedAppointment.getStatus(), userBean.getUser());
-            init(); // Refresh lists and calendar
-            addMessage(FacesMessage.SEVERITY_INFO, "Success", "Appointment status updated.");
-            PrimeFaces.current().executeScript("PF('statusDialog').hide()");
-            PrimeFaces.current().ajax().update("appointmentForm");
-        } catch(Exception e) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not update status.");
+            String url = FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath()
+                    + "/app/appointment-details.xhtml?id=" + appointmentId;
+            FacesContext.getCurrentInstance().getExternalContext().redirect(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+            addMessage(FacesMessage.SEVERITY_ERROR, "Navigation Error", "Could not open appointment details.");
         }
     }
 
     public void deleteAppointment() {
         try {
-            appointmentService.archiveAppointment(selectedAppointment.getAppointmentId(), userBean.getUser());
-            init(); // Refresh lists and calendar
+            if (selectedAppointmentForActions == null) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "No appointment selected for deletion.");
+                return;
+            }
+            appointmentService.archiveAppointment(selectedAppointmentForActions.getAppointmentId(), userBean.getUser());
+            loadAppointments();
+            initializeSchedule();
             addMessage(FacesMessage.SEVERITY_WARN, "Success", "Appointment has been deleted and archived.");
-            PrimeFaces.current().ajax().update("appointmentForm");
         } catch (Exception e) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not delete appointment.");
+            addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not delete appointment: " + e.getMessage());
         }
+    }
+
+    public boolean globalFilterFunction(Object value, Object filter, java.util.Locale locale) {
+        String filterText = (filter == null) ? null : filter.toString().trim().toLowerCase();
+        if (filterText == null || filterText.isEmpty()) return true;
+        Appointment appt = (Appointment) value;
+        return (appt.getPatient().getFirstName().toLowerCase().contains(filterText)) ||
+                (appt.getPatient().getLastName().toLowerCase().contains(filterText)) ||
+                (appt.getDoctor().getLastName().toLowerCase().contains(filterText)) ||
+                (appt.getStatus().toString().toLowerCase().contains(filterText));
     }
 
     private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 
-    public AppointmentStatus[] getAppointmentStatuses() {
-        return AppointmentStatus.values();
-    }
-
-    // --- Getters and Setters ---
+    // Getters and Setters
     public List<Appointment> getAppointments() { return appointments; }
-    public void setAppointments(List<Appointment> appointments) { this.appointments = appointments; }
+    public ScheduleModel getScheduleModel() { return scheduleModel; }
+    public Appointment getSelectedAppointmentForActions() { return selectedAppointmentForActions; }
+    public void setSelectedAppointmentForActions(Appointment selectedAppointmentForActions) { this.selectedAppointmentForActions = selectedAppointmentForActions; }
     public List<AppointmentArchive> getArchivedAppointments() { return archivedAppointments; }
-    public void setArchivedAppointments(List<AppointmentArchive> archivedAppointments) { this.archivedAppointments = archivedAppointments; }
-    public List<Doctor> getAvailableDoctors() { return availableDoctors; }
-    public void setAvailableDoctors(List<Doctor> availableDoctors) { this.availableDoctors = availableDoctors; }
-    public List<Patient> getAvailablePatients() { return availablePatients; }
-    public void setAvailablePatients(List<Patient> availablePatients) { this.availablePatients = availablePatients; }
-    public Appointment getSelectedAppointment() { return selectedAppointment; }
-    public void setSelectedAppointment(Appointment selectedAppointment) { this.selectedAppointment = selectedAppointment; }
-    public ScheduleModel getScheduleModel() { return scheduleModel; } // Getter for the calendar
+    public List<Appointment> getFilteredAppointments() { return filteredAppointments; }
+    public void setFilteredAppointments(List<Appointment> filteredAppointments) { this.filteredAppointments = filteredAppointments; }
 }

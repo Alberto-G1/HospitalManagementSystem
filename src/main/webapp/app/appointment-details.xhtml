@@ -1,0 +1,564 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+   <f:metadata>
+      <f:viewParam name="id" value="#{appointmentActionBean.appointmentId}" required="true" converter="jakarta.faces.Integer"/>
+      <f:viewAction action="#{appointmentActionBean.load}"/>
+   </f:metadata>
+
+   <ui:define name="pageTitle">Appointment Details</ui:define>
+
+   <ui:define name="content">
+      <style>
+         /* Enhanced Appointment Details Styles */
+         .appointment-header {
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 50%, #82C0CC 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 0;
+         }
+
+         .appointment-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><circle cx="50" cy="50" r="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
+            opacity: 0.3;
+         }
+
+         .appointment-id-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+         }
+
+         .appointment-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+         }
+
+         .appointment-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0.5rem 0 0 0;
+         }
+
+         .details-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+         }
+
+         .details-section {
+            padding: 2.5rem;
+         }
+
+         .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 2rem;
+         }
+
+         .info-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(22, 105, 122, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+         }
+
+         .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #16697A 0%, #489FB5 100%);
+            transition: width 0.3s ease;
+         }
+
+         .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(22, 105, 122, 0.15);
+         }
+
+         .info-card:hover::before {
+            width: 6px;
+         }
+
+         .info-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+         }
+
+         .info-value {
+            font-size: 1.1rem;
+            color: #16697A;
+            font-weight: 600;
+            line-height: 1.4;
+         }
+
+         .patient-info, .doctor-info {
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.05) 0%, rgba(72, 159, 181, 0.05) 100%);
+            border-left: 4px solid #16697A;
+         }
+
+         .datetime-info {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border-left: 4px solid #10b981;
+         }
+
+         .status-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%);
+            border-left: 4px solid #3b82f6;
+         }
+
+         .reason-section {
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(22, 105, 122, 0.1);
+         }
+
+         .reason-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #16697A;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+         }
+
+         .reason-content {
+            font-size: 1rem;
+            color: #475569;
+            line-height: 1.6;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            white-space: pre-wrap;
+         }
+
+         .metadata-section {
+            background: rgba(248, 250, 252, 0.5);
+            border-top: 1px solid rgba(22, 105, 122, 0.1);
+            padding: 2rem 2.5rem;
+         }
+
+         .metadata-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #16697A;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+         }
+
+         .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+         }
+
+         .metadata-item {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+         }
+
+         .metadata-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+         }
+
+         .metadata-value {
+            font-size: 0.9rem;
+            color: #16697A;
+            font-weight: 600;
+         }
+
+         /* Enhanced Status Tag */
+         .status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+         }
+
+         .status-completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+         }
+
+         .status-scheduled {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+         }
+
+         .status-cancelled {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+         }
+
+         /* Enhanced Toolbar */
+         .enhanced-toolbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(22, 105, 122, 0.1);
+         }
+
+         .toolbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+         }
+
+         /* Enhanced Buttons */
+         .btn-enhanced {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+         }
+
+         .btn-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+         }
+
+         .btn-enhanced:hover::before {
+            left: 100%;
+         }
+
+         .btn-enhanced:hover {
+            transform: translateY(-3px) scale(1.02);
+         }
+
+         .btn-back {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+         }
+
+         .btn-edit {
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3);
+         }
+
+         /* Icons */
+         .icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+         }
+
+         /* Responsive Design */
+         @media (max-width: 768px) {
+            .info-grid {
+               grid-template-columns: 1fr;
+               gap: 1.5rem;
+            }
+
+            .details-section {
+               padding: 2rem 1.5rem;
+            }
+
+            .metadata-section {
+               padding: 2rem 1.5rem;
+            }
+
+            .appointment-header {
+               padding: 1.5rem;
+            }
+
+            .appointment-title {
+               font-size: 1.75rem;
+            }
+
+            .toolbar-content {
+               flex-direction: column;
+               align-items: stretch;
+            }
+
+            .btn-enhanced {
+               justify-content: center;
+            }
+         }
+
+         /* Animation Classes */
+         .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+         }
+
+         @keyframes fadeInUp {
+            from {
+               opacity: 0;
+               transform: translateY(30px);
+            }
+            to {
+               opacity: 1;
+               transform: translateY(0);
+            }
+         }
+      </style>
+
+      <div rendered="#{not empty appointmentActionBean.appointment}" class="fade-in-up">
+         <!-- Enhanced Toolbar -->
+         <div class="enhanced-toolbar">
+            <div class="toolbar-content">
+               <h:link outcome="appointments" class="btn-enhanced btn-back">
+                  <i class="fas fa-arrow-left icon"></i>
+                  Back to List
+               </h:link>
+
+               <h:link outcome="appointment-edit" class="btn-enhanced btn-edit"
+                       rendered="#{userBean.isAdminOrReceptionist()}">
+                  <f:param name="id" value="#{appointmentActionBean.appointmentId}"/>
+                  <i class="fas fa-pencil icon"></i>
+                  Edit Appointment
+               </h:link>
+            </div>
+         </div>
+
+         <!-- Appointment Card -->
+         <div class="ui-card">
+            <!-- Header Section -->
+            <div class="appointment-header">
+               <div class="appointment-id-badge">
+                  <i class="fas fa-calendar-check"></i>
+                  APP-#{appointmentActionBean.appointment.appointmentId}
+               </div>
+               <h2 class="appointment-title">Appointment Details</h2>
+               <p class="appointment-subtitle">
+                  #{appointmentActionBean.appointment.patient.firstName} #{appointmentActionBean.appointment.patient.lastName}
+                  with Dr. #{appointmentActionBean.appointment.doctor.firstName} #{appointmentActionBean.appointment.doctor.lastName}
+               </p>
+            </div>
+
+            <!-- Details Container -->
+            <div class="details-container">
+               <div class="details-section">
+                  <!-- Main Information Grid -->
+                  <div class="info-grid">
+                     <!-- Patient Information -->
+                     <div class="info-card patient-info">
+                        <div class="info-label">
+                           <i class="fas fa-user-injured"></i>
+                           Patient Information
+                        </div>
+                        <div class="info-value">
+                           #{appointmentActionBean.appointment.patient.firstName} #{appointmentActionBean.appointment.patient.lastName}
+                        </div>
+                     </div>
+
+                     <!-- Doctor Information -->
+                     <div class="info-card doctor-info">
+                        <div class="info-label">
+                           <i class="fas fa-user-md"></i>
+                           Attending Doctor
+                        </div>
+                        <div class="info-value">
+                           Dr. #{appointmentActionBean.appointment.doctor.firstName} #{appointmentActionBean.appointment.doctor.lastName}
+                           <br/>
+                           <span style="font-size: 0.9rem; opacity: 0.8;">(#{appointmentActionBean.appointment.doctor.speciality})</span>
+                        </div>
+                     </div>
+
+                     <!-- Date & Time -->
+                     <div class="info-card datetime-info">
+                        <div class="info-label">
+                           <i class="fas fa-clock"></i>
+                           Date &amp; Time
+                        </div>
+                        <div class="info-value">
+                           #{appointmentActionBean.appointment.date}<br/>
+                           <span style="font-size: 0.95rem;">#{appointmentActionBean.appointment.time}</span>
+                        </div>
+                     </div>
+
+                     <!-- Status -->
+                     <div class="info-card status-info">
+                        <div class="info-label">
+                           <i class="fas fa-info-circle"></i>
+                           Status
+                        </div>
+                        <div class="info-value">
+                           <span class="status-tag #{appointmentActionBean.appointment.status == 'COMPLETED' ? 'status-completed' : (appointmentActionBean.appointment.status == 'SCHEDULED' ? 'status-scheduled' : 'status-cancelled')}">
+                              <i class="fas #{appointmentActionBean.appointment.status == 'COMPLETED' ? 'fa-check-circle' : (appointmentActionBean.appointment.status == 'SCHEDULED' ? 'fa-calendar-check' : 'fa-times-circle')}"></i>
+                              #{appointmentActionBean.appointment.status}
+                           </span>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Reason Section -->
+                  <div class="reason-section">
+                     <h3 class="reason-title">
+                        <i class="fas fa-file-medical-alt"></i>
+                        Reason for Visit
+                     </h3>
+                     <div class="reason-content">
+                        #{not empty appointmentActionBean.appointment.reason ? appointmentActionBean.appointment.reason : 'No specific reason provided for this appointment.'}
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Metadata Section -->
+               <div class="metadata-section">
+                  <h3 class="metadata-title">
+                     <i class="fas fa-info-circle"></i>
+                     Record Information
+                  </h3>
+                  <div class="metadata-grid">
+                     <div class="metadata-item">
+                        <span class="metadata-label">Created By:</span>
+                        <span class="metadata-value">#{appointmentActionBean.appointment.createdBy.username}</span>
+                     </div>
+                     <div class="metadata-item">
+                        <span class="metadata-label">Created At:</span>
+                        <span class="metadata-value">
+                           <h:outputText value="#{appointmentActionBean.appointment.createdAt}">
+                              <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm"/>
+                           </h:outputText>
+                        </span>
+                     </div>
+                     <div class="metadata-item">
+                        <span class="metadata-label">Last Updated By:</span>
+                        <span class="metadata-value">#{appointmentActionBean.appointment.lastUpdatedBy.username}</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- JavaScript for Enhanced Interactions -->
+      <script>
+         document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to info cards
+            const infoCards = document.querySelectorAll('.info-card');
+            infoCards.forEach(card => {
+               card.addEventListener('mouseenter', function() {
+                  this.style.transform = 'translateY(-8px) scale(1.02)';
+               });
+
+               card.addEventListener('mouseleave', function() {
+                  this.style.transform = 'translateY(0) scale(1)';
+               });
+            });
+
+            // Enhanced button interactions
+            const buttons = document.querySelectorAll('.btn-enhanced');
+            buttons.forEach(button => {
+               button.addEventListener('click', function(e) {
+                  // Create ripple effect
+                  const ripple = document.createElement('span');
+                  const rect = this.getBoundingClientRect();
+                  const size = Math.max(rect.width, rect.height);
+                  const x = e.clientX - rect.left - size / 2;
+                  const y = e.clientY - rect.top - size / 2;
+
+                  ripple.style.cssText = `
+                     position: absolute;
+                     width: ${size}px;
+                     height: ${size}px;
+                     left: ${x}px;
+                     top: ${y}px;
+                     background: rgba(255,255,255,0.4);
+                     border-radius: 50%;
+                     transform: scale(0);
+                     animation: ripple 0.6s ease-out;
+                     pointer-events: none;
+                  `;
+
+                  this.appendChild(ripple);
+                  setTimeout(() => ripple.remove(), 600);
+               });
+            });
+
+            // Add ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+               @keyframes ripple {
+                  to {
+                     transform: scale(2);
+                     opacity: 0;
+                  }
+               }
+            `;
+            document.head.appendChild(style);
+         });
+      </script>
+   </ui:define>
+</ui:composition>
