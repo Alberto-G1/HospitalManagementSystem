@@ -14,45 +14,629 @@
     <ui:define name="pageTitle">New Appointment</ui:define>
 
     <ui:define name="content">
-        <h:form id="form">
-            <p:growl id="messages" showDetail="true" life="6000"/>
+        <style>
+            /* Enhanced Form Styling */
+            .appointment-form-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                animation: fadeInUp 0.6s ease forwards;
+            }
 
-            <div class="card">
-                <p:toolbar>
-                    <p:toolbarGroup>
-                        <p:button value="Cancel" icon="pi pi-times" outcome="appointments" immediate="true" styleClass="ui-button-danger"/>
-                    </p:toolbarGroup>
-                    <p:toolbarGroup align="right">
-                        <p:commandButton value="Save Appointment" icon="pi pi-save"
+            .form-header {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 16px 16px 0 0;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .form-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 200px;
+                height: 200px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(50%, -50%);
+            }
+
+            .form-header h2 {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1.8rem;
+                font-weight: 600;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .form-header .header-icon {
+                width: 50px;
+                height: 50px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .form-content {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 0 0 16px 16px;
+                padding: 2.5rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            }
+
+            .form-section {
+                margin-bottom: 2rem;
+                position: relative;
+            }
+
+            .form-section:last-child {
+                margin-bottom: 0;
+            }
+
+            .form-section-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #16697A;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .section-icon {
+                width: 30px;
+                height: 30px;
+                background: linear-gradient(135deg, #16697A, #489FB5);
+                color: white;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.9rem;
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 2rem;
+                margin-top: 1.5rem;
+            }
+
+            .form-field {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .form-field.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .form-field label {
+                font-weight: 600;
+                color: #2c3e50;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .form-field label .required-indicator {
+                color: #ef4444;
+                font-size: 1.1rem;
+            }
+
+            .field-icon {
+                color: #489FB5;
+                font-size: 0.9rem;
+            }
+
+            /* Enhanced Input Styles */
+            .ui-selectonemenu,
+            .ui-calendar,
+            .ui-datepicker,
+            .ui-inputtextarea {
+                width: 100% !important;
+            }
+
+            .ui-selectonemenu .ui-selectonemenu-label,
+            .ui-inputfield {
+                padding: 1rem 1.25rem !important;
+                border: 2px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                font-size: 0.95rem !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(10px) !important;
+            }
+
+            .ui-selectonemenu:not(.ui-state-disabled):hover .ui-selectonemenu-label,
+            .ui-inputfield:hover {
+                border-color: #489FB5 !important;
+                box-shadow: 0 0 0 3px rgba(72, 159, 181, 0.1) !important;
+            }
+
+            .ui-selectonemenu.ui-state-focus .ui-selectonemenu-label,
+            .ui-inputfield:focus {
+                border-color: #489FB5 !important;
+                box-shadow: 0 0 0 4px rgba(72, 159, 181, 0.15) !important;
+                background: white !important;
+                transform: translateY(-2px) !important;
+            }
+
+            .ui-selectonemenu .ui-selectonemenu-trigger {
+                border-radius: 0 12px 12px 0 !important;
+                background: linear-gradient(135deg, #489FB5, #16697A) !important;
+                border: none !important;
+                width: 45px !important;
+            }
+
+            .ui-selectonemenu .ui-selectonemenu-trigger:hover {
+                background: linear-gradient(135deg, #16697A, #489FB5) !important;
+            }
+
+            .ui-inputtextarea {
+                min-height: 120px !important;
+                resize: vertical !important;
+                font-family: inherit !important;
+            }
+
+            /* Calendar Styling */
+            .ui-calendar .ui-inputfield {
+                padding-right: 50px !important;
+            }
+
+            .ui-calendar .ui-datepicker-trigger {
+                right: 15px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                background: linear-gradient(135deg, #489FB5, #16697A) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 8px !important;
+                width: 35px !important;
+                height: 35px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            /* Enhanced Action Bar */
+            .form-actions {
+                background: rgba(248, 250, 252, 0.8);
+                backdrop-filter: blur(10px);
+                padding: 1.5rem 2.5rem;
+                border-radius: 16px;
+                margin-top: 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                border: 1px solid rgba(226, 232, 240, 0.5);
+            }
+
+            .action-group {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            /* Enhanced Button Styles */
+            .enhanced-button {
+                padding: 0.875rem 2rem !important;
+                font-weight: 600 !important;
+                border-radius: 12px !important;
+                font-size: 0.95rem !important;
+                text-transform: none !important;
+                letter-spacing: 0.025em !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+                position: relative !important;
+                overflow: hidden !important;
+                border: none !important;
+            }
+
+            .enhanced-button::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .enhanced-button:hover::before {
+                left: 100%;
+            }
+
+            .enhanced-button:hover {
+                transform: translateY(-3px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .enhanced-button:active {
+                transform: translateY(-1px) scale(0.98) !important;
+            }
+
+            .btn-save {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                color: white !important;
+            }
+
+            .btn-save:hover {
+                background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+            }
+
+            .btn-cancel {
+                background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+                color: white !important;
+            }
+
+            .btn-cancel:hover {
+                background: linear-gradient(135deg, #475569 0%, #334155 100%) !important;
+            }
+
+            /* Progress Indicator */
+            .form-progress {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 2rem;
+            }
+
+            .progress-steps {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .progress-step {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #16697A, #489FB5);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                font-size: 0.9rem;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3);
+            }
+
+            .progress-line {
+                width: 60px;
+                height: 2px;
+                background: linear-gradient(90deg, #16697A, #489FB5);
+            }
+
+            /* Info Cards */
+            .info-card {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                border: 1px solid rgba(72, 159, 181, 0.2);
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .info-card-icon {
+                width: 45px;
+                height: 45px;
+                background: linear-gradient(135deg, #489FB5, #16697A);
+                color: white;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                flex-shrink: 0;
+            }
+
+            .info-card-content h4 {
+                margin: 0 0 0.5rem 0;
+                color: #16697A;
+                font-weight: 600;
+                font-size: 1rem;
+            }
+
+            .info-card-content p {
+                margin: 0;
+                color: #64748b;
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .appointment-form-container {
+                    margin: 0 1rem;
+                }
+
+                .form-header,
+                .form-content {
+                    padding: 1.5rem;
+                }
+
+                .form-grid {
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
+                }
+
+                .form-actions {
+                    flex-direction: column;
+                    gap: 1rem;
+                    padding: 1.5rem;
+                }
+
+                .action-group {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .enhanced-button {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+
+            /* Animation Classes */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .fade-in-up {
+                animation: fadeInUp 0.6s ease forwards;
+            }
+
+            .delay-1 { animation-delay: 0.1s; }
+            .delay-2 { animation-delay: 0.2s; }
+            .delay-3 { animation-delay: 0.3s; }
+        </style>
+
+        <div class="appointment-form-container">
+            <!-- Info Card -->
+            <div class="info-card fade-in-up">
+                <div class="info-card-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="info-card-content">
+                    <h4>Appointment Scheduling</h4>
+                    <p>Please fill in all required fields to schedule a new appointment. Make sure to select an available time slot for the chosen doctor.</p>
+                </div>
+            </div>
+
+            <h:form id="form">
+                <p:growl id="messages" showDetail="true" life="6000" sticky="false"/>
+
+                <div class="ui-card fade-in-up delay-1">
+                    <div class="form-header">
+                        <h2>
+                            <div class="header-icon">
+                                <i class="fas fa-calendar-plus"></i>
+                            </div>
+                            Schedule New Appointment
+                        </h2>
+                    </div>
+
+                    <div class="form-content">
+                        <!-- Progress Indicator -->
+                        <div class="form-progress">
+                            <div class="progress-steps">
+                                <div class="progress-step">1</div>
+                                <div class="progress-line"></div>
+                                <div class="progress-step">2</div>
+                            </div>
+                        </div>
+
+                        <!-- Patient & Doctor Selection -->
+                        <div class="form-section fade-in-up delay-2">
+                            <div class="form-section-title">
+                                <div class="section-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                Patient &amp; Doctor Selection
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <p:outputLabel for="patient" value="Patient">
+                                        <i class="fas fa-user-injured field-icon"></i>
+                                        <span class="required-indicator">*</span>
+                                    </p:outputLabel>
+                                    <p:selectOneMenu id="patient"
+                                                     value="#{appointmentActionBean.appointment.patient}"
+                                                     converter="omnifaces.SelectItemsConverter"
+                                                     filter="true"
+                                                     filterMatchMode="contains"
+                                                     required="true"
+                                                     requiredMessage="Patient is required."
+                                                     styleClass="enhanced-select">
+                                        <f:selectItem itemLabel="Select a Patient" noSelectionOption="true"/>
+                                        <f:selectItems value="#{appointmentActionBean.availablePatients}"
+                                                       var="p"
+                                                       itemValue="#{p}"
+                                                       itemLabel="#{p.firstName} #{p.lastName}"/>
+                                    </p:selectOneMenu>
+                                </div>
+
+                                <div class="form-field">
+                                    <p:outputLabel for="doctor" value="Doctor">
+                                        <i class="fas fa-user-md field-icon"></i>
+                                        <span class="required-indicator">*</span>
+                                    </p:outputLabel>
+                                    <p:selectOneMenu id="doctor"
+                                                     value="#{appointmentActionBean.appointment.doctor}"
+                                                     converter="omnifaces.SelectItemsConverter"
+                                                     filter="true"
+                                                     filterMatchMode="contains"
+                                                     required="true"
+                                                     requiredMessage="Doctor is required."
+                                                     styleClass="enhanced-select">
+                                        <f:selectItem itemLabel="Select a Doctor" noSelectionOption="true"/>
+                                        <f:selectItems value="#{appointmentActionBean.availableDoctors}"
+                                                       var="d"
+                                                       itemValue="#{d}"
+                                                       itemLabel="Dr. #{d.firstName} #{d.lastName} (#{d.speciality})"/>
+                                    </p:selectOneMenu>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Appointment Details -->
+                        <div class="form-section fade-in-up delay-3">
+                            <div class="form-section-title">
+                                <div class="section-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                Appointment Details
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <p:outputLabel for="date" value="Date">
+                                        <i class="fas fa-calendar-day field-icon"></i>
+                                        <span class="required-indicator">*</span>
+                                    </p:outputLabel>
+                                    <p:calendar id="date"
+                                                value="#{appointmentActionBean.appointment.date}"
+                                                navigator="true"
+                                                required="true"
+                                                mindate="#{java.time.LocalDate.now()}"
+                                                showButtonPanel="true"
+                                                pattern="dd/MM/yyyy"
+                                                styleClass="enhanced-calendar"/>
+                                </div>
+
+                                <div class="form-field">
+                                    <p:outputLabel for="time" value="Time">
+                                        <i class="fas fa-clock field-icon"></i>
+                                        <span class="required-indicator">*</span>
+                                    </p:outputLabel>
+                                    <p:datePicker id="time"
+                                                  value="#{appointmentActionBean.appointment.time}"
+                                                  required="true"
+                                                  pattern="HH:mm"
+                                                  timeOnly="true"
+                                                  stepMinute="15"
+                                                  styleClass="enhanced-timepicker"/>
+                                </div>
+
+                                <div class="form-field full-width">
+                                    <p:outputLabel for="reason" value="Reason for Visit">
+                                        <i class="fas fa-notes-medical field-icon"></i>
+                                    </p:outputLabel>
+                                    <p:inputTextarea id="reason"
+                                                     value="#{appointmentActionBean.appointment.reason}"
+                                                     rows="4"
+                                                     autoResize="false"
+                                                     placeholder="Please describe the reason for this appointment (optional)"
+                                                     styleClass="enhanced-textarea"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Action Buttons -->
+                <div class="form-actions fade-in-up delay-3">
+                    <div class="action-group">
+                        <p:button value="Cancel"
+                                  icon="fas fa-times"
+                                  outcome="appointments"
+                                  immediate="true"
+                                  styleClass="enhanced-button btn-cancel"/>
+                    </div>
+
+                    <div class="action-group">
+                        <p:commandButton value="Save Appointment"
+                                         icon="fas fa-save"
                                          action="#{appointmentActionBean.save}"
                                          update="@form"
-                                         styleClass="ui-button-success"/>
-                    </p:toolbarGroup>
-                </p:toolbar>
+                                         styleClass="enhanced-button btn-save"
+                                         onclick="PF('loadingDialog').show()"
+                                         oncomplete="PF('loadingDialog').hide()"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
 
-                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="margin-top:20px;">
-                    <p:outputLabel for="patient" value="Patient"/>
-                    <p:selectOneMenu id="patient" value="#{appointmentActionBean.appointment.patient}" converter="omnifaces.SelectItemsConverter" filter="true" required="true" requiredMessage="Patient is required.">
-                        <f:selectItem itemLabel="Select a Patient" noSelectionOption="true"/>
-                        <f:selectItems value="#{appointmentActionBean.availablePatients}" var="p" itemValue="#{p}" itemLabel="#{p.firstName} #{p.lastName}"/>
-                    </p:selectOneMenu>
-
-                    <p:outputLabel for="doctor" value="Doctor"/>
-                    <p:selectOneMenu id="doctor" value="#{appointmentActionBean.appointment.doctor}" converter="omnifaces.SelectItemsConverter" filter="true" required="true" requiredMessage="Doctor is required.">
-                        <f:selectItem itemLabel="Select a Doctor" noSelectionOption="true"/>
-                        <f:selectItems value="#{appointmentActionBean.availableDoctors}" var="d" itemValue="#{d}" itemLabel="Dr. #{d.firstName} #{d.lastName} (#{d.speciality})"/>
-                    </p:selectOneMenu>
-
-                    <p:outputLabel for="date" value="Date"/>
-                    <p:calendar id="date" value="#{appointmentActionBean.appointment.date}" navigator="true" required="true" mindate="#{java.time.LocalDate.now()}"/>
-
-                    <p:outputLabel for="time" value="Time"/>
-                    <p:datePicker id="time" value="#{appointmentActionBean.appointment.time}" required="true" pattern="HH:mm" timeOnly="true"/>
-
-                    <p:outputLabel for="reason" value="Reason for Visit"/>
-                    <p:inputTextarea id="reason" value="#{appointmentActionBean.appointment.reason}" rows="4" autoResize="false"/>
-                </p:panelGrid>
+        <!-- Loading Dialog -->
+        <p:dialog id="loadingDialog"
+                  widgetVar="loadingDialog"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  showHeader="false"
+                  styleClass="loading-dialog">
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #16697A; margin-bottom: 1rem;"></i>
+                <p style="margin: 0; color: #64748b; font-weight: 500;">Saving appointment...</p>
             </div>
-        </h:form>
+        </p:dialog>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add enhanced animations on form load
+                const formElements = document.querySelectorAll('.form-field');
+                formElements.forEach((element, index) => {
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(20px)';
+
+                    setTimeout(() => {
+                        element.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+
+                // Enhanced button interactions
+                const buttons = document.querySelectorAll('.enhanced-button');
+                buttons.forEach(button => {
+                    button.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px) scale(1.02)';
+                    });
+
+                    button.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                });
+
+                // Form validation visual feedback
+                const inputs = document.querySelectorAll('.ui-inputfield, .ui-selectonemenu-label');
+                inputs.forEach(input => {
+                    input.addEventListener('blur', function() {
+                        if (this.value &amp;&amp; this.value.trim() !== '') {
+                            this.style.borderColor = '#10b981';
+                            this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                        }
+                    });
+                });
+
+                console.log('🏥 Enhanced Appointment Form Loaded');
+            });
+        </script>
     </ui:define>
 </ui:composition>

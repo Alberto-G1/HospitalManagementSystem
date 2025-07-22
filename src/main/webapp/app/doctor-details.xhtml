@@ -3,6 +3,7 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:fn="http://java.sun.com/jsp/jstl/functions"
                 template="/WEB-INF/template.xhtml">
 
     <f:metadata>
@@ -13,37 +14,542 @@
     <ui:define name="pageTitle">Doctor Details</ui:define>
 
     <ui:define name="content">
+        <style>
+            /* Doctor Details Specific Styles */
+            .doctor-profile-container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .doctor-header-card {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 50%, #82C0CC 100%);
+                border-radius: 20px;
+                padding: 2.5rem;
+                color: white;
+                margin-bottom: 2rem;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 15px 35px rgba(22, 105, 122, 0.3);
+            }
+
+            .doctor-header-card::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -10%;
+                width: 300px;
+                height: 300px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+                border-radius: 50%;
+            }
+
+            .doctor-avatar {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 3rem;
+                color: white;
+                margin-bottom: 1.5rem;
+                border: 4px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .doctor-name {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 2.5rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .doctor-specialty {
+                font-size: 1.2rem;
+                opacity: 0.9;
+                margin-bottom: 1rem;
+                font-weight: 500;
+            }
+
+            .status-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 16px;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .status-active {
+                background: rgba(16, 185, 129, 0.2);
+                color: #10b981;
+                border: 2px solid rgba(16, 185, 129, 0.3);
+            }
+
+            .status-inactive {
+                background: rgba(239, 68, 68, 0.2);
+                color: #ef4444;
+                border: 2px solid rgba(239, 68, 68, 0.3);
+            }
+
+            .info-cards-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .info-card {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 16px;
+                padding: 2rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .info-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #16697A, #489FB5, #82C0CC);
+                border-radius: 16px 16px 0 0;
+            }
+
+            .info-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            }
+
+            .info-card-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 1.5rem;
+                color: #16697A;
+            }
+
+            .info-card-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.2rem;
+            }
+
+            .info-card-title {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1.3rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            }
+
+            .info-item:last-child {
+                border-bottom: none;
+            }
+
+            .info-label {
+                font-weight: 500;
+                color: #64748b;
+                font-size: 0.95rem;
+            }
+
+            .info-value {
+                font-weight: 600;
+                color: #2c3e50;
+                text-align: right;
+                font-size: 0.95rem;
+            }
+
+            .appointments-section {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .appointments-header {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                padding: 2rem;
+                border-bottom: 3px solid #16697A;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .appointments-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 15px;
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                box-shadow: 0 8px 20px rgba(22, 105, 122, 0.3);
+            }
+
+            .appointments-title {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #16697A;
+                margin: 0;
+            }
+
+            .appointments-count {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                color: white;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                margin-left: auto;
+            }
+
+            .enhanced-datatable {
+                border: none !important;
+            }
+
+            .enhanced-datatable .ui-datatable-header {
+                display: none;
+            }
+
+            .enhanced-datatable .ui-datatable-data tr {
+                border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .enhanced-datatable .ui-datatable-data tr:hover {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+                transform: scale(1.01) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.1) !important;
+            }
+
+            .enhanced-datatable .ui-datatable-data td {
+                padding: 1.25rem !important;
+                border: none !important;
+                vertical-align: middle !important;
+            }
+
+            .enhanced-datatable .ui-column-title {
+                font-weight: 600 !important;
+                color: #16697A !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                font-size: 0.85rem !important;
+                padding: 1rem 1.25rem !important;
+                background: rgba(248, 250, 252, 0.8) !important;
+                border-bottom: 2px solid #16697A !important;
+            }
+
+            .back-button-container {
+                margin-bottom: 2rem;
+            }
+
+            .back-button {
+                background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+                border: none !important;
+                padding: 12px 24px !important;
+                border-radius: 10px !important;
+                font-weight: 600 !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3) !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+            }
+
+            .back-button:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(100, 116, 139, 0.4) !important;
+            }
+
+            .empty-appointments {
+                text-align: center;
+                padding: 3rem 2rem;
+                color: #64748b;
+            }
+
+            .empty-icon {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                color: #94a3b8;
+                margin: 0 auto 1rem;
+            }
+
+            /* Status tags styling */
+            .status-tag {
+                padding: 6px 12px !important;
+                border-radius: 20px !important;
+                font-weight: 600 !important;
+                font-size: 0.8rem !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                border: none !important;
+            }
+
+            .status-scheduled {
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+                color: white !important;
+            }
+
+            .status-completed {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                color: white !important;
+            }
+
+            .status-cancelled {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+                color: white !important;
+            }
+
+            /* Responsive design */
+            @media (max-width: 768px) {
+                .doctor-profile-container {
+                    padding: 0 1rem;
+                }
+
+                .doctor-header-card {
+                    padding: 2rem;
+                    text-align: center;
+                }
+
+                .doctor-name {
+                    font-size: 2rem;
+                }
+
+                .info-cards-grid {
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
+                }
+
+                .info-card {
+                    padding: 1.5rem;
+                }
+
+                .appointments-header {
+                    padding: 1.5rem;
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 1rem;
+                }
+
+                .appointments-count {
+                    margin-left: 0;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .enhanced-datatable .ui-datatable-data td {
+                    padding: 1rem 0.75rem !important;
+                    font-size: 0.9rem !important;
+                }
+
+                .doctor-header-card {
+                    padding: 1.5rem;
+                }
+
+                .doctor-avatar {
+                    width: 100px;
+                    height: 100px;
+                    font-size: 2.5rem;
+                }
+            }
+        </style>
+
         <h:form id="form">
-            <div class="card" rendered="#{not empty doctorDetailBean.doctor}">
-                <p:toolbar>
-                    <p:toolbarGroup>
-                        <p:button value="Back to Staff List" icon="pi pi-arrow-left" outcome="staff" styleClass="ui-button-secondary"/>
-                    </p:toolbarGroup>
-                </p:toolbar>
+            <div class="doctor-profile-container fade-in" rendered="#{not empty doctorDetailBean.doctor}">
+                <!-- Back Button -->
+                <div class="back-button-container">
+                    <p:button value="← Back to Staff List"
+                              outcome="staff"
+                              styleClass="back-button"/>
+                </div>
 
-                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="margin-top:20px;">
-                    <h:outputText value="Name:" styleClass="font-bold"/>
-                    <h:outputText value="Dr. #{doctorDetailBean.doctor.firstName} #{doctorDetailBean.doctor.lastName}"/>
-                    <h:outputText value="Specialty:" styleClass="font-bold"/>
-                    <h:outputText value="#{doctorDetailBean.doctor.speciality}"/>
-                    <h:outputText value="Phone:" styleClass="font-bold"/>
-                    <h:outputText value="#{doctorDetailBean.doctor.phoneNumber}"/>
-                    <p:separator/><p:separator/>
-                    <h:outputText value="Username:" styleClass="font-bold"/>
-                    <h:outputText value="#{doctorDetailBean.doctor.user.username}"/>
-                    <h:outputText value="Email:" styleClass="font-bold"/>
-                    <h:outputText value="#{doctorDetailBean.doctor.user.email}"/>
-                    <h:outputText value="Account Status:" styleClass="font-bold"/>
-                    <p:tag value="#{doctorDetailBean.doctor.user.active ? 'ACTIVE' : 'INACTIVE'}" severity="#{doctorDetailBean.doctor.user.active ? 'success' : 'danger'}"/>
-                </p:panelGrid>
+                <!-- Doctor Header Card -->
+                <div class="doctor-header-card">
+                    <div class="doctor-avatar">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h1 class="doctor-name">
+                        Dr. #{doctorDetailBean.doctor.firstName} #{doctorDetailBean.doctor.lastName}
+                    </h1>
+                    <div class="doctor-specialty">
+                        <i class="fas fa-stethoscope" style="margin-right: 8px;"></i>
+                        #{doctorDetailBean.doctor.speciality}
+                    </div>
+                    <div class="status-badge #{doctorDetailBean.doctor.user.active ? 'status-active' : 'status-inactive'}">
+                        <i class="fas #{doctorDetailBean.doctor.user.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                        #{doctorDetailBean.doctor.user.active ? 'ACTIVE' : 'INACTIVE'}
+                    </div>
+                </div>
 
-                <p:panel header="Upcoming Appointments (#{doctorDetailBean.appointments.size()})" style="margin-top:20px;">
-                    <p:dataTable var="appt" value="#{doctorDetailBean.appointments}" emptyMessage="No appointments found.">
-                        <p:column headerText="Date"><h:outputText value="#{appt.date}"/></p:column>
-                        <p:column headerText="Patient">#{appt.patient.firstName} #{appt.patient.lastName}</p:column>
-                        <p:column headerText="Status"><p:tag value="#{appt.status}"/></p:column>
-                    </p:dataTable>
-                </p:panel>
+                <!-- Info Cards Grid -->
+                <div class="info-cards-grid">
+                    <!-- Contact Information Card -->
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-address-card"></i>
+                            </div>
+                            <h3 class="info-card-title">Contact Information</h3>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-phone" style="margin-right: 8px; color: #16697A;"></i>
+                                Phone Number
+                            </span>
+                            <span class="info-value">#{doctorDetailBean.doctor.phoneNumber}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-envelope" style="margin-right: 8px; color: #16697A;"></i>
+                                Email Address
+                            </span>
+                            <span class="info-value">#{doctorDetailBean.doctor.user.email}</span>
+                        </div>
+                    </div>
+
+                    <!-- Account Information Card -->
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                            <h3 class="info-card-title">Account Information</h3>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-user" style="margin-right: 8px; color: #16697A;"></i>
+                                Username
+                            </span>
+                            <span class="info-value">#{doctorDetailBean.doctor.user.username}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-shield-alt" style="margin-right: 8px; color: #16697A;"></i>
+                                Account Status
+                            </span>
+                            <span class="info-value">
+                                <p:tag value="#{doctorDetailBean.doctor.user.active ? 'ACTIVE' : 'INACTIVE'}"
+                                       severity="#{doctorDetailBean.doctor.user.active ? 'success' : 'danger'}"
+                                       styleClass="status-tag"/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Section -->
+                <div class="appointments-section">
+                    <div class="appointments-header">
+                        <div class="appointments-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h2 class="appointments-title">Upcoming Appointments</h2>
+                        <div class="appointments-count">
+                            #{doctorDetailBean.appointments.size()} Total
+                        </div>
+                    </div>
+
+                    <h:panelGroup rendered="#{not empty doctorDetailBean.appointments}">
+                        <p:dataTable var="appt"
+                                     value="#{doctorDetailBean.appointments}"
+                                     styleClass="enhanced-datatable"
+                                     emptyMessage="No appointments found."
+                                     paginator="true"
+                                     rows="10"
+                                     paginatorPosition="bottom">
+
+                            <p:column headerText="Date &amp; Time" sortBy="#{appt.date}">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-calendar" style="color: #16697A;"></i>
+                                    <div>
+                                        <div style="font-weight: 600; color: #2c3e50;">
+                                            <h:outputText value="#{appt.date}">
+                                                <h:outputText value="#{appt.date}" />
+                                            </h:outputText>
+                                        </div>
+                                        <div style="font-size: 0.85rem; color: #64748b;">
+                                            <h:outputText value="#{appt.date}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </p:column>
+
+                            <p:column headerText="Patient Information">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-user-injured" style="color: #16697A;"></i>
+                                    <div>
+                                        <div style="font-weight: 600; color: #2c3e50;">
+                                            #{appt.patient.firstName} #{appt.patient.lastName}
+                                        </div>
+                                        <div style="font-size: 0.85rem; color: #64748b;">
+                                            Patient ID: ##{appt.patient.patientId}
+                                        </div>
+                                    </div>
+                                </div>
+                            </p:column>
+
+                            <p:column headerText="Status" sortBy="#{appt.status}">
+                                <p:tag value="#{appt.status}"
+                                       styleClass="status-tag status-#{fn:toLowerCase(appt.status)}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{empty doctorDetailBean.appointments}">
+                        <div class="empty-appointments">
+                            <div class="empty-icon">
+                                <i class="fas fa-calendar-times"></i>
+                            </div>
+                            <h3 style="color: #64748b; margin-bottom: 0.5rem; font-weight: 600;">No Upcoming Appointments</h3>
+                            <p style="margin: 0; font-size: 0.95rem;">This doctor doesn't have any upcoming appointments scheduled.</p>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+
+            <!-- Error state when doctor not found -->
+            <div class="fade-in" rendered="#{empty doctorDetailBean.doctor}" style="text-align: center; padding: 3rem;">
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; margin: 0 auto 2rem; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 style="color: #ef4444; margin-bottom: 1rem;">Doctor Not Found</h2>
+                <p style="color: #64748b; margin-bottom: 2rem;">The requested doctor information could not be found.</p>
+                <p:button value="← Back to Staff List" outcome="staff" styleClass="back-button"/>
             </div>
         </h:form>
     </ui:define>

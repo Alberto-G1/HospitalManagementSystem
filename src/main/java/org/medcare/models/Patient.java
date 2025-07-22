@@ -54,6 +54,7 @@ public class Patient extends BaseModel {
     private String address;
 
     @Size(max = 50, message = "Emergency contact must be less than 50 characters.")
+    @NotBlank(message = "Emergency Contact is required.")
     @Pattern(regexp = "^(\\+256|0)7[0-9]{8}$", message = "Invalid Ugandan phone number.")
     @Column(length = 50)
     private String emergencyContact;
