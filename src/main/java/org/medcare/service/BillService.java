@@ -135,7 +135,6 @@ public class BillService implements BillServiceInterface {
             throw new ValidationException("Payments can only be added to FINALIZED or PARTIALLY_PAID bills.");
         }
 
-        // Validate payment amount
         BigDecimal balanceDue = bill.getBalanceDue();
         if (payment.getAmountPaid().compareTo(balanceDue) > 0) {
             throw new ValidationException("Payment amount cannot exceed the balance due of " + balanceDue);
@@ -145,7 +144,9 @@ public class BillService implements BillServiceInterface {
         payment.setProcessedBy(cashier);
         paymentDAO.save(payment);
 
-        // Update bill status based on new payment
+        bill.getPayments().add(payment); // This ensures getBalanceDue() is accurate for the check
+
+        // Now, update bill status based on the ACCURATE new balance
         BigDecimal newBalance = bill.getBalanceDue();
         if (newBalance.compareTo(BigDecimal.ZERO) <= 0) {
             bill.setStatus(BillStatus.PAID);
