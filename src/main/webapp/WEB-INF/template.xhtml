@@ -831,6 +831,7 @@
                     <p:menuitem value="Appointments" outcome="/app/appointments" icon="fas fa-calendar-check"/>
                     <p:menuitem value="Medical Records" outcome="/app/records" icon="fas fa-file-medical"/>
                     <p:menuitem value="Billing" outcome="/app/billing" icon="fas fa-receipt" rendered="#{userBean.user.role != 'DOCTOR'}"/>
+                    <p:menuitem value="Payments" outcome="/app/payments" icon="fas fa-cash-register" rendered="#{userBean.isAdminOrReceptionist()}"/>
                     <p:menuitem value="Reports" outcome="/app/reports" icon="fas fa-chart-line" rendered="#{userBean.user.role == 'ADMIN'}"/>
                     <p:menuitem value="Audit Log" outcome="/app/audit" icon="fas fa-history" rendered="#{userBean.user.role == 'ADMIN'}"/>
                     <p:menuitem value="Settings" outcome="/app/settings" icon="fas fa-cog" rendered="#{userBean.user.role == 'ADMIN'}"/>

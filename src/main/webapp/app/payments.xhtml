@@ -1,0 +1,96 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="pageTitle">Payments Dashboard</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <!-- Statistics Cards -->
+            <div class="grid">
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="card widget-overview-box widget-overview-box-success">
+                        <div class="card-body">
+                            <div class="overview-info">
+                                <h6>Total Revenue</h6>
+                                <h2><h:outputText value="#{paymentBean.totalRevenue}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="card widget-overview-box widget-overview-box-danger">
+                        <div class="card-body">
+                            <div class="overview-info">
+                                <h6>Total Outstanding</h6>
+                                <h2><h:outputText value="#{paymentBean.totalOutstanding}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="card widget-overview-box widget-overview-box-info">
+                        <div class="card-body">
+                            <div class="overview-info">
+                                <h6>Fully Paid Bills</h6>
+                                <h2>#{paymentBean.paidBillsCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="card widget-overview-box widget-overview-box-warning">
+                        <div class="card-body">
+                            <div class="overview-info">
+                                <h6>Pending &amp; Partial</h6>
+                                <h2>#{paymentBean.unpaidBillsCount + paymentBean.partiallyPaidBillsCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Bills Data Table -->
+            <div class="card">
+                <h3>All Financial Records (Finalized Bills)</h3>
+                <p:dataTable var="bill" value="#{paymentBean.allBills}" rows="15" paginator="true"
+                             emptyMessage="No finalized bills found.">
+
+                    <p:column headerText="Bill ID" sortBy="#{bill.billId}">B-#{bill.billId}</p:column>
+                    <p:column headerText="Patient">#{bill.appointment.patient.firstName} #{bill.appointment.patient.lastName}</p:column>
+                    <p:column headerText="Total Amount" style="text-align:right;">
+                        <h:outputText value="#{bill.totalAmount}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                    </p:column>
+                    <p:column headerText="Amount Paid" style="text-align:right;">
+                        <h:outputText value="#{bill.totalPaid}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                    </p:column>
+                    <p:column headerText="Balance Due" style="text-align:right;">
+                        <h:outputText value="#{bill.balanceDue}" style="color: #{bill.balanceDue > 0 ? 'red' : 'green'};"/>
+                    </p:column>
+                    <p:column headerText="Status">
+                        <p:tag value="#{bill.status}" severity="#{bill.status == 'PAID' ? 'success' : (bill.status == 'DRAFT' ? 'info' : (bill.status == 'VOIDED' ? 'danger' : 'warning'))}"/>
+                    </p:column>
+                    <p:column headerText="Actions" style="text-align:center;">
+                        <p:button outcome="bill-details" icon="pi pi-eye" title="View/Manage Bill">
+                            <f:param name="id" value="#{bill.billId}"/>
+                        </p:button>
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </h:form>
+
+        <style>
+            .widget-overview-box { color: #ffffff; }
+            .widget-overview-box-success { background: linear-gradient(90deg, #28a745, #218838); }
+            .widget-overview-box-danger { background: linear-gradient(90deg, #dc3545, #c82333); }
+            .widget-overview-box-info { background: linear-gradient(90deg, #17a2b8, #138496); }
+            .widget-overview-box-warning { background: linear-gradient(90deg, #ffc107, #e0a800); }
+            .overview-info h2 { font-size: 2.5rem; margin: 0; }
+            .overview-info h6 { font-size: 1rem; margin: 0; opacity: 0.9; }
+        </style>
+    </ui:define>
+
+</ui:composition>
