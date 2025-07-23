@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      template="/WEB-INF/template.xhtml">
+
+<f:metadata>
+    <f:viewParam name="id" value="#{billDetailBean.billId}" converter="jakarta.faces.Integer"/>
+    <f:viewParam name="appointmentId" value="#{billDetailBean.appointmentId}" converter="jakarta.faces.Integer"/>
+    <f:viewAction action="#{billDetailBean.loadBill}"/>
+</f:metadata>
+
+<ui:define name="pageTitle">Bill Details</ui:define>
+
+<ui:define name="content">
+    <h:form id="form">
+        <p:growl id="messages" showDetail="true" life="6000" global="true"/>
+
+        <div class="card" rendered="#{not empty billDetailBean.bill}">
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:button value="Back to List" icon="pi pi-arrow-left" outcome="billing" styleClass="ui-button-secondary"/>
+                </p:toolbarGroup>
+                <p:toolbarGroup align="right">
+                    <p:commandButton value="Void Bill" icon="pi pi-times-circle" styleClass="ui-button-danger"
+                                     oncomplete="PF('voidBillDialog').show()" process="@this"
+                                     rendered="#{userBean.isAdmin() and billDetailBean.bill.status ne 'VOIDED' and billDetailBean.bill.status ne 'PAID'}"/>
+
+                    <p:commandButton value="Add Payment" icon="pi pi-money-bill"
+                                     oncomplete="PF('addPaymentDialog').show()" process="@this" update=":form:paymentPanel"
+                                     rendered="#{billDetailBean.bill.status eq 'FINALIZED' or billDetailBean.bill.status eq 'PARTIALLY_PAID'}"/>
+
+                    <!-- FIX: This button now only processes itself, not the whole form -->
+                    <p:commandButton value="Finalize Bill" icon="pi pi-check-circle" styleClass="ui-button-success"
+                                     actionListener="#{billDetailBean.finalizeBill}"
+                                     process="@this" update="@form"
+                                     rendered="#{billDetailBean.bill.status eq 'DRAFT'}">
+                        <p:confirm header="Confirm Finalization" message="Are you sure you want to finalize this bill? It cannot be edited further." icon="pi pi-exclamation-triangle"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:panel header="Bill Summary" style="margin-top:20px;">
+                <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank" columnClasses="ui-g-2,ui-g-4,ui-g-2,ui-g-4">
+                    <h:outputText value="Bill ID:" styleClass="font-bold"/>
+                    <h:outputText value="B-#{billDetailBean.bill.billId}"/>
+                    <h:outputText value="Status:" styleClass="font-bold"/>
+                    <p:tag value="#{billDetailBean.bill.status}"
+                           severity="#{billDetailBean.bill.status == 'PAID' ? 'success' : billDetailBean.bill.status == 'DRAFT' ? 'info' : (billDetailBean.bill.status == 'VOIDED' ? 'danger' : 'warning')}"/>
+
+                    <h:outputText value="Patient:" styleClass="font-bold"/>
+                    <h:outputText value="#{billDetailBean.bill.appointment.patient.firstName} #{billDetailBean.bill.appointment.patient.lastName}"/>
+                    <h:outputText value="Doctor:" styleClass="font-bold"/>
+                    <h:outputText value="Dr. #{billDetailBean.bill.appointment.doctor.lastName}"/>
+
+                    <h:outputText value="Appointment Date:" styleClass="font-bold"/>
+                    <h:outputText value="#{billDetailBean.bill.appointment.date}"/>
+                    <h:outputText value="Bill Date:" styleClass="font-bold"/>
+                    <h:outputText value="#{billDetailBean.bill.billDate}"/>
+                </p:panelGrid>
+            </p:panel>
+
+            <p:panel id="billItemsPanel" header="Billable Items" style="margin-top:20px;">
+                <p:dataTable id="dt-items" var="item" value="#{billDetailBean.bill.billItems}" emptyMessage="No items have been added to this bill.">
+                    <p:column headerText="Description">
+                        <h:outputText value="#{item.description}"/>
+                    </p:column>
+                    <p:column headerText="Quantity" style="width: 8rem; text-align: center;">
+                        <h:outputText value="#{item.quantity}"/>
+                    </p:column>
+                    <p:column headerText="Unit Price" style="width: 10rem; text-align: right;">
+                        <h:outputText value="#{item.unitPrice}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                    </p:column>
+                    <p:column headerText="Subtotal" style="width: 10rem; text-align: right;">
+                        <h:outputText value="#{item.subtotal}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                    </p:column>
+                    <p:column style="width: 5rem; text-align: center;" rendered="#{billDetailBean.bill.status eq 'DRAFT'}">
+                        <p:commandButton icon="pi pi-trash" actionListener="#{billDetailBean.removeBillItem(item)}" update=":form:billItemsPanel" process="@this"/>
+                    </p:column>
+                </p:dataTable>
+
+                <p:panelGrid columns="4" style="margin-top: 20px;" rendered="#{billDetailBean.bill.status eq 'DRAFT'}">
+                    <p:inputText id="newBillItemDesc" placeholder="Item Description" value="#{billDetailBean.newBillItem.description}" required="true" requiredMessage="Item description is required."/>
+                    <p:inputNumber id="newBillItemQty" placeholder="Quantity" value="#{billDetailBean.newBillItem.quantity}" required="true" requiredMessage="Quantity must be at least 1." minValue="1"/>
+                    <p:inputNumber id="newBillItemPrice" placeholder="Unit Price (Shs)" value="#{billDetailBean.newBillItem.unitPrice}" required="true" requiredMessage="Unit price is required." symbol="Shs " decimalPlaces="0"/>
+                    <p:commandButton value="Add Item" actionListener="#{billDetailBean.addBillItem}" update=":form:billItemsPanel" process="@this newBillItemDesc newBillItemQty newBillItemPrice"/>
+                    <p:commandButton value="Save Items" icon="pi pi-save" actionListener="#{billDetailBean.saveBillItems}" update=":form:billItemsPanel" process="dt-items @this"/>
+                </p:panelGrid>
+
+                <div style="text-align: right; margin-top: 20px; font-size: 1.2em;">
+                    <h:outputText value="Total Amount: " styleClass="font-bold"/>
+                    <h:outputText value="#{billDetailBean.bill.totalAmount}" style="color: green; font-weight: bold;"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                </div>
+            </p:panel>
+
+            <p:panel header="Payments Received" style="margin-top:20px;">
+                <p:dataTable var="payment" value="#{billDetailBean.bill.payments}" emptyMessage="No payments have been recorded for this bill.">
+                    <p:column headerText="Payment Date"><h:outputText value="#{payment.paymentDate}"><f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm"/></h:outputText></p:column>
+                    <p:column headerText="Amount Paid" style="text-align:right;"><h:outputText value="#{payment.amountPaid}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText></p:column>
+                    <p:column headerText="Method">#{payment.paymentMethod}</p:column>
+                    <p:column headerText="Details">
+                        <h:outputText value="#{payment.cardDetails}" rendered="#{payment.paymentMethod eq 'CARD'}"/>
+                        <h:outputText value="#{payment.mobileMoneyNumber}" rendered="#{payment.paymentMethod eq 'MOBILE_MONEY'}"/>
+                    </p:column>
+                    <p:column headerText="Processed By">#{payment.processedBy.username}</p:column>
+                </p:dataTable>
+                <div style="text-align: right; margin-top: 20px; font-size: 1.2em;">
+                    <h:outputText value="Total Paid: " styleClass="font-bold"/>
+                    <h:outputText value="#{billDetailBean.bill.totalPaid}" style="color: blue; font-weight: bold;"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                    <br/>
+                    <h:outputText value="Balance Due: " styleClass="font-bold"/>
+                    <h:outputText value="#{billDetailBean.bill.balanceDue}" style="color: red; font-weight: bold;"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
+                </div>
+            </p:panel>
+        </div>
+
+        <div class="card" rendered="#{empty billDetailBean.bill}">
+            <h3>Bill Not Found</h3>
+            <p>The requested bill could not be loaded. Please return to the list and try again.</p>
+        </div>
+
+        <p:dialog header="Add New Payment" widgetVar="addPaymentDialog" modal="true" width="500">
+            <p:outputPanel id="paymentPanel" class="ui-fluid">
+                <p:panelGrid columns="2" layout="grid">
+                    <p:outputLabel for="amount" value="Amount Paid (Shs)"/>
+                    <p:inputNumber id="amount" value="#{billDetailBean.newPayment.amountPaid}" required="true" requiredMessage="Amount Paid (Shs): Validation Error: Value is required." decimalPlaces="0"/>
+
+                    <p:outputLabel for="method" value="Payment Method"/>
+                    <p:selectOneMenu id="method" value="#{billDetailBean.newPayment.paymentMethod}" required="true" requiredMessage="Payment Method: Validation Error: Value is required.">
+                        <f:selectItem itemLabel="Select Method" noSelectionOption="true"/>
+                        <f:selectItems value="#{billDetailBean.paymentMethods}"/>
+                        <p:ajax update="cardDetails mobileMoneyDetails"/>
+                    </p:selectOneMenu>
+
+                    <p:outputPanel id="cardDetails" style="grid-column: 1 / 3;">
+                        <p:outputLabel for="card" value="Card Details (e.g., Visa **** 1234)" rendered="#{billDetailBean.newPayment.paymentMethod eq 'CARD'}"/>
+                        <p:inputText id="card" value="#{billDetailBean.newPayment.cardDetails}" rendered="#{billDetailBean.newPayment.paymentMethod eq 'CARD'}"/>
+                    </p:outputPanel>
+
+                    <p:outputPanel id="mobileMoneyDetails" style="grid-column: 1 / 3;">
+                        <p:outputLabel for="mobile" value="Mobile Money Number" rendered="#{billDetailBean.newPayment.paymentMethod eq 'MOBILE_MONEY'}"/>
+                        <p:inputText id="mobile" value="#{billDetailBean.newPayment.mobileMoneyNumber}" rendered="#{billDetailBean.newPayment.paymentMethod eq 'MOBILE_MONEY'}"/>
+                    </p:outputPanel>
+
+                    <p:outputLabel for="notes" value="Payment Notes (Optional)"/>
+                    <p:inputTextarea id="notes" value="#{billDetailBean.newPayment.notes}" rows="3"/>
+                </p:panelGrid>
+            </p:outputPanel>
+            <f:facet name="footer">
+                <!-- FIX: This button now only processes the payment panel -->
+                <p:commandButton value="Record Payment" actionListener="#{billDetailBean.addPayment}" process="paymentPanel @this" update="@form"/>
+                <p:commandButton value="Cancel" type="button" styleClass="ui-button-secondary" onclick="PF('addPaymentDialog').hide()"/>
+            </f:facet>
+        </p:dialog>
+
+        <p:dialog header="Void Bill" widgetVar="voidBillDialog" modal="true" width="500">
+            <p:outputPanel class="ui-fluid">
+                <p>Are you sure you want to void this bill? This action cannot be undone. Please provide a justification.</p>
+                <p:outputLabel for="justification" value="Justification"/>
+                <p:inputTextarea id="justification" value="#{billDetailBean.voidJustification}" required="true" requiredMessage="Justification: Validation Error: Value is required." rows="4"/>
+            </p:outputPanel>
+            <f:facet name="footer">
+                <!-- FIX: This button now only processes itself and the justification textarea -->
+                <p:commandButton value="Confirm Void" actionListener="#{billDetailBean.voidBill}" process="@this justification" update="@form"/>
+                <p:commandButton value="Cancel" type="button" styleClass="ui-button-secondary" onclick="PF('voidBillDialog').hide()"/>
+            </f:facet>
+        </p:dialog>
+
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+            <p:commandButton value="No" type="button" styleClass="ui-button-secondary ui-confirmdialog-no" icon="pi pi-times" />
+        </p:confirmDialog>
+    </h:form>
+</ui:define>
+
+</ui:composition>
+</html>
