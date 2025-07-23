@@ -1,11 +1,11 @@
 package org.medcare.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import org.medcare.enums.PaymentStatus;
-
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet; // Import HashSet
+import java.util.Set;    // Import Set
 
 @Entity
 @Table(name = "bills")
@@ -15,48 +15,66 @@ public class Bill extends BaseModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int billId;
 
-    @NotNull(message = "Patient is required.")
-    @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
-
+    @NotNull(message = "An appointment must be linked to the bill.")
     @OneToOne
-    @JoinColumn(name = "appointment_id")
+    @JoinColumn(name = "appointment_id", unique = true, nullable = false)
     private Appointment appointment;
 
     @NotNull(message = "Bill date is required.")
-    @PastOrPresent(message = "Bill date cannot be in the future.")
     @Column(nullable = false)
     private LocalDate billDate;
 
-    @NotNull(message = "Amount is required.")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be positive.")
-    @Digits(integer = 8, fraction = 2, message = "Amount must be a valid currency format.")
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal amount;
-
-    @NotNull(message = "Payment status is required.")
+    @NotNull(message = "Bill status is required.")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status;
+    private BillStatus status;
 
-    @Size(max = 1000, message = "Description must be less than 1000 characters.")
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String justification;
 
-    // Getters and Setters
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<BillItem> billItems = new HashSet<>();
+
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<Payment> payments = new HashSet<>();
+
+    public enum BillStatus {
+        DRAFT, FINALIZED, PARTIALLY_PAID, PAID, VOIDED
+    }
+
+    // Transient methods for calculations
+    @Transient
+    public BigDecimal getTotalAmount() {
+        return billItems.stream()
+                .map(BillItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Transient
+    public BigDecimal getTotalPaid() {
+        return payments.stream()
+                .map(Payment::getAmountPaid)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Transient
+    public BigDecimal getBalanceDue() {
+        return getTotalAmount().subtract(getTotalPaid());
+    }
+
+    // Getters and Setters (updated to use Set)
     public int getBillId() { return billId; }
     public void setBillId(int billId) { this.billId = billId; }
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
     public Appointment getAppointment() { return appointment; }
     public void setAppointment(Appointment appointment) { this.appointment = appointment; }
     public LocalDate getBillDate() { return billDate; }
     public void setBillDate(LocalDate billDate) { this.billDate = billDate; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public PaymentStatus getStatus() { return status; }
-    public void setStatus(PaymentStatus status) { this.status = status; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public BillStatus getStatus() { return status; }
+    public void setStatus(BillStatus status) { this.status = status; }
+    public String getJustification() { return justification; }
+    public void setJustification(String justification) { this.justification = justification; }
+    public Set<BillItem> getBillItems() { return billItems; }
+    public void setBillItems(Set<BillItem> billItems) { this.billItems = billItems; }
+    public Set<Payment> getPayments() { return payments; }
+    public void setPayments(Set<Payment> payments) { this.payments = payments; }
 }

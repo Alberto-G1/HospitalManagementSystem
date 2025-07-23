@@ -26,6 +26,8 @@
 
         <mapping class="org.medcare.models.MedicalRecord"/>
         <mapping class="org.medcare.models.Bill"/>
+        <mapping class="org.medcare.models.BillItem"/>
+        <mapping class="org.medcare.models.Payment"/>
         <mapping class="org.medcare.models.ActivityLog"/>
     </session-factory>
 </hibernate-configuration>
