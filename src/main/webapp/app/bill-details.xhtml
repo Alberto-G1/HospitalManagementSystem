@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html>
-<ui:composition        xmlns="http://www.w3.org/1999/xhtml"
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui"
@@ -18,7 +18,6 @@
 
 <ui:define name="content">
     <h:form id="form">
-        <!-- FIX: Added global="true" to the growl to catch all messages -->
         <p:growl id="messages" showDetail="true" life="6000" global="true"/>
 
         <div class="card" rendered="#{not empty billDetailBean.bill}">
@@ -30,11 +29,15 @@
                     <p:commandButton value="Void Bill" icon="pi pi-times-circle" styleClass="ui-button-danger"
                                      oncomplete="PF('voidBillDialog').show()" process="@this"
                                      rendered="#{userBean.isAdmin() and billDetailBean.bill.status ne 'VOIDED' and billDetailBean.bill.status ne 'PAID'}"/>
+
                     <p:commandButton value="Add Payment" icon="pi pi-money-bill"
                                      oncomplete="PF('addPaymentDialog').show()" process="@this" update=":form:paymentPanel"
                                      rendered="#{billDetailBean.bill.status eq 'FINALIZED' or billDetailBean.bill.status eq 'PARTIALLY_PAID'}"/>
+
+                    <!-- FIX: This button now only processes itself, not the whole form -->
                     <p:commandButton value="Finalize Bill" icon="pi pi-check-circle" styleClass="ui-button-success"
-                                     actionListener="#{billDetailBean.finalizeBill}" update="@form"
+                                     actionListener="#{billDetailBean.finalizeBill}"
+                                     process="@this" update="@form"
                                      rendered="#{billDetailBean.bill.status eq 'DRAFT'}">
                         <p:confirm header="Confirm Finalization" message="Are you sure you want to finalize this bill? It cannot be edited further." icon="pi pi-exclamation-triangle"/>
                     </p:commandButton>
@@ -76,19 +79,16 @@
                         <h:outputText value="#{item.subtotal}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
                     </p:column>
                     <p:column style="width: 5rem; text-align: center;" rendered="#{billDetailBean.bill.status eq 'DRAFT'}">
-                        <!-- FIX: Use an absolute path ':form:billItemsPanel' to update the outer panel -->
                         <p:commandButton icon="pi pi-trash" actionListener="#{billDetailBean.removeBillItem(item)}" update=":form:billItemsPanel" process="@this"/>
                     </p:column>
                 </p:dataTable>
 
                 <p:panelGrid columns="4" style="margin-top: 20px;" rendered="#{billDetailBean.bill.status eq 'DRAFT'}">
-                    <p:inputText id="newBillItemDesc" placeholder="Item Description" value="#{billDetailBean.newBillItem.description}"/>
-                    <p:inputNumber id="newBillItemQty" placeholder="Quantity" value="#{billDetailBean.newBillItem.quantity}" decimalPlaces="0"/>
-                    <p:inputNumber id="newBillItemPrice" placeholder="Unit Price (Shs)" value="#{billDetailBean.newBillItem.unitPrice}" symbol="Shs " decimalPlaces="0"/>
-                    <!-- FIX: Update the absolute path to the panel -->
+                    <p:inputText id="newBillItemDesc" placeholder="Item Description" value="#{billDetailBean.newBillItem.description}" required="true" requiredMessage="Item description is required."/>
+                    <p:inputNumber id="newBillItemQty" placeholder="Quantity" value="#{billDetailBean.newBillItem.quantity}" required="true" requiredMessage="Quantity must be at least 1." minValue="1"/>
+                    <p:inputNumber id="newBillItemPrice" placeholder="Unit Price (Shs)" value="#{billDetailBean.newBillItem.unitPrice}" required="true" requiredMessage="Unit price is required." symbol="Shs " decimalPlaces="0"/>
                     <p:commandButton value="Add Item" actionListener="#{billDetailBean.addBillItem}" update=":form:billItemsPanel" process="@this newBillItemDesc newBillItemQty newBillItemPrice"/>
-                    <!-- FIX: Update the absolute path to the panel -->
-                    <p:commandButton value="Save Items" icon="pi pi-save" actionListener="#{billDetailBean.saveBillItems}" update=":form:billItemsPanel :form:messages" process="dt-items @this"/>
+                    <p:commandButton value="Save Items" icon="pi pi-save" actionListener="#{billDetailBean.saveBillItems}" update=":form:billItemsPanel" process="dt-items @this"/>
                 </p:panelGrid>
 
                 <div style="text-align: right; margin-top: 20px; font-size: 1.2em;">
@@ -127,10 +127,10 @@
             <p:outputPanel id="paymentPanel" class="ui-fluid">
                 <p:panelGrid columns="2" layout="grid">
                     <p:outputLabel for="amount" value="Amount Paid (Shs)"/>
-                    <p:inputNumber id="amount" value="#{billDetailBean.newPayment.amountPaid}" required="true" decimalPlaces="0"/>
+                    <p:inputNumber id="amount" value="#{billDetailBean.newPayment.amountPaid}" required="true" requiredMessage="Amount Paid (Shs): Validation Error: Value is required." decimalPlaces="0"/>
 
                     <p:outputLabel for="method" value="Payment Method"/>
-                    <p:selectOneMenu id="method" value="#{billDetailBean.newPayment.paymentMethod}" required="true">
+                    <p:selectOneMenu id="method" value="#{billDetailBean.newPayment.paymentMethod}" required="true" requiredMessage="Payment Method: Validation Error: Value is required.">
                         <f:selectItem itemLabel="Select Method" noSelectionOption="true"/>
                         <f:selectItems value="#{billDetailBean.paymentMethods}"/>
                         <p:ajax update="cardDetails mobileMoneyDetails"/>
@@ -151,6 +151,7 @@
                 </p:panelGrid>
             </p:outputPanel>
             <f:facet name="footer">
+                <!-- FIX: This button now only processes the payment panel -->
                 <p:commandButton value="Record Payment" actionListener="#{billDetailBean.addPayment}" process="paymentPanel @this" update="@form"/>
                 <p:commandButton value="Cancel" type="button" styleClass="ui-button-secondary" onclick="PF('addPaymentDialog').hide()"/>
             </f:facet>
@@ -160,9 +161,10 @@
             <p:outputPanel class="ui-fluid">
                 <p>Are you sure you want to void this bill? This action cannot be undone. Please provide a justification.</p>
                 <p:outputLabel for="justification" value="Justification"/>
-                <p:inputTextarea id="justification" value="#{billDetailBean.voidJustification}" required="true" rows="4"/>
+                <p:inputTextarea id="justification" value="#{billDetailBean.voidJustification}" required="true" requiredMessage="Justification: Validation Error: Value is required." rows="4"/>
             </p:outputPanel>
             <f:facet name="footer">
+                <!-- FIX: This button now only processes itself and the justification textarea -->
                 <p:commandButton value="Confirm Void" actionListener="#{billDetailBean.voidBill}" process="@this justification" update="@form"/>
                 <p:commandButton value="Cancel" type="button" styleClass="ui-button-secondary" onclick="PF('voidBillDialog').hide()"/>
             </f:facet>
