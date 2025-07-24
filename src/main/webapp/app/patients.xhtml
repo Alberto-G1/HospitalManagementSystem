@@ -13,195 +13,1458 @@
         <h:form id="patientForm">
             <p:growl id="messages" showDetail="true" life="6000"/>
 
-            <div class="card">
-                <p:toolbar>
-                    <p:toolbarGroup>
-                        <!-- "New Patient" button is ONLY for Admins and Receptionists. -->
-                        <p:commandButton value="New Patient" icon="pi pi-plus"
-                                         actionListener="#{patientBean.openNew}"
-                                         update=":patientForm:managePatientContent"
-                                         oncomplete="PF('managePatientDialog').show()"
-                                         styleClass="ui-button-success" process="@this"
-                                         rendered="#{userBean.isLoggedIn()}"/>
-                    </p:toolbarGroup>
-                </p:toolbar>
+            <!-- Enhanced Stats Cards Section -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card fade-in">
+                    <div class="stat-icon patients">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Active Patients</div>
+                        <div class="stat-value">#{patientBean.activePatients.size()}</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> Currently Active
+                        </div>
+                    </div>
+                </div>
 
-                <p:tabView id="patientTabs" style="margin-top: 20px;">
-                    <!-- ========================== -->
-                    <!-- === ACTIVE PATIENTS TAB === -->
-                    <!-- ========================== -->
-                    <p:tab title="Active Patients (#{patientBean.activePatients.size()})">
-                        <p:dataTable id="dt-patients" widgetVar="dtPatients" var="patient"
-                                     value="#{patientBean.activePatients}" paginator="true" rows="10"
-                                     selectionMode="single" selection="#{patientBean.selectedPatient}"
-                                     rowKey="#{patient.patientId}" emptyMessage="No active patients found."
-                                     filteredValue="#{patientBean.filteredPatients}"
-                                     globalFilterFunction="#{patientBean.globalFilterFunction}">
+                <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="stat-icon emergency">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Total Records</div>
+                        <div class="stat-value">#{patientBean.activePatients.size() + patientBean.inactivePatients.size()}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-database"></i> All Time
+                        </div>
+                    </div>
+                </div>
 
-                            <f:facet name="header">
-                                <div class="flex justify-content-between align-items-center">
-                                    <span class="font-bold">Active Patient Records</span>
-                                    <span class="p-input-icon-left">
-                                        <i class="pi pi-search"></i>
-                                        <p:inputText id="globalFilter" onkeyup="PF('dtPatients').filter()" placeholder="Search..." style="width: 250px;"/>
-                                    </span>
+                <div class="stat-card fade-in" style="animation-delay: 0.2s;" rendered="#{userBean.isAdminOrReceptionist()}">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Inactive Patients</div>
+                        <div class="stat-value">#{patientBean.inactivePatients.size()}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-pause"></i> Archived
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+                    <div class="stat-icon doctors">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Growth Rate</div>
+                        <div class="stat-value">+12%</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> This Month
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Main Card with Modern Design -->
+            <div class="ui-card enhanced-patient-card fade-in">
+                <div class="ui-card-header">
+                    <div class="card-header-content">
+                        <div class="header-left">
+                            <i class="fas fa-users-cog header-icon"></i>
+                            <span class="header-title">Patient Management System</span>
+                        </div>
+                        <div class="header-right">
+                            <p:commandButton value="New Patient" icon="fas fa-user-plus"
+                                             actionListener="#{patientBean.openNew}"
+                                             update=":patientForm:managePatientContent"
+                                             oncomplete="PF('managePatientDialog').show()"
+                                             styleClass="enhanced-button new-patient-btn" process="@this"
+                                             rendered="#{userBean.isLoggedIn()}"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui-card-body">
+                    <!-- Enhanced Tab View -->
+                    <p:tabView id="patientTabs" styleClass="enhanced-tabview">
+                        <!-- Active Patients Tab -->
+                        <p:tab title="Active Patients">
+                            <f:facet name="title">
+                                <div class="tab-title-wrapper">
+                                    <i class="fas fa-user-check tab-icon"></i>
+                                    <span>Active Patients</span>
+                                    <span class="tab-badge">#{patientBean.activePatients.size()}</span>
                                 </div>
                             </f:facet>
 
-                            <p:column headerText="Patient ID" sortBy="#{patient.patientId}" style="width:8rem;"><h:outputText value="PID-#{patient.patientId}"/></p:column>
-                            <p:column headerText="Name" sortBy="#{patient.lastName}"><h:outputText value="#{patient.firstName} #{patient.lastName}"/></p:column>
-                            <p:column headerText="Age" style="width:5rem;"><h:outputText value="#{patientBean.calculateAge(patient.dateOfBirth)}"/></p:column>
-                            <p:column headerText="Gender" sortBy="#{patient.gender}" style="width:7rem;"><h:outputText value="#{patient.gender}"/></p:column>
-                            <p:column headerText="Phone Number" sortBy="#{patient.phoneNumber}"><h:outputText value="#{patient.phoneNumber}"/></p:column>
+                            <!-- Enhanced DataTable -->
+                            <div class="datatable-wrapper">
+                                <p:dataTable id="dt-patients" widgetVar="dtPatients" var="patient"
+                                             value="#{patientBean.activePatients}" paginator="true" rows="10"
+                                             selectionMode="single" selection="#{patientBean.selectedPatient}"
+                                             rowKey="#{patient.patientId}" emptyMessage="No active patients found."
+                                             filteredValue="#{patientBean.filteredPatients}"
+                                             globalFilterFunction="#{patientBean.globalFilterFunction}"
+                                             styleClass="enhanced-datatable"
+                                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                             rowsPerPageTemplate="10,25,50">
 
-                            <p:column headerText="Actions" style="width:11rem;text-align:center;">
-                                <!-- VIEW BUTTON - Navigates to the new details page -->
-                                <p:button icon="pi pi-eye" title="View Full Details"
-                                          outcome="patient-details"
-                                          styleClass="rounded-button ui-button-secondary">
-                                    <f:param name="id" value="#{patient.patientId}"/>
-                                </p:button>
+                                    <f:facet name="header">
+                                        <div class="datatable-header">
+                                            <div class="header-left">
+                                                <i class="fas fa-table header-icon"></i>
+                                                <span class="header-title">Active Patient Records</span>
+                                            </div>
+                                            <div class="header-right">
+                                                <div class="search-wrapper">
+                                                    <i class="fas fa-search search-icon"></i>
+                                                    <p:inputText id="globalFilter" onkeyup="PF('dtPatients').filter()"
+                                                                 placeholder="Search patients..."
+                                                                 styleClass="enhanced-search-input"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </f:facet>
 
-                                <!-- EDIT BUTTON - Opens the corrected dialog -->
-                                <p:commandButton icon="pi pi-pencil" title="Edit Patient Info"
-                                                 update=":patientForm:managePatientContent"
-                                                 oncomplete="PF('managePatientDialog').show()" process="@this"
-                                                 styleClass="rounded-button ui-button-info" style="margin-left:.5rem;"
-                                                 rendered="#{userBean.isAdminOrReceptionist()}">
-                                    <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
-                                </p:commandButton>
+                                    <p:column headerText="Patient ID" sortBy="#{patient.patientId}" styleClass="id-column">
+                                        <div class="patient-id-cell">
+                                            <i class="fas fa-id-card id-icon"></i>
+                                            <span class="patient-id">PID-#{patient.patientId}</span>
+                                        </div>
+                                    </p:column>
 
-                                <!-- VIEW MEDICAL RECORDS BUTTON (Functionality remains here for quick access) -->
-                                <p:commandButton icon="pi pi-file-medical" title="View Medical Records"
-                                                 oncomplete="PF('medicalRecordsDialog').show()" process="@this"
-                                                 styleClass="rounded-button ui-button-secondary" style="margin-left:.5rem"
-                                                 actionListener="#{patientBean.viewMedicalRecords(patient)}"
-                                                 update=":patientForm:medicalRecordsPanel"/>
+                                    <p:column headerText="Patient Name" sortBy="#{patient.lastName}" styleClass="name-column">
+                                        <div class="patient-name-cell">
+                                            <div class="patient-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="patient-info">
+                                                <div class="patient-name">#{patient.firstName} #{patient.lastName}</div>
+                                            </div>
+                                        </div>
+                                    </p:column>
 
-                                <!-- DEACTIVATE BUTTON -->
-                                <p:commandButton icon="pi pi-trash" title="Deactivate Patient" process="@this"
-                                                 styleClass="rounded-button ui-button-danger" style="margin-left:.5rem"
-                                                 oncomplete="PF('deactivatePatientDialog').show()"
-                                                 rendered="#{userBean.isAdminOrReceptionist()}">
-                                    <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
-                                </p:commandButton>
-                            </p:column>
-                        </p:dataTable>
-                    </p:tab>
+                                    <p:column headerText="Age" styleClass="age-column">
+                                        <div class="age-cell">
+                                            <span class="age-badge">#{patientBean.calculateAge(patient.dateOfBirth)} yrs</span>
+                                        </div>
+                                    </p:column>
 
-                    <!-- Inactive Patients Tab is ONLY for Admins and Receptionists. -->
-                    <p:tab title="Inactive Patients (#{patientBean.inactivePatients.size()})"
-                           rendered="#{userBean.isAdminOrReceptionist()}">
-                        <p:dataTable id="dt-inactive-patients" var="patient" value="#{patientBean.inactivePatients}"
-                                     paginator="true" rows="10" emptyMessage="No inactive patients found.">
-                            <f:facet name="header"><div class="font-bold">Inactive/Archived Patient Records</div></f:facet>
-                            <p:column headerText="Patient ID" style="width:8rem;"><h:outputText value="PID-#{patient.patientId}"/></p:column>
-                            <p:column headerText="Name"><h:outputText value="#{patient.firstName} #{patient.lastName}"/></p:column>
-                            <p:column headerText="Phone Number"><h:outputText value="#{patient.phoneNumber}"/></p:column>
-                            <p:column headerText="Last Updated"><h:outputText value="#{patient.lastUpdatedAt}"><f:convertDateTime type="localDateTime" pattern="dd MMM yyyy"/></h:outputText></p:column>
-                            <p:column style="width:8rem;text-align:center;">
-                                <p:commandButton icon="pi pi-undo" title="Reactivate Patient"
-                                                 actionListener="#{patientBean.reactivatePatient}"
-                                                 update=":patientForm:messages :patientForm:patientTabs" process="@this"
-                                                 styleClass="rounded-button ui-button-success">
-                                    <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
-                                </p:commandButton>
-                            </p:column>
-                        </p:dataTable>
-                    </p:tab>
-                </p:tabView>
+                                    <p:column headerText="Gender" sortBy="#{patient.gender}" styleClass="gender-column">
+                                        <div class="gender-cell">
+                                            <i class="fas #{patient.gender == 'MALLE' ? 'fa-mars' : 'fa-venus'} gender-icon #{patient.gender.name().toLowerCase()}"></i>
+                                            <span>#{patient.gender}</span>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Contact" sortBy="#{patient.phoneNumber}" styleClass="contact-column">
+                                        <div class="contact-cell">
+                                            <i class="fas fa-phone contact-icon"></i>
+                                            <span>#{patient.phoneNumber}</span>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Actions" styleClass="actions-column">
+                                        <div class="action-buttons">
+                                            <!-- View Button -->
+                                            <p:button icon="fas fa-eye" title="View Full Details"
+                                                      outcome="patient-details"
+                                                      styleClass="action-btn view-btn">
+                                                <f:param name="id" value="#{patient.patientId}"/>
+                                            </p:button>
+
+                                            <!-- Edit Button -->
+                                            <p:commandButton icon="fas fa-edit" title="Edit Patient Info"
+                                                             update=":patientForm:managePatientContent"
+                                                             oncomplete="PF('managePatientDialog').show()" process="@this"
+                                                             styleClass="action-btn edit-btn"
+                                                             rendered="#{userBean.isAdminOrReceptionist()}">
+                                                <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
+                                            </p:commandButton>
+
+                                            <!-- Medical Records Button -->
+                                            <p:commandButton icon="fas fa-file-medical" title="View Medical Records"
+                                                             oncomplete="PF('medicalRecordsDialog').show()" process="@this"
+                                                             styleClass="action-btn records-btn"
+                                                             actionListener="#{patientBean.viewMedicalRecords(patient)}"
+                                                             update=":patientForm:medicalRecordsPanel"/>
+
+                                            <!-- Deactivate Button -->
+                                            <p:commandButton icon="fas fa-user-times" title="Deactivate Patient" process="@this"
+                                                             styleClass="action-btn deactivate-btn"
+                                                             oncomplete="PF('deactivatePatientDialog').show()"
+                                                             rendered="#{userBean.isAdminOrReceptionist()}">
+                                                <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
+                                            </p:commandButton>
+                                        </div>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+                        </p:tab>
+
+                        <!-- Inactive Patients Tab -->
+                        <p:tab title="Inactive Patients" rendered="#{userBean.isAdminOrReceptionist()}">
+                            <f:facet name="title">
+                                <div class="tab-title-wrapper">
+                                    <i class="fas fa-user-slash tab-icon"></i>
+                                    <span>Inactive Patients</span>
+                                    <span class="tab-badge inactive">#{patientBean.inactivePatients.size()}</span>
+                                </div>
+                            </f:facet>
+
+                            <div class="datatable-wrapper">
+                                <p:dataTable id="dt-inactive-patients" var="patient" value="#{patientBean.inactivePatients}"
+                                             paginator="true" rows="10" emptyMessage="No inactive patients found."
+                                             styleClass="enhanced-datatable inactive-table">
+
+                                    <f:facet name="header">
+                                        <div class="datatable-header">
+                                            <div class="header-left">
+                                                <i class="fas fa-archive header-icon"></i>
+                                                <span class="header-title">Inactive/Archived Patient Records</span>
+                                            </div>
+                                        </div>
+                                    </f:facet>
+
+                                    <p:column headerText="Patient ID" styleClass="id-column">
+                                        <div class="patient-id-cell inactive">
+                                            <i class="fas fa-id-card id-icon"></i>
+                                            <span class="patient-id">PID-#{patient.patientId}</span>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Name">
+                                        <div class="patient-name-cell inactive">
+                                            <div class="patient-avatar inactive">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="patient-info">
+                                                <div class="patient-name">#{patient.firstName} #{patient.lastName}</div>
+                                            </div>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Phone Number">
+                                        <div class="contact-cell inactive">
+                                            <i class="fas fa-phone contact-icon"></i>
+                                            <span>#{patient.phoneNumber}</span>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Last Updated">
+                                        <div class="date-cell">
+                                            <i class="fas fa-calendar-alt date-icon"></i>
+                                            <h:outputText value="#{patient.lastUpdatedAt}">
+                                                <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy"/>
+                                            </h:outputText>
+                                        </div>
+                                    </p:column>
+
+                                    <p:column headerText="Actions" styleClass="actions-column">
+                                        <div class="action-buttons">
+                                            <p:commandButton icon="fas fa-undo" title="Reactivate Patient"
+                                                             actionListener="#{patientBean.reactivatePatient}"
+                                                             update=":patientForm:messages :patientForm:patientTabs" process="@this"
+                                                             styleClass="action-btn reactivate-btn">
+                                                <f:setPropertyActionListener value="#{patient}" target="#{patientBean.selectedPatient}"/>
+                                            </p:commandButton>
+                                        </div>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+                        </p:tab>
+                    </p:tabView>
+                </div>
             </div>
 
-            <!-- ================================= -->
-            <!-- === DIALOGS (ADD/EDIT, RECORDS) === -->
-            <!-- ================================= -->
-
-            <!-- FIX: This dialog for adding/editing patient info is now available to all roles. -->
-            <!-- The rendered panelGroup wrapper has been removed. -->
-            <p:dialog header="Patient Details" widgetVar="managePatientDialog" modal="true" width="800" responsive="true" showEffect="fade" hideEffect="fade">
+            <!-- Enhanced Add/Edit Patient Dialog -->
+            <p:dialog header="Patient Information" widgetVar="managePatientDialog" modal="true" width="900" responsive="true"
+                      showEffect="fade" hideEffect="fade" styleClass="enhanced-dialog patient-dialog">
                 <p:outputPanel id="managePatientContent" class="ui-fluid">
-                    <div style="max-height: 65vh; overflow-y: auto; padding-right: 15px;">
-                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{not empty patientBean.selectedPatient}">
-                            <p:outputLabel for="firstname" value="First Name"/>
-                            <p:inputText id="firstname" value="#{patientBean.selectedPatient.firstName}" required="true"/>
-                            <p:outputLabel for="lastname" value="Last Name"/>
-                            <p:inputText id="lastname" value="#{patientBean.selectedPatient.lastName}" required="true"/>
-                            <p:outputLabel for="dob" value="Date of Birth"/>
-                            <p:calendar id="dob" value="#{patientBean.selectedPatient.dateOfBirth}" required="true" navigator="true" yearRange="c-120:c" showIcon="true" pattern="dd/MM/yyyy"/>
-                            <p:outputLabel for="gender" value="Gender"/>
-                            <p:selectOneRadio id="gender" value="#{patientBean.selectedPatient.gender}" required="true">
-                                <f:selectItems value="#{patientBean.genders}" var="g" itemLabel="#{g}" itemValue="#{g}"/>
-                            </p:selectOneRadio>
-                            <p:outputLabel for="phone" value="Phone Number"/>
-                            <p:inputText id="phone" value="#{patientBean.selectedPatient.phoneNumber}" required="true"/>
-                            <p:outputLabel for="email" value="Email (Optional)"/>
-                            <p:inputText id="email" value="#{patientBean.selectedPatient.email}"/>
-                            <p:outputLabel for="address" value="Address"/>
-                            <p:inputTextarea id="address" value="#{patientBean.selectedPatient.address}" rows="3" autoResize="false"/>
-                            <p:outputLabel for="emergency" value="Emergency Contact"/>
-                            <p:inputText id="emergency" value="#{patientBean.selectedPatient.emergencyContact}"/>
-                            <p:outputLabel for="history" value="Medical History Summary"/>
-                            <p:inputTextarea id="history" value="#{patientBean.selectedPatient.medicalHistory}" rows="4" autoResize="false"/>
+                    <div class="dialog-content">
+                        <p:panelGrid columns="2" layout="grid" styleClass="patient-form-grid" rendered="#{not empty patientBean.selectedPatient}">
+                            <div class="form-group">
+                                <p:outputLabel for="firstname" value="First Name" styleClass="required-label"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <p:inputText id="firstname" value="#{patientBean.selectedPatient.firstName}"
+                                                 required="true" styleClass="enhanced-input"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p:outputLabel for="lastname" value="Last Name" styleClass="required-label"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <p:inputText id="lastname" value="#{patientBean.selectedPatient.lastName}"
+                                                 required="true" styleClass="enhanced-input"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p:outputLabel for="dob" value="Date of Birth" styleClass="required-label"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-birthday-cake input-icon"></i>
+                                    <p:calendar id="dob" value="#{patientBean.selectedPatient.dateOfBirth}"
+                                                required="true" navigator="true" yearRange="c-120:c"
+                                                showIcon="true" pattern="dd/MM/yyyy" styleClass="enhanced-calendar"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p:outputLabel for="gender" value="Gender" styleClass="required-label"/>
+                                <div class="radio-group">
+                                    <p:selectOneRadio id="gender" value="#{patientBean.selectedPatient.gender}"
+                                                      required="true" styleClass="enhanced-radio">
+                                        <f:selectItems value="#{patientBean.genders}" var="g" itemLabel="#{g}" itemValue="#{g}"/>
+                                    </p:selectOneRadio>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p:outputLabel for="phone" value="Phone Number" styleClass="required-label"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <p:inputText id="phone" value="#{patientBean.selectedPatient.phoneNumber}"
+                                                 required="true" styleClass="enhanced-input"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p:outputLabel for="email" value="Email (Optional)"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-envelope input-icon"></i>
+                                    <p:inputText id="email" value="#{patientBean.selectedPatient.email}"
+                                                 styleClass="enhanced-input"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <p:outputLabel for="address" value="Address"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                    <p:inputTextarea id="address" value="#{patientBean.selectedPatient.address}"
+                                                     rows="3" autoResize="false" styleClass="enhanced-textarea"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p:outputLabel for="emergency" value="Emergency Contact"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-phone-alt input-icon"></i>
+                                    <p:inputText id="emergency" value="#{patientBean.selectedPatient.emergencyContact}"
+                                                 styleClass="enhanced-input"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <p:outputLabel for="history" value="Medical History Summary"/>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-notes-medical input-icon"></i>
+                                    <p:inputTextarea id="history" value="#{patientBean.selectedPatient.medicalHistory}"
+                                                     rows="4" autoResize="false" styleClass="enhanced-textarea"/>
+                                </div>
+                            </div>
                         </p:panelGrid>
                     </div>
                 </p:outputPanel>
+
                 <f:facet name="footer">
-                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{patientBean.savePatient}"
-                                     update=":patientForm:messages :patientForm:patientTabs"
-                                     process="managePatientContent @this"/>
-                    <p:commandButton value="Cancel" icon="pi pi-times" styleClass="ui-button-secondary"
-                                     onclick="PF('managePatientDialog').hide()"/>
+                    <div class="dialog-footer">
+                        <p:commandButton value="Save Patient" icon="fas fa-save"
+                                         actionListener="#{patientBean.savePatient}"
+                                         update=":patientForm:messages :patientForm:patientTabs"
+                                         process="managePatientContent @this"
+                                         styleClass="enhanced-button save-btn"/>
+                        <p:commandButton value="Cancel" icon="fas fa-times"
+                                         styleClass="enhanced-button cancel-btn"
+                                         onclick="PF('managePatientDialog').hide()"/>
+                    </div>
                 </f:facet>
             </p:dialog>
 
-            <!-- This dialog is for EVERYONE. -->
-            <p:dialog header="Medical Records for: #{patientBean.selectedPatient.firstName} #{patientBean.selectedPatient.lastName}"
-                      widgetVar="medicalRecordsDialog" modal="true" width="900" height="600" responsive="true" showEffect="fade">
-                <p:outputPanel id="medicalRecordsPanel" style="height: 100%;">
-                    <p:accordionPanel multiple="true" activeIndex="0" rendered="#{not empty patientBean.selectedPatient}">
-                        <p:tab title="Add New Record" rendered="#{userBean.isDoctor()}">
-                            <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank">
-                                <p:outputLabel for="notes" value="Visit Notes"/><p:inputTextarea id="notes" value="#{patientBean.newRecord.notes}" rows="4" required="true"/>
-                                <p:outputLabel for="prescription" value="Prescription"/><p:inputTextarea id="prescription" value="#{patientBean.newRecord.prescription}" rows="3"/>
-                                <p:commandButton value="Add Record" actionListener="#{patientBean.addMedicalRecord}" update=":patientForm:medicalRecordsPanel :patientForm:messages" icon="pi pi-plus"/>
-                            </p:panelGrid>
-                        </p:tab>
-                        <p:tab title="Previous Records">
-                            <p:dataList value="#{patientBean.selectedPatientRecords}" var="record" type="unordered" itemType="none" paginator="true" rows="3" emptyMessage="No medical records found for this patient.">
-                                <f:facet name="header">Visit History</f:facet>
-                                <div class="medical-record-item">
-                                    <div class="record-header">
-                                        <span class="record-date"><i class="pi pi-calendar mr-2"></i><h:outputText value="#{record.visitDate}"><f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, h:mm a"/></h:outputText></span>
-                                        <span class="record-doctor"><i class="pi pi-user-md mr-2"></i> Dr. #{record.doctor.firstName} #{record.doctor.lastName}</span>
-                                    </div>
-                                    <div class="record-body"><h5>Notes:</h5><p>#{record.notes}</p><h5>Prescription:</h5><p>#{record.prescription}</p></div>
+            <!-- Enhanced Medical Records Dialog -->
+            <p:dialog header="Medical Records" widgetVar="medicalRecordsDialog" modal="true" width="950" height="650"
+                      responsive="true" showEffect="fade" styleClass="enhanced-dialog records-dialog">
+                <f:facet name="header">
+                    <div class="dialog-header-content">
+                        <i class="fas fa-file-medical-alt header-icon"></i>
+                        <span>Medical Records for: #{patientBean.selectedPatient.firstName} #{patientBean.selectedPatient.lastName}</span>
+                    </div>
+                </f:facet>
+
+                <p:outputPanel id="medicalRecordsPanel" styleClass="records-panel">
+                    <p:accordionPanel multiple="true" activeIndex="0" styleClass="enhanced-accordion"
+                                      rendered="#{not empty patientBean.selectedPatient}">
+
+                        <p:tab title="Add New Record" rendered="#{userBean.isDoctor()}" styleClass="add-record-tab">
+                            <f:facet name="title">
+                                <div class="accordion-title">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Add New Medical Record</span>
                                 </div>
-                            </p:dataList>
+                            </f:facet>
+
+                            <div class="new-record-form">
+                                <div class="form-group">
+                                    <p:outputLabel for="notes" value="Visit Notes" styleClass="required-label"/>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-notes-medical input-icon"></i>
+                                        <p:inputTextarea id="notes" value="#{patientBean.newRecord.notes}"
+                                                         rows="4" required="true" styleClass="enhanced-textarea"
+                                                         placeholder="Enter detailed visit notes..."/>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p:outputLabel for="prescription" value="Prescription"/>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-prescription-bottle input-icon"></i>
+                                        <p:inputTextarea id="prescription" value="#{patientBean.newRecord.prescription}"
+                                                         rows="3" styleClass="enhanced-textarea"
+                                                         placeholder="Enter prescription details..."/>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <p:commandButton value="Add Record"
+                                                     actionListener="#{patientBean.addMedicalRecord}"
+                                                     update=":patientForm:medicalRecordsPanel :patientForm:messages"
+                                                     icon="fas fa-plus" styleClass="enhanced-button add-record-btn"/>
+                                </div>
+                            </div>
+                        </p:tab>
+
+                        <p:tab title="Previous Records" styleClass="records-history-tab">
+                            <f:facet name="title">
+                                <div class="accordion-title">
+                                    <i class="fas fa-history"></i>
+                                    <span>Medical History</span>
+                                </div>
+                            </f:facet>
+
+                            <div class="records-list-wrapper">
+                                <p:dataList value="#{patientBean.selectedPatientRecords}" var="record"
+                                            type="unordered" itemType="none" paginator="true" rows="5"
+                                            emptyMessage="No medical records found for this patient."
+                                            styleClass="enhanced-datalist">
+
+                                    <f:facet name="header">
+                                        <div class="records-header">
+                                            <i class="fas fa-clipboard-list"></i>
+                                            <span>Complete Visit History</span>
+                                        </div>
+                                    </f:facet>
+
+                                    <div class="medical-record-card">
+                                        <div class="record-header">
+                                            <div class="record-meta">
+                                                <div class="record-date">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    <h:outputText value="#{record.visitDate}">
+                                                        <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, h:mm a"/>
+                                                    </h:outputText>
+                                                </div>
+                                                <div class="record-doctor">
+                                                    <i class="fas fa-user-md"></i>
+                                                    <span>Dr. #{record.doctor.firstName} #{record.doctor.lastName}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="record-content">
+                                            <div class="record-section">
+                                                <h6 class="section-title">
+                                                    <i class="fas fa-notes-medical"></i>
+                                                    Visit Notes
+                                                </h6>
+                                                <p class="record-text">#{record.notes}</p>
+                                            </div>
+
+                                            <div class="record-section" rendered="#{not empty record.prescription}">
+                                                <h6 class="section-title">
+                                                    <i class="fas fa-prescription-bottle"></i>
+                                                    Prescription
+                                                </h6>
+                                                <p class="record-text prescription">#{record.prescription}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </p:dataList>
+                            </div>
                         </p:tab>
                     </p:accordionPanel>
                 </p:outputPanel>
             </p:dialog>
 
-            <!-- This confirmation dialog is ONLY for Admins and Receptionists. -->
+            <!-- Enhanced Confirmation Dialog -->
             <p:confirmDialog widgetVar="deactivatePatientDialog"
                              rendered="#{userBean.isAdminOrReceptionist()}"
                              message="Are you sure you want to deactivate this patient's record?"
-                             header="Confirm Deactivation" severity="alert">
-                <p:commandButton value="Yes, Deactivate" icon="pi pi-check"
-                                 actionListener="#{patientBean.deletePatient}"
-                                 process="@this" update=":patientForm:messages :patientForm:patientTabs"/>
-                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
-                                 onclick="PF('deactivatePatientDialog').hide()"/>
+                             header="Confirm Patient Deactivation" severity="alert"
+                             styleClass="enhanced-confirm-dialog">
+                <f:facet name="header">
+                    <div class="confirm-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Confirm Patient Deactivation</span>
+                    </div>
+                </f:facet>
+
+                <div class="confirm-content">
+                    <i class="fas fa-user-times confirm-icon"></i>
+                    <p>This action will move the patient to the inactive list. The patient record will be preserved but marked as inactive.</p>
+                </div>
+
+                <f:facet name="footer">
+                    <div class="confirm-footer">
+                        <p:commandButton value="Yes, Deactivate" icon="fas fa-check"
+                                         actionListener="#{patientBean.deletePatient}"
+                                         process="@this" update=":patientForm:messages :patientForm:patientTabs"
+                                         styleClass="enhanced-button danger-btn"/>
+                        <p:commandButton value="Cancel" type="button" icon="fas fa-times"
+                                         styleClass="enhanced-button cancel-btn"
+                                         onclick="PF('deactivatePatientDialog').hide()"/>
+                    </div>
+                </f:facet>
             </p:confirmDialog>
         </h:form>
 
         <style type="text/css">
-            .medical-record-item { border: 1px solid #dee2e6; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
-            .record-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #6c757d; }
-            .record-body h5 { margin: 1rem 0 0.5rem 0; font-size: 1rem; }
-            .record-body p { margin: 0; white-space: pre-wrap; }
-        </style>
-    </ui:define>
+            /* Enhanced Patient Page Styles */
+            .enhanced-patient-card {
+                border-radius: 20px !important;
+                box-shadow: 0 15px 35px rgba(22, 105, 122, 0.1) !important;
+                border: 1px solid rgba(72, 159, 181, 0.1) !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(20px) !important;
+            }
 
+            .card-header-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .header-icon {
+                font-size: 1.5rem;
+                color: rgba(255, 255, 255, 0.9);
+            }
+
+            .header-title {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: white;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            .new-patient-btn {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                border: none !important;
+                border-radius: 12px !important;
+                padding: 0.75rem 1.5rem !important;
+                font-weight: 600 !important;
+                font-size: 0.9rem !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+
+            .new-patient-btn:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4) !important;
+            }
+
+            /* Enhanced Tab Styles */
+            .enhanced-tabview .ui-tabs-nav {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+                border-radius: 12px 12px 0 0 !important;
+                border-bottom: 3px solid #16697A !important;
+                padding: 0.5rem 1rem !important;
+            }
+
+            .enhanced-tabview .ui-tabs-nav li {
+                margin: 0 0.5rem !important;
+                border-radius: 10px 10px 0 0 !important;
+                background: transparent !important;
+                border: none !important;
+            }
+
+            .enhanced-tabview .ui-tabs-nav li a {
+                background: rgba(255, 255, 255, 0.7) !important;
+                border: 2px solid transparent !important;
+                border-radius: 10px 10px 0 0 !important;
+                padding: 1rem 1.5rem !important;
+                font-weight: 600 !important;
+                color: #64748b !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .enhanced-tabview .ui-tabs-nav li.ui-state-active a {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%) !important;
+                color: white !important;
+                border-color: #16697A !important;
+                box-shadow: 0 8px 25px rgba(22, 105, 122, 0.3) !important;
+                transform: translateY(-2px) !important;
+            }
+
+            .enhanced-tabview .ui-tabs-nav li:hover a {
+                background: rgba(255, 255, 255, 0.9) !important;
+                transform: translateY(-1px) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .tab-title-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .tab-icon {
+                font-size: 1rem;
+            }
+
+            .tab-badge {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border-radius: 20px;
+                padding: 0.2rem 0.6rem;
+                font-size: 0.8rem;
+                font-weight: 700;
+                margin-left: 8px;
+            }
+
+            .tab-badge.inactive {
+                background: rgba(239, 68, 68, 0.2);
+                color: #dc2626;
+            }
+
+            /* Stats Grid */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+                border-radius: 16px;
+                padding: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                border: 1px solid rgba(72, 159, 181, 0.1);
+                box-shadow: 0 8px 25px rgba(22, 105, 122, 0.08);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(20px);
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px) scale(1.02);
+                box-shadow: 0 15px 40px rgba(22, 105, 122, 0.15);
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: white;
+            }
+
+            .stat-icon.patients {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            }
+
+            .stat-icon.emergency {
+                background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            }
+
+            .stat-icon.warning {
+                background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            }
+
+            .stat-icon.doctors {
+                background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            }
+
+            .stat-info {
+                flex: 1;
+            }
+
+            .stat-title {
+                font-size: 0.9rem;
+                color: #64748b;
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 0.25rem;
+            }
+
+            .stat-change {
+                font-size: 0.8rem;
+                color: #64748b;
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            .stat-change.positive {
+                color: #16a34a;
+            }
+
+            .stat-change i {
+                font-size: 0.7rem;
+            }
+
+            /* Enhanced DataTable */
+            .enhanced-datatable {
+                border-radius: 15px !important;
+                overflow: hidden !important;
+                box-shadow: 0 10px 30px rgba(22, 105, 122, 0.08) !important;
+            }
+
+            .datatable-wrapper {
+                border-radius: 15px;
+                overflow: hidden;
+                background: white;
+            }
+
+            .datatable-header {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                color: white;
+                padding: 1.5rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .datatable-header .header-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .datatable-header .header-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .search-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            .search-icon {
+                position: absolute;
+                left: 12px;
+                color: #94a3b8;
+                z-index: 10;
+            }
+
+            .enhanced-search-input {
+                background: rgba(255, 255, 255, 0.95) !important;
+                border: 2px solid rgba(255, 255, 255, 0.2) !important;
+                border-radius: 25px !important;
+                padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+                width: 300px !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .enhanced-search-input:focus {
+                background: white !important;
+                border-color: rgba(255, 255, 255, 0.8) !important;
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2) !important;
+            }
+
+            .enhanced-datatable .ui-datatable-header {
+                background: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+
+            .enhanced-datatable .ui-datatable-data {
+                background: white !important;
+            }
+
+            .enhanced-datatable .ui-datatable-even {
+                background: #f8fafc !important;
+            }
+
+            .enhanced-datatable .ui-datatable-odd {
+                background: white !important;
+            }
+
+            .enhanced-datatable td {
+                padding: 1rem !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                vertical-align: middle !important;
+            }
+
+            .enhanced-datatable th {
+                background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+                color: #475569 !important;
+                font-weight: 600 !important;
+                padding: 1rem !important;
+                border-bottom: 2px solid #cbd5e1 !important;
+                text-transform: uppercase !important;
+                font-size: 0.8rem !important;
+                letter-spacing: 0.5px !important;
+            }
+
+            /* Patient Cell Styles */
+            .patient-id-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .id-icon {
+                color: #16697A;
+                font-size: 0.9rem;
+            }
+
+            .patient-id {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 600;
+                color: #374151;
+                background: rgba(22, 105, 122, 0.1);
+                padding: 0.25rem 0.5rem;
+                border-radius: 6px;
+                font-size: 0.8rem;
+            }
+
+            .patient-name-cell {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .patient-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1rem;
+            }
+
+            .patient-avatar.inactive {
+                background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%);
+            }
+
+            .patient-name {
+                font-weight: 600;
+                color: #1e293b;
+                font-size: 0.95rem;
+            }
+
+            .age-cell {
+                text-align: center;
+            }
+
+            .age-badge {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                color: #0369a1;
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.8rem;
+                border: 1px solid #bae6fd;
+            }
+
+            .gender-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .gender-icon {
+                font-size: 1rem;
+            }
+
+            .gender-icon.male {
+                color: #3b82f6;
+            }
+
+            .gender-icon.female {
+                color: #ec4899;
+            }
+
+            .contact-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .contact-icon {
+                color: #16a34a;
+                font-size: 0.9rem;
+            }
+
+            .contact-cell.inactive .contact-icon {
+                color: #94a3b8;
+            }
+
+            .date-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .date-icon {
+                color: #f59e0b;
+                font-size: 0.9rem;
+            }
+
+            /* Action Buttons */
+            .action-buttons {
+                display: flex;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .action-btn {
+                width: 35px !important;
+                height: 35px !important;
+                border-radius: 8px !important;
+                border: none !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s ease !important;
+                cursor: pointer !important;
+            }
+
+            .view-btn {
+                background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+                color: white !important;
+            }
+
+            .view-btn:hover {
+                transform: translateY(-2px) scale(1.1) !important;
+                box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3) !important;
+            }
+
+            .edit-btn {
+                background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+                color: white !important;
+            }
+
+            .edit-btn:hover {
+                transform: translateY(-2px) scale(1.1) !important;
+                box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3) !important;
+            }
+
+            .records-btn {
+                background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+                color: white !important;
+            }
+
+            .records-btn:hover {
+                transform: translateY(-2px) scale(1.1) !important;
+                box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3) !important;
+            }
+
+            .deactivate-btn {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+                color: white !important;
+            }
+
+            .deactivate-btn:hover {
+                transform: translateY(-2px) scale(1.1) !important;
+                box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3) !important;
+            }
+
+            .reactivate-btn {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                color: white !important;
+            }
+
+            .reactivate-btn:hover {
+                transform: translateY(-2px) scale(1.1) !important;
+                box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3) !important;
+            }
+
+            /* Inactive Table Styles */
+            .inactive-table td {
+                opacity: 0.7;
+            }
+
+            .patient-id-cell.inactive .patient-id {
+                background: rgba(148, 163, 184, 0.2);
+                color: #64748b;
+            }
+
+            .patient-name-cell.inactive .patient-name {
+                color: #64748b;
+            }
+
+            /* Enhanced Dialog Styles */
+            .enhanced-dialog {
+                border-radius: 20px !important;
+                overflow: hidden !important;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+            }
+
+            .enhanced-dialog .ui-dialog-titlebar {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%) !important;
+                color: white !important;
+                border: none !important;
+                padding: 1.5rem 2rem !important;
+                border-radius: 0 !important;
+            }
+
+            .enhanced-dialog .ui-dialog-title {
+                font-weight: 600 !important;
+                font-size: 1.2rem !important;
+            }
+
+            .enhanced-dialog .ui-dialog-content {
+                padding: 2rem !important;
+                background: #fafafa !important;
+            }
+
+            .patient-dialog .dialog-content {
+                background: white;
+                border-radius: 15px;
+                padding: 2rem;
+            }
+
+            /* Form Styles */
+            .patient-form-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1.5rem !important;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-group.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .required-label {
+                font-weight: 600 !important;
+                color: #374151 !important;
+                font-size: 0.9rem !important;
+                position: relative !important;
+            }
+
+            .required-label::after {
+                content: " *";
+                color: #ef4444;
+            }
+
+            .input-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            .input-icon {
+                position: absolute;
+                left: 12px;
+                color: #94a3b8;
+                z-index: 10;
+                font-size: 0.9rem;
+            }
+
+            .enhanced-input, .enhanced-textarea {
+                background: #f8fafc !important;
+                border: 2px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s ease !important;
+                width: 100% !important;
+            }
+
+            .enhanced-input:focus, .enhanced-textarea:focus {
+                background: white !important;
+                border-color: #16697A !important;
+                box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1) !important;
+            }
+
+            .enhanced-calendar {
+                width: 100% !important;
+            }
+
+            .enhanced-calendar input {
+                background: #f8fafc !important;
+                border: 2px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .enhanced-calendar input:focus {
+                background: white !important;
+                border-color: #16697A !important;
+                box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1) !important;
+            }
+
+            .radio-group {
+                display: flex;
+                gap: 1rem;
+                margin-top: 0.5rem;
+            }
+
+            .enhanced-radio .ui-radiobutton {
+                margin-right: 0.5rem;
+            }
+
+            .enhanced-radio .ui-radiobutton-box {
+                border: 2px solid #e2e8f0 !important;
+                border-radius: 50% !important;
+                background: #f8fafc !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .enhanced-radio .ui-radiobutton-box:hover {
+                border-color: #16697A !important;
+            }
+
+            .enhanced-radio .ui-radiobutton-box.ui-state-active {
+                background: #16697A !important;
+                border-color: #16697A !important;
+            }
+
+            /* Dialog Footer */
+            .dialog-footer {
+                display: flex;
+                gap: 1rem;
+                justify-content: flex-end;
+                padding: 1.5rem 0 0 0;
+                border-top: 1px solid #e2e8f0;
+                margin-top: 1.5rem;
+            }
+
+            .enhanced-button {
+                border-radius: 12px !important;
+                padding: 0.75rem 1.5rem !important;
+                font-weight: 600 !important;
+                font-size: 0.9rem !important;
+                border: none !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                cursor: pointer !important;
+            }
+
+            .save-btn {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%) !important;
+                color: white !important;
+            }
+
+            .save-btn:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(22, 105, 122, 0.3) !important;
+            }
+
+            .cancel-btn {
+                background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+                color: white !important;
+            }
+
+            .cancel-btn:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(148, 163, 184, 0.3) !important;
+            }
+
+            .danger-btn {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+                color: white !important;
+            }
+
+            .danger-btn:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3) !important;
+            }
+
+            /* Medical Records Dialog */
+            .records-dialog .ui-dialog-content {
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+            }
+
+            .dialog-header-content {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .records-panel {
+                background: white;
+                border-radius: 15px;
+                padding: 1.5rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .enhanced-accordion .ui-accordion-header {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 12px !important;
+                margin-bottom: 0.5rem !important;
+                padding: 1rem 1.5rem !important;
+                font-weight: 600 !important;
+            }
+
+            .enhanced-accordion .ui-accordion-header:hover {
+                background: linear-gradient(135deg, #134e57 0%, #3a7f96 100%) !important;
+            }
+
+            .enhanced-accordion .ui-accordion-content {
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 0 0 12px 12px !important;
+                padding: 1.5rem !important;
+            }
+
+            .accordion-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .new-record-form {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .form-actions {
+                margin-top: 1.5rem;
+                text-align: right;
+            }
+
+            .add-record-btn {
+                background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+                color: white !important;
+            }
+
+            .add-record-btn:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 8px 25px rgba(22, 163, 74, 0.3) !important;
+            }
+
+            .records-list-wrapper {
+                background: white;
+                border-radius: 12px;
+                padding: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .records-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #374151;
+                font-weight: 600;
+                padding: 1rem;
+                border-bottom: 2px solid #e2e8f0;
+            }
+
+            .enhanced-datalist {
+                background: transparent !important;
+            }
+
+            .medical-record-card {
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .medical-record-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .record-header {
+                background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid #cbd5e1;
+            }
+
+            .record-meta {
+                display: flex;
+                gap: 2rem;
+                align-items: center;
+            }
+
+            .record-date, .record-doctor {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #475569;
+                font-size: 0.9rem;
+            }
+
+            .record-date i {
+                color: #f59e0b;
+            }
+
+            .record-doctor i {
+                color: #16697A;
+            }
+
+            .record-content {
+                padding: 1.5rem;
+            }
+
+            .record-section {
+                margin-bottom: 1.5rem;
+            }
+
+            .record-section:last-child {
+                margin-bottom: 0;
+            }
+
+            .section-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #374151;
+                font-weight: 600;
+                font-size: 0.9rem;
+                margin-bottom: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .section-title i {
+                color: #16697A;
+            }
+
+            .record-text {
+                color: #4b5563;
+                line-height: 1.6;
+                background: #f8fafc;
+                padding: 1rem;
+                border-radius: 8px;
+                border-left: 4px solid #16697A;
+                margin: 0;
+            }
+
+            .record-text.prescription {
+                background: #f0fdf4;
+                border-left-color: #16a34a;
+            }
+
+            /* Confirmation Dialog */
+            .enhanced-confirm-dialog {
+                border-radius: 16px !important;
+                overflow: hidden !important;
+            }
+
+            .enhanced-confirm-dialog .ui-dialog-titlebar {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+                color: white !important;
+            }
+
+            .confirm-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .confirm-content {
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .confirm-icon {
+                font-size: 3rem;
+                color: #f59e0b;
+                margin-bottom: 1rem;
+            }
+
+            .confirm-footer {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                padding: 1rem 0;
+            }
+
+            /* Animations */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .fade-in {
+                animation: fadeIn 0.6s ease-out forwards;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .patient-form-grid {
+                    grid-template-columns: 1fr !important;
+                }
+
+                .datatable-header {
+                    flex-direction: column;
+                    gap: 1rem;
+                    align-items: stretch;
+                }
+
+                .enhanced-search-input {
+                    width: 100% !important;
+                }
+
+                .action-buttons {
+                    flex-wrap: wrap;
+                }
+
+                .record-meta {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                }
+            }
+            </style>
+    </ui:define>
 </ui:composition>
 </html>
