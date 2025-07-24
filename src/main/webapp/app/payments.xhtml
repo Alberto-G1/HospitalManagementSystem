@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
@@ -9,88 +12,573 @@
 
     <ui:define name="content">
         <h:form id="form">
-            <!-- Statistics Cards -->
-            <div class="grid">
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="card widget-overview-box widget-overview-box-success">
-                        <div class="card-body">
-                            <div class="overview-info">
-                                <h6>Total Revenue</h6>
-                                <h2><h:outputText value="#{paymentBean.totalRevenue}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText></h2>
-                            </div>
+            <!-- Enhanced Statistics Cards -->
+            <div class="stats-grid fade-in">
+                <div class="stat-card">
+                    <div class="stat-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Total Revenue</div>
+                        <div class="stat-value">
+                            <h:outputText value="#{paymentBean.totalRevenue}">
+                                <f:convertNumber type="currency" currencySymbol="Shs "/>
+                            </h:outputText>
+                        </div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> +12% from last month
                         </div>
                     </div>
                 </div>
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="card widget-overview-box widget-overview-box-danger">
-                        <div class="card-body">
-                            <div class="overview-info">
-                                <h6>Total Outstanding</h6>
-                                <h2><h:outputText value="#{paymentBean.totalOutstanding}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText></h2>
-                            </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon emergency">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Total Outstanding</div>
+                        <div class="stat-value">
+                            <h:outputText value="#{paymentBean.totalOutstanding}">
+                                <f:convertNumber type="currency" currencySymbol="Shs "/>
+                            </h:outputText>
+                        </div>
+                        <div class="stat-change negative">
+                            <i class="fas fa-clock"></i> Requires attention
                         </div>
                     </div>
                 </div>
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="card widget-overview-box widget-overview-box-info">
-                        <div class="card-body">
-                            <div class="overview-info">
-                                <h6>Fully Paid Bills</h6>
-                                <h2>#{paymentBean.paidBillsCount}</h2>
-                            </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon patients">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Fully Paid Bills</div>
+                        <div class="stat-value">#{paymentBean.paidBillsCount}</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-thumbs-up"></i> Completed payments
                         </div>
                     </div>
                 </div>
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="card widget-overview-box widget-overview-box-warning">
-                        <div class="card-body">
-                            <div class="overview-info">
-                                <h6>Pending &amp; Partial</h6>
-                                <h2>#{paymentBean.unpaidBillsCount + paymentBean.partiallyPaidBillsCount}</h2>
-                            </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon appointments">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-title">Pending &amp; Partial</div>
+                        <div class="stat-value">#{paymentBean.unpaidBillsCount + paymentBean.partiallyPaidBillsCount}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-tasks"></i> Awaiting processing
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- All Bills Data Table -->
-            <div class="card">
-                <h3>All Financial Records (Finalized Bills)</h3>
-                <p:dataTable var="bill" value="#{paymentBean.allBills}" rows="15" paginator="true"
-                             emptyMessage="No finalized bills found.">
+            <!-- Enhanced Analytics Section -->
+            <div class="analytics-grid fade-in">
+                <!-- Enhanced Bar Chart Card -->
+                <div class="analytics-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Financial Summary
+                        </div>
+                        <div class="chart-subtitle">Revenue vs Outstanding Analysis</div>
+                    </div>
+                    <div class="chart-container">
+                        <h:panelGroup rendered="#{not empty paymentBean.financialSummaryBarChart}">
+                            <p:barChart model="#{paymentBean.financialSummaryBarChart}"
+                                        style="height: 350px; width: 100%;"/>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{empty paymentBean.financialSummaryBarChart}">
+                            <div class="no-data-state">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>No Financial Data</h3>
+                                <p>No financial data available to display chart.</p>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </div>
 
-                    <p:column headerText="Bill ID" sortBy="#{bill.billId}">B-#{bill.billId}</p:column>
-                    <p:column headerText="Patient">#{bill.appointment.patient.firstName} #{bill.appointment.patient.lastName}</p:column>
-                    <p:column headerText="Total Amount" style="text-align:right;">
-                        <h:outputText value="#{bill.totalAmount}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
-                    </p:column>
-                    <p:column headerText="Amount Paid" style="text-align:right;">
-                        <h:outputText value="#{bill.totalPaid}"><f:convertNumber type="currency" currencySymbol="Shs "/></h:outputText>
-                    </p:column>
-                    <p:column headerText="Balance Due" style="text-align:right;">
-                        <h:outputText value="#{bill.balanceDue}" style="color: #{bill.balanceDue > 0 ? 'red' : 'green'};"/>
-                    </p:column>
-                    <p:column headerText="Status">
-                        <p:tag value="#{bill.status}" severity="#{bill.status == 'PAID' ? 'success' : (bill.status == 'DRAFT' ? 'info' : (bill.status == 'VOIDED' ? 'danger' : 'warning'))}"/>
-                    </p:column>
-                    <p:column headerText="Actions" style="text-align:center;">
-                        <p:button outcome="bill-details" icon="pi pi-eye" title="View/Manage Bill">
-                            <f:param name="id" value="#{bill.billId}"/>
-                        </p:button>
-                    </p:column>
-                </p:dataTable>
+                <!-- Enhanced Line Chart Card -->
+                <div class="analytics-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-line-chart"></i>
+                            Revenue Trends
+                        </div>
+                        <div class="chart-subtitle">Monthly Revenue Performance</div>
+                    </div>
+                    <div class="chart-container">
+                        <h:panelGroup rendered="#{not empty paymentBean.monthlyRevenueLineChart}">
+                            <p:lineChart model="#{paymentBean.monthlyRevenueLineChart}"
+                                         style="height: 350px; width: 100%;"/>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{empty paymentBean.monthlyRevenueLineChart}">
+                            <div class="no-data-state">
+                                <i class="fas fa-line-chart"></i>
+                                <h3>No Revenue Data</h3>
+                                <p>No revenue data available to display trend chart.</p>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Bills Data Table -->
+            <div class="ui-card table-card fade-in">
+                <div class="ui-card-header">
+                    <i class="fas fa-file-invoice-dollar" style="margin-right: 10px;"></i>
+                    All Financial Records
+                    <span class="header-subtitle">Finalized Bills Management</span>
+                </div>
+                <div class="ui-card-body">
+                    <div class="table-controls">
+                        <div class="table-info">
+                            <i class="fas fa-info-circle"></i>
+                            Comprehensive view of all finalized bills and payment statuses
+                        </div>
+                    </div>
+
+                    <p:dataTable var="bill"
+                                 value="#{billService.getAllBills()}"
+                                 rows="15"
+                                 paginator="true"
+                                 emptyMessage="No finalized bills found."
+                                 styleClass="enhanced-datatable"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowsPerPageTemplate="10,15,25,50">
+
+                        <p:column headerText="Bill ID" sortBy="#{bill.billId}" style="width: 100px;">
+                            <div class="bill-id">
+                                <i class="fas fa-hashtag"></i>
+                                B-#{bill.billId}
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Patient" sortBy="#{bill.appointment.patient.lastName}">
+                            <div class="patient-info">
+                                <i class="fas fa-user"></i>
+                                <span>#{bill.appointment.patient.firstName} #{bill.appointment.patient.lastName}</span>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Total Amount" sortBy="#{bill.totalAmount}" style="text-align:right;">
+                            <div class="amount-cell total">
+                                <h:outputText value="#{bill.totalAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="Shs "/>
+                                </h:outputText>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Amount Paid" sortBy="#{bill.totalPaid}" style="text-align:right;">
+                            <div class="amount-cell paid">
+                                <h:outputText value="#{bill.totalPaid}">
+                                    <f:convertNumber type="currency" currencySymbol="Shs "/>
+                                </h:outputText>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Balance Due" sortBy="#{bill.balanceDue}" style="text-align:right;">
+                            <div class="amount-cell balance #{bill.balanceDue.compareTo(java.math.BigDecimal.ZERO) > 0 ? 'due' : 'cleared'}">
+                                <h:outputText value="#{bill.balanceDue}">
+                                    <f:convertNumber type="currency" currencySymbol="Shs "/>
+                                </h:outputText>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Status" sortBy="#{bill.status}">
+                            <div class="status-container">
+                                <p:tag value="#{bill.status}"
+                                       severity="#{bill.status == 'PAID' ? 'success' : (bill.status == 'DRAFT' ? 'info' : (bill.status == 'VOIDED' ? 'danger' : 'warning'))}"
+                                       styleClass="enhanced-tag"/>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Actions" style="text-align:center; width: 100px;">
+                            <div class="action-buttons">
+                                <p:button outcome="bill-details"
+                                          icon="fas fa-eye"
+                                          title="View/Manage Bill"
+                                          styleClass="ui-button-info ui-button-sm">
+                                    <f:param name="id" value="#{bill.billId}"/>
+                                </p:button>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+                </div>
             </div>
         </h:form>
 
         <style>
-            .widget-overview-box { color: #ffffff; }
-            .widget-overview-box-success { background: linear-gradient(90deg, #28a745, #218838); }
-            .widget-overview-box-danger { background: linear-gradient(90deg, #dc3545, #c82333); }
-            .widget-overview-box-info { background: linear-gradient(90deg, #17a2b8, #138496); }
-            .widget-overview-box-warning { background: linear-gradient(90deg, #ffc107, #e0a800); }
-            .overview-info h2 { font-size: 2.5rem; margin: 0; }
-            .overview-info h6 { font-size: 1rem; margin: 0; opacity: 0.9; }
+            /* ===== ENHANCED STATISTICS CARDS ===== */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+
+            /* ===== ANALYTICS GRID ===== */
+            .analytics-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+
+            .analytics-card {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                overflow: hidden;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .analytics-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            }
+
+            .chart-header {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                color: white;
+                padding: 1.5rem 2rem;
+                position: relative;
+            }
+
+            .chart-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+                opacity: 0.3;
+            }
+
+            .chart-title {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1.25rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 0.5rem;
+            }
+
+            .chart-subtitle {
+                font-size: 0.9rem;
+                opacity: 0.8;
+                font-weight: 400;
+            }
+
+            .chart-container {
+                padding: 2rem;
+                background: rgba(255, 255, 255, 0.95);
+                min-height: 400px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* ===== NO DATA STATE ===== */
+            .no-data-state {
+                text-align: center;
+                color: #64748b;
+                padding: 3rem;
+            }
+
+            .no-data-state i {
+                font-size: 4rem;
+                color: #cbd5e1;
+                margin-bottom: 1rem;
+            }
+
+            .no-data-state h3 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #475569;
+                margin-bottom: 0.5rem;
+            }
+
+            .no-data-state p {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            /* ===== ENHANCED TABLE STYLES ===== */
+            .table-card {
+                margin-top: 0 !important;
+            }
+
+            .header-subtitle {
+                font-size: 0.9rem;
+                opacity: 0.8;
+                font-weight: 400;
+                margin-left: 1rem;
+            }
+
+            .table-controls {
+                margin-bottom: 1.5rem;
+                padding: 1rem;
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                border-radius: 12px;
+                border: 1px solid rgba(22, 105, 122, 0.1);
+            }
+
+            .table-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #64748b;
+                font-size: 0.95rem;
+            }
+
+            .table-info i {
+                color: #16697A;
+            }
+
+            /* ===== ENHANCED DATATABLE CELLS ===== */
+            .bill-id {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 600;
+                color: #16697A;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            .patient-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 500;
+            }
+
+            .patient-info i {
+                color: #489FB5;
+                width: 16px;
+            }
+
+            .amount-cell {
+                font-weight: 600;
+                font-family: 'Montserrat', sans-serif;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                display: inline-block;
+                min-width: 120px;
+            }
+
+            .amount-cell.total {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                color: #0369a1;
+                border: 1px solid rgba(3, 105, 161, 0.2);
+            }
+
+            .amount-cell.paid {
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                color: #166534;
+                border: 1px solid rgba(22, 101, 52, 0.2);
+            }
+
+            .amount-cell.balance.due {
+                background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+                color: #dc2626;
+                border: 1px solid rgba(220, 38, 38, 0.2);
+            }
+
+            .amount-cell.balance.cleared {
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                color: #166534;
+                border: 1px solid rgba(22, 101, 52, 0.2);
+            }
+
+            .status-container {
+                display: flex;
+                justify-content: center;
+            }
+
+            .enhanced-tag {
+                font-weight: 600 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                padding: 0.5rem 1rem !important;
+                border-radius: 25px !important;
+                font-size: 0.8rem !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .action-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .ui-button-sm {
+                padding: 0.5rem 1rem !important;
+                font-size: 0.85rem !important;
+            }
+
+            /* ===== ENHANCED DATATABLE STYLES ===== */
+            .enhanced-datatable .ui-datatable-thead > tr > th {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%) !important;
+                color: white !important;
+                font-weight: 600 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                font-size: 0.85rem !important;
+                padding: 1rem !important;
+                border: none !important;
+            }
+
+            .enhanced-datatable .ui-datatable-data > tr {
+                transition: all 0.3s ease !important;
+                border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+            }
+
+            .enhanced-datatable .ui-datatable-data > tr:hover {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+                transform: scale(1.005) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.1) !important;
+            }
+
+            .enhanced-datatable .ui-datatable-data > tr > td {
+                padding: 1rem !important;
+                border: none !important;
+                vertical-align: middle !important;
+            }
+
+            /* ===== PAGINATOR ENHANCEMENT ===== */
+            .ui-paginator {
+                background: rgba(255, 255, 255, 0.95) !important;
+                border: 1px solid rgba(22, 105, 122, 0.1) !important;
+                border-radius: 12px !important;
+                padding: 1rem !important;
+                margin-top: 1rem !important;
+            }
+
+            .ui-paginator .ui-paginator-page,
+            .ui-paginator .ui-paginator-next,
+            .ui-paginator .ui-paginator-prev,
+            .ui-paginator .ui-paginator-first,
+            .ui-paginator .ui-paginator-last {
+                background: transparent !important;
+                border: 1px solid #e2e8f0 !important;
+                color: #64748b !important;
+                border-radius: 8px !important;
+                margin: 0 2px !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .ui-paginator .ui-paginator-page:hover,
+            .ui-paginator .ui-paginator-next:hover,
+            .ui-paginator .ui-paginator-prev:hover,
+            .ui-paginator .ui-paginator-first:hover,
+            .ui-paginator .ui-paginator-last:hover {
+                background: linear-gradient(135deg, #16697A, #489FB5) !important;
+                color: white !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 12px rgba(22, 105, 122, 0.3) !important;
+            }
+
+            .ui-paginator .ui-state-active {
+                background: linear-gradient(135deg, #16697A, #489FB5) !important;
+                color: white !important;
+                border-color: #16697A !important;
+            }
+
+            /* ===== RESPONSIVE DESIGN ===== */
+            @media (max-width: 1200px) {
+                .analytics-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 992px) {
+                .stats-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 1.5rem;
+                }
+
+                .analytics-grid {
+                    gap: 1.5rem;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                }
+
+                .chart-header {
+                    padding: 1rem 1.5rem;
+                }
+
+                .chart-container {
+                    padding: 1.5rem;
+                }
+
+                .table-controls {
+                    padding: 0.75rem;
+                }
+
+                .amount-cell {
+                    min-width: 100px;
+                    font-size: 0.9rem;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .analytics-card {
+                    border-radius: 16px;
+                }
+
+                .chart-title {
+                    font-size: 1.1rem;
+                }
+
+                .enhanced-datatable .ui-datatable-thead > tr > th,
+                .enhanced-datatable .ui-datatable-data > tr > td {
+                    padding: 0.75rem !important;
+                    font-size: 0.9rem !important;
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                }
+            }
+
+            /* ===== LOADING STATES ===== */
+            .ui-datatable-loading-overlay {
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(5px) !important;
+            }
+
+            .ui-datatable-loading {
+                color: #16697A !important;
+            }
+
+            /* ===== PRINT STYLES ===== */
+            @media print {
+                .action-buttons,
+                .ui-paginator {
+                    display: none !important;
+                }
+
+                .analytics-card,
+                .table-card {
+                    box-shadow: none !important;
+                    border: 1px solid #ddd !important;
+                }
+            }
         </style>
     </ui:define>
 
 </ui:composition>
+</html>
